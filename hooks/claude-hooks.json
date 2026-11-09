@@ -119,6 +119,315 @@
             },
             "timeout": 10,
             "if": "Bash(gh pr merge*)"
+          },
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "command": "${tool_input.command}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10,
+            "if": "Bash(gh release create*)"
+          },
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "command": "${tool_input.command}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10,
+            "if": "Bash(gh issue close*)"
+          },
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "command": "${tool_input.command}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10,
+            "if": "Bash(gh workflow run*)"
+          },
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "command": "${tool_input.command}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10,
+            "if": "Bash(vercel*)"
+          },
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "command": "${tool_input.command}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10,
+            "if": "Bash(npx vercel*)"
+          },
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "command": "${tool_input.command}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10,
+            "if": "Bash(netlify deploy*)"
+          },
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "command": "${tool_input.command}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10,
+            "if": "Bash(fly deploy*)"
+          },
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "command": "${tool_input.command}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10,
+            "if": "Bash(flyctl deploy*)"
+          },
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "command": "${tool_input.command}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10,
+            "if": "Bash(firebase deploy*)"
+          },
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "command": "${tool_input.command}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10,
+            "if": "Bash(wrangler deploy*)"
+          },
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "command": "${tool_input.command}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10,
+            "if": "Bash(cdk deploy*)"
+          },
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "command": "${tool_input.command}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10,
+            "if": "Bash(npx cdk deploy*)"
+          },
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "command": "${tool_input.command}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10,
+            "if": "Bash(serverless deploy*)"
+          },
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "command": "${tool_input.command}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10,
+            "if": "Bash(sls deploy*)"
+          },
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "command": "${tool_input.command}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10,
+            "if": "Bash(terraform apply*)"
+          },
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "command": "${tool_input.command}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10,
+            "if": "Bash(kubectl apply*)"
+          },
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "command": "${tool_input.command}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10,
+            "if": "Bash(helm upgrade*)"
+          },
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "command": "${tool_input.command}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10,
+            "if": "Bash(npm publish*)"
+          },
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "command": "${tool_input.command}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10,
+            "if": "Bash(pnpm publish*)"
+          },
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "command": "${tool_input.command}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10,
+            "if": "Bash(yarn publish*)"
+          },
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "command": "${tool_input.command}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10,
+            "if": "Bash(cargo publish*)"
+          },
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "command": "${tool_input.command}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10,
+            "if": "Bash(docker push*)"
+          },
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "command": "${tool_input.command}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10,
+            "if": "Bash(twine upload*)"
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__plugin_venom_venom__append_task_log|mcp__plugin_venom_venom__append_project_log|mcp__plugin_venom_venom__edit_log_entry",
+        "hooks": [
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "tool": "${tool_name}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "Stop",
+              "session_id": "${session_id}",
+              "stop_hook_active": "${stop_hook_active}"
+            },
+            "timeout": 10
           }
         ]
       }

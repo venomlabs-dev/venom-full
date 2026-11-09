@@ -1,10 +1,19 @@
 # Venom Full
 
 The full Venom experience for developers in Claude Code and Codex. It adds
-hooks to the [`venom`](https://github.com/venomlabs-dev/plugin) plugin, so
-your agent gets Venom guidance after compaction, before compaction (Claude
-Code), when a subagent starts, on each prompt, and after `git commit`,
-`git push`, `gh pr create` and `gh pr merge`.
+hooks to the [`venom`](https://github.com/venomlabs-dev/plugin) plugin:
+
+- **Each new session** starts with your Venom projects and unread mentions,
+  so the agent knows where to look before it acts. They arrive with your
+  first prompt.
+- **After a milestone** (a commit, push, pull request, merge, release, closed
+  issue, workflow run, deploy or publish) the agent is reminded to log the
+  outcome. If the turn ends with nothing logged after it, Venom asks once
+  more. The agent logs only if there's a decision, outcome, blocker or next
+  step worth recording, so unfinished work isn't logged early.
+- **Compaction and subagents**: guidance before and after compaction keeps
+  the task in view, and subagents report to their parent instead of writing.
+- **New mentions** from teammates show up on your next prompt.
 
 Anthropic's and OpenAI's plugin directories don't accept hooks from us, so
 Venom Full isn't listed there. It installs from the Venom marketplace, the

@@ -68,6 +68,39 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "matcher": "^mcp__venom__(append_task_log|append_project_log|edit_log_entry)$",
+        "hooks": [
+          {
+            "type": "mcp_tool",
+            "server": "venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "tool": "${tool_name}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "mcp_tool",
+            "server": "venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "Stop",
+              "session_id": "${session_id}",
+              "stop_hook_active": "${stop_hook_active}"
+            },
+            "timeout": 10
+          }
+        ]
       }
     ]
   }
