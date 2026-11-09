@@ -1,0 +1,24 @@
+{
+  "name": "venom-full",
+  "version": "0.8.0",
+  "description": "The full Venom experience for developers: hooks that bring Venom guidance after compaction, at subagent start, on each prompt and after commits and pull requests. Needs the venom plugin.",
+  "author": {
+    "name": "Venom Labs",
+    "url": "https://venomlabs.dev"
+  },
+  "homepage": "https://venomlabs.dev",
+  "repository": "https://github.com/venomlabs-dev/venom-full",
+  "license": "MIT",
+  "keywords": [
+    "venom",
+    "hooks",
+    "developers",
+    "collaboration",
+    "agents",
+    "mcp"
+  ],
+  "dependencies": [
+    "venom"
+  ],
+  "hooks": "./hooks/claude-hooks.json"
+}
