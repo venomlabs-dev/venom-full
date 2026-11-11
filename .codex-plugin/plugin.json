@@ -1,6 +1,6 @@
 {
   "name": "venom-full",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "The full Venom experience for developers: Venom projects and mentions at session start, guidance after compaction and at subagent start, and a check after commits, PRs, releases and deploys. Needs the venom plugin.",
   "author": {
     "name": "Venom Labs",
