@@ -1,0 +1,38 @@
+{
+  "name": "@venomlabs/opencode",
+  "version": "0.10.0",
+  "description": "Venom for OpenCode: multiplayer AI for your team. Adds the Venom MCP server, the venom skill, and guidance at compaction, in subagents and after commits and PRs.",
+  "type": "module",
+  "main": "./index.js",
+  "exports": {
+    ".": "./index.js"
+  },
+  "files": [
+    "index.js",
+    "guidance.js",
+    "skills/",
+    "README.md"
+  ],
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "venom",
+    "mcp",
+    "multiplayer-ai",
+    "agents"
+  ],
+  "homepage": "https://venomlabs.dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/venomlabs-dev/venom-full.git",
+    "directory": "opencode"
+  },
+  "license": "MIT",
+  "author": "Venom Labs <support@venomlabs.dev> (https://venomlabs.dev)",
+  "engines": {
+    "opencode": ">=1.18.29"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  }
+}
