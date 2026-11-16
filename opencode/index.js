@@ -70,9 +70,8 @@ async function setup(ctx) {
       event.result = { ...result, content: `${result.content}\n\n${note}` };
     } else if (typeof result.output === "string") {
       event.result = { ...result, output: `${result.output}\n\n${note}` };
-    } else {
-      event.result = { ...result, content: note };
     }
+    // Any other result shape stays as it is, so the shell output is never hidden.
   });
 }
 

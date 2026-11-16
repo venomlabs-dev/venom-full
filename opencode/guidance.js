@@ -115,13 +115,12 @@ export function createState(now = () => Date.now()) {
     async isSubagent(sessionID, lookupParent) {
       if (!sessionID) return false;
       if (!parents.has(sessionID)) {
-        let parent = null;
         try {
-          parent = (await lookupParent(sessionID)) ?? null;
+          parents.set(sessionID, (await lookupParent(sessionID)) ?? null);
         } catch {
-          parent = null;
+          // Unknown this time: ask again on the next request instead of caching.
+          return false;
         }
-        parents.set(sessionID, parent);
       }
       return Boolean(parents.get(sessionID));
     },

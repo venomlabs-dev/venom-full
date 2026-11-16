@@ -13,6 +13,7 @@
 // - End of turn: if a milestone came after the last Venom log, ask once more.
 //
 // Install: amp plugins add https://raw.githubusercontent.com/venomlabs-dev/venom-full/main/amp/venom.ts
+// (or save this file in ~/.config/amp/plugins/).
 import type { PluginAPI, PluginTools, ToolResult } from '@ampcode/plugin'
 
 // Amp names remote MCP tools `module.function`; local ones also take mcp__server__tool.
@@ -76,35 +77,48 @@ function appendTo(output: unknown, note: string): unknown | undefined {
 	return undefined
 }
 
+const LOG_TOOLS = new Set(['append_task_log', 'append_project_log', 'edit_log_entry'])
+
 export default function venom(amp: PluginAPI) {
 	const subagent = new Map<string, boolean>()
 	const subagentTold = new Set<string>()
 	const continued = new Set<string>()
+	// Milestone notes that couldn't ride on a tool result go with the next prompt.
+	const pending = new Map<string, string>()
 
 	amp.on('agent.start', async (event, ctx) => {
 		const thread = event.thread.id
 		const parts: string[] = []
+		const note = pending.get(thread)
+		if (note) {
+			pending.delete(thread)
+			parts.push(note)
+		}
 		if (!subagent.has(thread)) {
 			subagent.set(thread, Boolean(await ctx.thread.parentThreadID().catch(() => null)))
 		}
-		if (subagent.get(thread) && !subagentTold.has(thread)) {
-			subagentTold.add(thread)
-			parts.push(contextOf(await guidance(ctx.tools, { event: 'SubagentStart' })))
+		if (subagent.get(thread)) {
+			// Like Claude Code: subagents get the subagent note once, not projects and mentions.
+			if (!subagentTold.has(thread)) {
+				subagentTold.add(thread)
+				parts.push(contextOf(await guidance(ctx.tools, { event: 'SubagentStart' })))
+			}
+		} else {
+			parts.push(contextOf(await guidance(ctx.tools, { event: 'UserPromptSubmit', session_id: thread })))
 		}
-		parts.push(contextOf(await guidance(ctx.tools, { event: 'UserPromptSubmit', session_id: thread })))
 		const content = parts.filter(Boolean).join('\n\n')
 		return content ? { message: { content } } : {}
 	})
 
 	amp.on('tool.result', async (event, ctx) => {
+		if (event.status !== 'done') return
 		const thread = event.thread.id
 		const tool = bareTool(event.tool)
-		if (tool === 'append_task_log' || tool === 'edit_log_entry') {
+		if (LOG_TOOLS.has(tool)) {
 			// Lets the end-of-turn check see that the milestone was logged.
 			await guidance(ctx.tools, { event: 'PostToolUse', tool, session_id: thread })
 			return
 		}
-		if (event.status !== 'done') return
 		const shell = amp.helpers.shellCommandFromToolCall(event as ToolResult)
 		if (!shell?.command) return
 		const note = contextOf(
@@ -117,13 +131,17 @@ export default function venom(amp: PluginAPI) {
 		)
 		if (!note) return
 		const output = appendTo(event.output, note)
-		return output === undefined ? undefined : { status: 'done', output }
+		if (output === undefined) {
+			pending.set(thread, note)
+			return
+		}
+		return { status: 'done', output }
 	})
 
 	amp.on('agent.end', async (event, ctx) => {
 		const thread = event.thread.id
-		if (event.status !== 'done') return
 		const active = continued.delete(thread)
+		if (event.status !== 'done') return
 		const reason = stopReason(
 			await guidance(ctx.tools, {
 				event: 'Stop',

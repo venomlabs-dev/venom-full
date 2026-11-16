@@ -42,16 +42,22 @@ test('helpers', () => {
 	assert.equal(bareTool('mcp__venom__append_task_log'), 'append_task_log')
 })
 
-test('each prompt gets projects and mentions; subagents are told once', async () => {
+test('each prompt gets projects and mentions', async () => {
+	const { handlers, ctx, calls } = setup({ UserPromptSubmit: hook('UserPromptSubmit', 'Your projects') })
+	const first = await handlers['agent.start']({ thread: { id: 'T1' }, message: 'hi' }, ctx)
+	assert.equal(first.message.content, 'Your projects')
+	assert.deepEqual(calls[0], { event: 'UserPromptSubmit', session_id: 'T1' })
+})
+
+test('subagent threads get the subagent note once, and no projects', async () => {
 	const { handlers, ctx, calls } = setup(
 		{ UserPromptSubmit: hook('UserPromptSubmit', 'Your projects'), SubagentStart: hook('SubagentStart', 'Subagent') },
 		{ parent: 'T0' },
 	)
 	const first = await handlers['agent.start']({ thread: { id: 'T1' }, message: 'hi' }, ctx)
-	assert.equal(first.message.content, 'Subagent\n\nYour projects')
-	const second = await handlers['agent.start']({ thread: { id: 'T1' }, message: 'more' }, ctx)
-	assert.equal(second.message.content, 'Your projects')
-	assert.deepEqual(calls[1], { event: 'UserPromptSubmit', session_id: 'T1' })
+	assert.equal(first.message.content, 'Subagent')
+	assert.deepEqual(await handlers['agent.start']({ thread: { id: 'T1' }, message: 'more' }, ctx), {})
+	assert.deepEqual(calls, [{ event: 'SubagentStart' }])
 })
 
 test('nothing to say adds nothing', async () => {
@@ -69,6 +75,17 @@ test('milestone note is appended to the shell output', async () => {
 	assert.deepEqual(calls[0], { event: 'PostToolUse', tool: 'Bash', command: 'git commit -m x', session_id: 'T1' })
 })
 
+test('a note that fits no output shape goes with the next prompt', async () => {
+	const { handlers, ctx } = setup({ PostToolUse: hook('PostToolUse', 'Venom milestone: you pushed.') })
+	const result = await handlers['tool.result'](
+		{ thread: { id: 'T1' }, tool: 'Bash', toolUseID: 'u', input: { cmd: 'git push' }, status: 'done', output: { exitCode: 0 } },
+		ctx,
+	)
+	assert.equal(result, undefined)
+	const next = await handlers['agent.start']({ thread: { id: 'T1' }, message: 'next' }, ctx)
+	assert.equal(next.message.content, 'Venom milestone: you pushed.')
+})
+
 test('Venom logs are reported so the end-of-turn check sees them', async () => {
 	const { handlers, ctx, calls } = setup({})
 	const result = await handlers['tool.result'](
@@ -77,6 +94,16 @@ test('Venom logs are reported so the end-of-turn check sees them', async () => {
 	)
 	assert.equal(result, undefined)
 	assert.deepEqual(calls[0], { event: 'PostToolUse', tool: 'append_task_log', session_id: 'T1' })
+	await handlers['tool.result'](
+		{ thread: { id: 'T1' }, tool: 'mcp__venom__append_project_log', toolUseID: 'v', input: {}, status: 'done', output: {} },
+		ctx,
+	)
+	assert.deepEqual(calls[1], { event: 'PostToolUse', tool: 'append_project_log', session_id: 'T1' })
+	await handlers['tool.result'](
+		{ thread: { id: 'T1' }, tool: 'venom.append_task_log', toolUseID: 'w', input: {}, status: 'error', output: {} },
+		ctx,
+	)
+	assert.equal(calls.length, 2)
 })
 
 test('end of turn continues once when the server blocks', async () => {
@@ -86,6 +113,15 @@ test('end of turn continues once when the server blocks', async () => {
 	assert.equal(await end(), undefined)
 	assert.equal(calls[1].stop_hook_active, 'true')
 	assert.equal(await end('cancelled'), undefined)
+})
+
+test('a cancelled continuation does not mark the next turn handled', async () => {
+	const { handlers, ctx, calls } = setup({ Stop: JSON.stringify({ decision: 'block', reason: 'Log the merge.' }) })
+	const end = (status = 'done') => handlers['agent.end']({ thread: { id: 'T1' }, status, messages: [] }, ctx)
+	await end()
+	assert.equal(await end('cancelled'), undefined)
+	assert.deepEqual(await end(), { action: 'continue', userMessage: 'Log the merge.' })
+	assert.equal(calls[1].stop_hook_active, '')
 })
 
 test('Venom not connected: the plugin stays quiet', async () => {

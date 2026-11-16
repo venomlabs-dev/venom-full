@@ -114,12 +114,17 @@ amp skill add venomlabs-dev/plugin --global
 amp plugins add https://raw.githubusercontent.com/venomlabs-dev/venom-full/main/amp/venom.ts
 ```
 
+If `amp plugins add` doesn't take the URL, save
+[`amp/venom.ts`](amp/venom.ts) in `~/.config/amp/plugins/` instead, and copy
+the plugin repository's `skills/venom` folder into `~/.config/agents/skills/`.
+
 Amp signs in to Venom the first time it connects. If Amp asks before running
 `venom.get_guidance`, allow it: the tool only reads Venom's guidance. The
 plugin expects the server to be named `venom`.
 
-The Amp plugin is checked against Amp's published plugin types and unit
-tests, but hasn't run in a signed-in Amp yet.
+Untested in Amp: the plugin is checked against Amp's published plugin types
+and unit tests, but hasn't run in a signed-in Amp, and these commands come from
+Amp's docs.
 
 ## Tests
 
