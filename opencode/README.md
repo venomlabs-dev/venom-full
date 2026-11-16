@@ -11,7 +11,8 @@ deploys and publishes. It works with OpenCode 2.x and 1.x (1.18.29 or later).
 ## Install
 
 ```bash
-opencode plugin add github:venomlabs-dev/venom-full
+opencode plugin add github:venomlabs-dev/venom-full   # OpenCode 2.x
+opencode plugin -g github:venomlabs-dev/venom-full    # OpenCode 1.x
 opencode mcp auth venom
 ```
 

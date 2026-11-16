@@ -74,10 +74,16 @@ itself ([`opencode/guidance.js`](opencode/guidance.js)), matched to the
 server's. The server's instructions and tool-response reminders still reach
 OpenCode.
 
-Install it from this repository:
+Install it from this repository. OpenCode 2.x:
 
 ```bash
 opencode plugin add github:venomlabs-dev/venom-full
+```
+
+OpenCode 1.x:
+
+```bash
+opencode plugin -g github:venomlabs-dev/venom-full
 ```
 
 Or add it to `opencode.json` yourself:
