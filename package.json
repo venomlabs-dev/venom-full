@@ -1,0 +1,19 @@
+{
+  "name": "venom-full",
+  "private": true,
+  "description": "Venom Full: Venom hooks for Claude Code and Codex, and the Venom plugins for OpenCode and Amp. This file lets OpenCode install the OpenCode plugin straight from this repository.",
+  "type": "module",
+  "main": "./opencode/index.js",
+  "exports": {
+    ".": "./opencode/index.js"
+  },
+  "files": [
+    "opencode/index.js",
+    "opencode/guidance.js",
+    "opencode/skills/"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test opencode/test/*.test.mjs amp/test/*.test.ts"
+  }
+}
