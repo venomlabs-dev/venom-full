@@ -34,3 +34,25 @@ test("nothing at the plugin root that Claude Code or Codex would load", () => {
     assert.equal(existsSync(join(root, path)), false, `${path} at the repository root reaches Claude Code or Codex`);
   }
 });
+
+test("every package manifest carries the same version as Claude Code's", async () => {
+  const { readdirSync, statSync } = await import("node:fs");
+  const want = json(".claude-plugin/plugin.json").version;
+  const names = /^(plugin\.json|package\.json|.*-extension\.json|kimi\.plugin\.json|openclaw\.plugin\.json|extension\.json)$/;
+  const seen = [];
+  const walk = (dir, depth) => {
+    for (const entry of readdirSync(join(root, dir))) {
+      if (entry === "node_modules" || entry === ".git") continue;
+      const rel = dir ? `${dir}/${entry}` : entry;
+      if (statSync(join(root, rel)).isDirectory()) {
+        if (depth < 3) walk(rel, depth + 1);
+      } else if (names.test(entry) && !entry.endsWith("marketplace.json")) {
+        const version = json(rel).version;
+        if (version !== undefined) seen.push([rel, version]);
+      }
+    }
+  };
+  walk("", 0);
+  assert.ok(seen.length > 10, `found only ${seen.length} manifests`);
+  for (const [file, version] of seen) assert.equal(version, want, file);
+});

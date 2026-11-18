@@ -1,0 +1,16 @@
+{
+  "name": "venom-full",
+  "description": "Venom hooks for Factory Droid.",
+  "owner": {
+    "name": "Venom Labs",
+    "url": "https://venomlabs.dev"
+  },
+  "plugins": [
+    {
+      "name": "venom-droid",
+      "description": "Venom reminders for Droid: session start, compaction, subagents, milestones and one end-of-turn check. Install the venom plugin too.",
+      "source": "./droid",
+      "category": "productivity"
+    }
+  ]
+}

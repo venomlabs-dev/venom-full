@@ -1,0 +1,77 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear",
+        "hooks": [
+          {
+            "type": "command",
+            "name": "venom-session-start",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/venom-qwen.sh\" session-start context SessionStart",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "name": "venom-compacted",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/venom-qwen.sh\" compacted context SessionStart",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "name": "venom-pre-compact",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/venom-qwen.sh\" pre-compact context PreCompact",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "name": "venom-subagent",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/venom-qwen.sh\" subagent context SubagentStart",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "run_shell_command|append_task_log|append_project_log|edit_log_entry",
+        "hooks": [
+          {
+            "type": "command",
+            "name": "venom-post-tool",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/venom-qwen.sh\" post-tool context PostToolUse",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "name": "venom-stop",
+            "command": "sh \"${CLAUDE_PLUGIN_ROOT}/hooks/venom-qwen.sh\" stop block Stop",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

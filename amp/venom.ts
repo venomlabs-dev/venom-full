@@ -10,7 +10,10 @@
 // - Subagent threads: read Venom, report to the parent instead of writing.
 // - After a shell command that commits, pushes, opens or merges a PR,
 //   releases, deploys or publishes: a reminder to log the outcome.
-// - End of turn: if a milestone came after the last Venom log, ask once more.
+// - End of turn: if a milestone came after the last Venom log, ask once more
+//   (one follow-up turn, no more).
+// - Ship and Push to Branch: the prompt Amp builds gets a line asking to log
+//   the shipped work to Venom.
 //
 // Install: amp plugins add https://raw.githubusercontent.com/venomlabs-dev/venom-full/main/amp/venom.ts
 // (or save this file in ~/.config/amp/plugins/).
@@ -77,6 +80,15 @@ function appendTo(output: unknown, note: string): unknown | undefined {
 	return undefined
 }
 
+// Added to the Ship and Push to Branch prompts (same wording as the milestone
+// note the server gives after a commit or push).
+const SHIP_NOTE: Record<'ship' | 'push_branch', string> = {
+	ship:
+		'Venom milestone: you shipped this thread\'s changes. If this advances a Venom task, log the outcome with evidence (commit or PR link) and the next step, and update the status if it changed. A commit, push or PR alone does not make a task done unless the task says so.',
+	push_branch:
+		'Venom milestone: you pushed this branch. If this advances a Venom task, log the outcome with evidence (commit or PR link) and the next step, and update the status if it changed. A commit, push or PR alone does not make a task done unless the task says so.',
+}
+
 const LOG_TOOLS = new Set(['append_task_log', 'append_project_log', 'edit_log_entry'])
 
 export default function venom(amp: PluginAPI) {
@@ -85,6 +97,21 @@ export default function venom(amp: PluginAPI) {
 	const continued = new Set<string>()
 	// Milestone notes that couldn't ride on a tool result go with the next prompt.
 	const pending = new Map<string, string>()
+
+	// session.start can't add model context (it returns nothing), so the first
+	// prompt's agent.start carries the session-start guidance. Here we only look
+	// up whether this thread is a subagent's, so that prompt doesn't wait for it.
+	amp.on('session.start', async (event, ctx) => {
+		const thread = event.thread.id
+		if (!subagent.has(thread)) {
+			subagent.set(thread, Boolean(await ctx.thread.parentThreadID().catch(() => null)))
+		}
+	})
+
+	amp.on('changes.prompt', (event) => {
+		const note = SHIP_NOTE[event.workflow]
+		return note ? { append: note } : undefined
+	})
 
 	amp.on('agent.start', async (event, ctx) => {
 		const thread = event.thread.id
@@ -151,6 +178,6 @@ export default function venom(amp: PluginAPI) {
 		)
 		if (!reason || active) return
 		continued.add(thread)
-		return { action: 'continue', userMessage: reason }
+		return { action: 'continue', userMessage: reason, maxContinuations: 1 }
 	})
 }

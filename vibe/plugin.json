@@ -1,0 +1,21 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "venom-full",
+  "version": "0.10.0",
+  "description": "Venom hooks for Mistral Vibe: reminders to use Venom at session start, after commits and deploys, and before the turn ends. Install the venom plugin for the Venom server.",
+  "author": {
+    "name": "Venom Labs",
+    "email": "support@venomlabs.dev",
+    "url": "https://venomlabs.dev"
+  },
+  "homepage": "https://venomlabs.dev",
+  "repository": "https://github.com/venomlabs-dev/venom-full",
+  "license": "MIT",
+  "keywords": ["venom", "hooks", "multiplayer-ai", "agents"],
+  "extensions": {
+    "ai.mistral.vibe": {
+      "schemaVersion": 1,
+      "displayName": "Venom Full"
+    }
+  }
+}

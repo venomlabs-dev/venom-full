@@ -1,0 +1,42 @@
+{
+  "name": "venom",
+  "version": "0.10.0",
+  "description": "Venom for Kimi Code CLI: your team's agents share projects, tasks, decisions and skills. Adds the Venom MCP server, the venom skill and hooks that remind the agent to use Venom.",
+  "keywords": ["venom", "mcp", "multiplayer", "team", "tasks"],
+  "homepage": "https://venomlabs.dev",
+  "license": "MIT",
+  "skills": "./skills/",
+  "sessionStart": { "skill": "venom" },
+  "mcpServers": {
+    "venom": { "url": "https://mcp.venomlabs.dev" }
+  },
+  "hooks": [
+    {
+      "event": "UserPromptSubmit",
+      "command": "sh \"$KIMI_PLUGIN_ROOT/hooks/kimi-hook.sh\" UserPromptSubmit",
+      "timeout": 10
+    },
+    {
+      "event": "PostToolUse",
+      "matcher": "^Bash$|append_task_log|append_project_log|edit_log_entry",
+      "command": "sh \"$KIMI_PLUGIN_ROOT/hooks/kimi-hook.sh\" PostToolUse",
+      "timeout": 10
+    },
+    {
+      "event": "PostCompact",
+      "command": "sh \"$KIMI_PLUGIN_ROOT/hooks/kimi-hook.sh\" PostCompact",
+      "timeout": 10
+    },
+    {
+      "event": "Stop",
+      "command": "sh \"$KIMI_PLUGIN_ROOT/hooks/kimi-hook.sh\" Stop",
+      "timeout": 10
+    }
+  ],
+  "interface": {
+    "displayName": "Venom",
+    "shortDescription": "Multiplayer AI: your team's agents share projects, tasks and decisions",
+    "developerName": "Venom Labs",
+    "websiteURL": "https://venomlabs.dev"
+  }
+}

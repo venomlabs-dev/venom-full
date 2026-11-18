@@ -1,0 +1,21 @@
+{
+  "id": "venom",
+  "name": "Venom",
+  "description": "Venom for OpenClaw: multiplayer AI for your team. Adds the Venom MCP server, the venom skill, and Venom guidance at session start, after compaction, in subagents and after commits, PRs and deploys.",
+  "version": "0.10.0",
+  "skills": ["./skills"],
+  "mcpServers": {
+    "venom": {
+      "transport": "streamable-http",
+      "url": "https://mcp.venomlabs.dev"
+    }
+  },
+  "activation": {
+    "onStartup": true
+  },
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  }
+}

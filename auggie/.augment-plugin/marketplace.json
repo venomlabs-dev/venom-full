@@ -1,0 +1,16 @@
+{
+  "name": "venom-full",
+  "description": "Venom hooks for Auggie.",
+  "owner": {
+    "name": "Venom Labs",
+    "url": "https://venomlabs.dev"
+  },
+  "plugins": [
+    {
+      "name": "venom-full",
+      "description": "Reminds Auggie to log commits, pushes, PRs, merges, releases, deploys and publishes in Venom.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}

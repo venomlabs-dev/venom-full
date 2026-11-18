@@ -86,6 +86,12 @@ test("a Venom log clears the stop question; a commit alone never asks", () =>
     assert.equal(hook("stop", { session_id: "c" }, tmp), "");
   }));
 
+test("JSON that escapes & < > as \\u0026 \\u003c \\u003e still finds milestones", () =>
+  withTmp((tmp) => {
+    const payload = '{"session_id":"u","tool_input":{"command":"cd app \\u0026\\u0026 git push"}}';
+    assert.equal(hook("post-tool", payload, tmp), milestoneText("push"));
+  }));
+
 test("wrappers can pass what they parsed", () =>
   withTmp((tmp) => {
     const env = { VENOM_HOOK_SESSION: "w", VENOM_HOOK_COMMAND: "git push" };

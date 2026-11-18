@@ -1,7 +1,7 @@
 {
   "name": "venom-full",
   "private": true,
-  "description": "Venom Full: Venom hooks for Claude Code and Codex, and the Venom plugins for OpenCode and Amp. This file lets OpenCode install the OpenCode plugin straight from this repository.",
+  "description": "Venom Full: Venom hooks for Claude Code and Codex, the Venom plugins for OpenCode, Amp and Pi, and hook packages for other agents (one folder each). This file lets OpenCode and Pi install straight from this repository.",
   "type": "module",
   "main": "./opencode/index.js",
   "exports": {
@@ -16,5 +16,10 @@
   "scripts": {
     "test": "node --test 'test/*.test.mjs' '*/test/*.test.mjs' 'amp/test/*.test.ts'",
     "sync": "node scripts/sync-shared.mjs"
+  },
+  "pi": {
+    "extensions": [
+      "./pi/extensions/venom.js"
+    ]
   }
 }

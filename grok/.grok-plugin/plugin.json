@@ -1,0 +1,14 @@
+{
+  "name": "venom-full-grok",
+  "version": "0.10.0",
+  "description": "Venom reminders for Grok Build: session start, subagents, a check after commits, PRs, releases and deploys, and one more ask at the end of a turn. Needs the venom plugin.",
+  "author": {
+    "name": "Venom Labs",
+    "url": "https://venomlabs.dev"
+  },
+  "homepage": "https://venomlabs.dev",
+  "repository": "https://github.com/venomlabs-dev/venom-full",
+  "license": "MIT",
+  "keywords": ["venom", "hooks", "agents", "mcp"],
+  "hooks": "./hooks/hooks.json"
+}

@@ -1,0 +1,10 @@
+name: venom
+version: 0.10.0
+description: "Adds short Venom reminders to the model's context at the right moments: session start, subagents, after compaction, after commits, pushes, pull requests and deploys, and once before finishing."
+author: "Venom Labs"
+provides_hooks:
+  - pre_llm_call
+  - post_tool_call
+  - transform_tool_result
+  - pre_verify
+  - post_compaction

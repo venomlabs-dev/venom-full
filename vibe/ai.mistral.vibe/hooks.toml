@@ -1,0 +1,43 @@
+# Venom hooks for Mistral Vibe. Each command runs hooks/vibe-context.sh or
+# hooks/vibe-stop.sh, which call the shared hooks/venom-hook.sh and put its
+# one-line text in Vibe's reply format. Hooks never fail the session: they
+# always exit 0 and print nothing when there is nothing to say.
+
+# New, resumed, cleared and forked sessions: find the Venom project and task.
+[[hooks]]
+name = "session-start"
+type = "session_start"
+command = "sh \"$PLUGIN_ROOT/hooks/vibe-context.sh\" session-start"
+timeout = 10.0
+description = "Remind the agent to find the Venom project and task."
+
+# Subagents get no session_start, so their turns carry the note. The match
+# skips the agent named main; the script then checks for a parent session,
+# because the user's own agent can have any name.
+[[hooks]]
+name = "subagent"
+type = "pre_agent"
+match = "re:(?!main$).+"
+command = "sh \"$PLUGIN_ROOT/hooks/vibe-context.sh\" subagent"
+timeout = 10.0
+description = "Tell subagents to report to their parent instead of writing to Venom."
+
+# After a shell command: remind to log commits, pushes, PRs, merges, releases,
+# deploys and publishes. Also sees Venom log calls, which clear the stop question.
+[[hooks]]
+name = "milestone"
+type = "post_tool"
+match = "re:(.*[._])?(bash|process_start|append_task_log|append_project_log|edit_log_entry)"
+command = "sh \"$PLUGIN_ROOT/hooks/vibe-context.sh\" post-tool"
+timeout = 10.0
+description = "Remind the agent to log milestones to Venom."
+
+# End of the main agent's turn: ask once after a merge, release, workflow,
+# deploy or publish when nothing was logged to Venom after it.
+[[hooks]]
+name = "stop"
+type = "post_agent"
+match = "main"
+command = "sh \"$PLUGIN_ROOT/hooks/vibe-stop.sh\""
+timeout = 10.0
+description = "Ask once to log the outcome to Venom before the turn ends."

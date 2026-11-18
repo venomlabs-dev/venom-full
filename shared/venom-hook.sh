@@ -96,8 +96,10 @@ case $tool in *append_task_log* | *append_project_log* | *edit_log_entry*) rm -f
 command=${VENOM_HOOK_COMMAND:-$(json_value 'command|cmd')}
 [ -n "$command" ] || exit 0
 # Quoted strings are data (a commit message that says "git push" is not a
-# push); JSON line breaks and && || ; | ( separate commands.
-command=$(printf '%s' "$command" | sed -E 's/\\"([^"\\]|\\[^"])*\\"//g; s/"[^"]*"//g; s/'"'"'[^'"'"']*'"'"'//g; s/\\n/;/g')
+# push); JSON line breaks and && || ; | ( separate commands. Some agents (Go
+# JSON, e.g. Crush) send & < > as & < >: decode those first.
+command=$(printf '%s' "$command" | sed -E 's/\\u0026/\&/g; s/\\u003[cC]/</g; s/\\u003[eE]/>/g' |
+  sed -E 's/\\"([^"\\]|\\[^"])*\\"//g; s/"[^"]*"//g; s/'"'"'[^'"'"']*'"'"'//g; s/\\n/;/g')
 s='(^|[;&|(][[:space:]]*)'
 g="${s}git([[:space:]]+(-[Cc][[:space:]]+[^[:space:]]+|-[^[:space:]]+))*[[:space:]]+"
 e='([[:space:]]|[;&|)]|$)'

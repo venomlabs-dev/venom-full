@@ -6,6 +6,13 @@
 
 export const MCP_URL = "https://mcp.venomlabs.dev";
 
+export const SESSION_START =
+  "Venom: before your first reply about the team's work, find the Venom " +
+  "project and task it belongs to (search with a few keywords, or " +
+  "list_projects and read_task) and check list_mentions. If it is new work " +
+  "to build or change something and no task matches, create one first. " +
+  "Before your final reply, log decisions, outcomes and next steps to that task.";
+
 export const PRE_COMPACT =
   "In the summary, keep the Venom project and task refs being worked on, any " +
   "decisions not yet logged to Venom, and unanswered Venom mentions.";
@@ -84,16 +91,58 @@ export function milestoneText(kind) {
   );
 }
 
+// Outcome-type milestones that earn one end-of-turn question when nothing was
+// logged to Venom after them.
+const STOP_KINDS = new Set(["merge", "release", "workflow", "deploy", "publish"]);
+
+export function stopText(kind) {
+  return (
+    `Venom: ${MILESTONE_TEXT[kind] ?? "you finished a step"} this turn and nothing was ` +
+    "logged to Venom after it. If it produced a decision, outcome, blocker or " +
+    "next step a teammate would need, log it to the Venom task now, with the " +
+    "commit, PR or deploy as evidence. If the work isn't at a point worth " +
+    "recording yet, don't log anything; just finish your reply."
+  );
+}
+
+/** True for a Venom log tool, however the host spells its name (venom_append_task_log, ...). */
+export function isLogTool(name) {
+  return typeof name === "string" && /append_task_log|append_project_log|edit_log_entry/.test(name);
+}
+
 // The server says each milestone at most once per type every 5 minutes per
 // session; the plugin keeps the same limit.
 const MILESTONE_GAP_MS = 5 * 60 * 1000;
+// The stop question is asked at most once every 15 minutes per session.
+const STOP_GAP_MS = 15 * 60 * 1000;
 
 /** Per-process memory of what each session has been told. */
 export function createState(now = () => Date.now()) {
   const compacted = new Set();
   const lastMilestone = new Map();
   const parents = new Map();
+  const pendingStop = new Map();
+  const lastStop = new Map();
   return {
+    /** Remember an outcome milestone that no Venom log has followed yet. */
+    notePending(sessionID, command) {
+      const kind = milestone(command);
+      if (sessionID && kind && STOP_KINDS.has(kind)) pendingStop.set(sessionID, kind);
+    },
+    /** A Venom log call came after the milestone: nothing to ask. */
+    clearPending(sessionID) {
+      pendingStop.delete(sessionID);
+    },
+    /** The end-of-turn question text, once, or null. */
+    stopQuestion(sessionID) {
+      const kind = pendingStop.get(sessionID);
+      if (!kind) return null;
+      pendingStop.delete(sessionID);
+      const last = lastStop.get(sessionID);
+      if (last !== undefined && now() - last < STOP_GAP_MS) return null;
+      lastStop.set(sessionID, now());
+      return stopText(kind);
+    },
     markCompacted(sessionID) {
       if (sessionID) compacted.add(sessionID);
     },

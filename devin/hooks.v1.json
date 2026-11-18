@@ -1,0 +1,38 @@
+{
+  "SessionStart": [
+    {
+      "matcher": "",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "sh \"$HOME/.venom-full/devin/hooks/devin-hook.sh\" session-start",
+          "timeout": 10
+        }
+      ]
+    }
+  ],
+  "PostToolUse": [
+    {
+      "matcher": "^(exec|mcp__.*(append_task_log|append_project_log|edit_log_entry))$",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "sh \"$HOME/.venom-full/devin/hooks/devin-hook.sh\" post-tool",
+          "timeout": 10
+        }
+      ]
+    }
+  ],
+  "Stop": [
+    {
+      "matcher": "",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "sh \"$HOME/.venom-full/devin/hooks/devin-hook.sh\" stop",
+          "timeout": 10
+        }
+      ]
+    }
+  ]
+}

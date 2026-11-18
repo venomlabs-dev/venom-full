@@ -1,0 +1,73 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "venom-session-start",
+      "description": "Venom: find the project and task before the first reply",
+      "trigger": "SessionStart",
+      "action": {
+        "type": "command",
+        "command": "sh \"$HOME/.kiro/hooks/venom\"/venom-hook.sh session-start"
+      },
+      "timeout": 10,
+      "enabled": true
+    },
+    {
+      "name": "venom-pre-compaction",
+      "description": "Venom: keep task refs and unlogged decisions in the summary",
+      "trigger": "PreCompaction",
+      "action": {
+        "type": "command",
+        "command": "sh \"$HOME/.kiro/hooks/venom\"/venom-hook.sh pre-compact"
+      },
+      "timeout": 10,
+      "enabled": true
+    },
+    {
+      "name": "venom-post-compaction",
+      "description": "Venom: re-read the task after compaction",
+      "trigger": "PostCompaction",
+      "action": {
+        "type": "command",
+        "command": "sh \"$HOME/.kiro/hooks/venom\"/venom-hook.sh compacted"
+      },
+      "timeout": 10,
+      "enabled": true
+    },
+    {
+      "name": "venom-milestone",
+      "description": "Venom: log the outcome after a commit, push, PR, merge, release or deploy",
+      "trigger": "PostToolUse",
+      "matcher": "shell",
+      "action": {
+        "type": "command",
+        "command": "sh \"$HOME/.kiro/hooks/venom\"/venom-hook.sh post-tool"
+      },
+      "timeout": 10,
+      "enabled": true
+    },
+    {
+      "name": "venom-log-clears-stop",
+      "description": "Venom: a log call clears the pending end-of-turn question",
+      "trigger": "PostToolUse",
+      "matcher": ".*(append_task_log|append_project_log|edit_log_entry)",
+      "action": {
+        "type": "command",
+        "command": "sh \"$HOME/.kiro/hooks/venom\"/venom-hook.sh post-tool"
+      },
+      "timeout": 10,
+      "enabled": true
+    },
+    {
+      "name": "venom-stop",
+      "description": "Venom: ask once to log an outcome nothing was logged for",
+      "trigger": "Stop",
+      "action": {
+        "type": "command",
+        "command": "sh \"$HOME/.kiro/hooks/venom\"/venom-hook.sh stop"
+      },
+      "timeout": 10,
+      "enabled": true
+    }
+  ]
+}

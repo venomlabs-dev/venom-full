@@ -1,0 +1,22 @@
+{
+  "name": "@venomlabs/pi",
+  "version": "0.10.0",
+  "description": "Venom hooks for Pi: reminders to use Venom at session start, after commits, pushes, PRs, deploys and publishes, after compaction, and once before finishing.",
+  "type": "module",
+  "keywords": ["pi-package", "venom", "mcp", "multiplayer-ai", "agents"],
+  "homepage": "https://venomlabs.dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/venomlabs-dev/venom-full.git",
+    "directory": "pi"
+  },
+  "license": "MIT",
+  "author": "Venom Labs <support@venomlabs.dev> (https://venomlabs.dev)",
+  "files": ["extensions/", "guidance.json", "README.md"],
+  "pi": {
+    "extensions": ["./extensions/venom.js"]
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  }
+}

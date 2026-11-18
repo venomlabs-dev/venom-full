@@ -1,10 +1,11 @@
 # Venom Full
 
-The full Venom experience for developers in Claude Code, Codex, OpenCode and
-Amp. In Claude Code and Codex it adds hooks to the
-[`venom`](https://github.com/venomlabs-dev/plugin) plugin. OpenCode and Amp
-get their own plugin from this repository: see [OpenCode](#opencode) and
-[Amp](#amp).
+The full Venom experience for developers. In Claude Code and Codex it adds
+hooks to the [`venom`](https://github.com/venomlabs-dev/plugin) plugin.
+OpenCode and Amp get their own plugin from this repository: see
+[OpenCode](#opencode) and [Amp](#amp). Every other agent that has hooks gets
+its own package in a folder of this repository: see
+[Other agents](#other-agents).
 
 What the hooks do:
 
@@ -42,6 +43,54 @@ codex plugin add venom-full@venom
 ```
 
 Then trust the Venom hooks once in `/hooks`.
+
+## Other agents
+
+These agents can't run the Claude Code and Codex hooks, which call Venom's
+server. Each folder below holds a package in that agent's own format, built on
+one shared script ([shared/venom-hook.sh](shared/venom-hook.sh)) and one set of
+texts ([shared/guidance.json](shared/guidance.json)), the same texts the server
+sends Claude Code and Codex. They add Venom's guidance at the start of a
+session and, where the agent allows it, after compaction and in subagents; a
+reminder to log after commits, pushes, pull requests, merges, releases,
+deploys and publishes; and one question at the end of a turn when an outcome
+wasn't logged. They don't show your projects and mentions yet: that needs a
+signed-in client.
+
+Install the `venom` plugin (server and skill) first, then the package for your
+agent. Each folder's README has the details, what reaches the model, and how
+it was checked.
+
+| Agent | Folder | Install |
+| --- | --- | --- |
+| Cursor | [cursor](cursor) | Copy the folder to `~/.cursor/plugins/local/venom-full`; Cursor CLI: `--plugin-dir` |
+| GitHub Copilot CLI and VS Code | [copilot](copilot) | `copilot plugin install venomlabs-dev/venom-full:copilot` |
+| Gemini CLI | [gemini](gemini) | `gemini extensions install <clone>/gemini` |
+| Antigravity | [antigravity](antigravity) | `agy plugin install <clone>/antigravity` |
+| Grok Build | [grok](grok) | `grok plugin install venomlabs-dev/venom-full#grok --trust` |
+| Qwen Code | [qwen](qwen) | `qwen extensions install <clone>/qwen` |
+| Factory Droid | [droid](droid) | `droid plugin marketplace add venomlabs-dev/venom-full`, then `droid plugin install venom-droid@venom-full` |
+| Devin CLI and Devin Desktop | [devin](devin) | `devin plugins install venomlabs-dev/venom-full#devin`, or the hooks file |
+| JetBrains Junie | [junie](junie) | `/extensions marketplace add <clone>/junie`, then `/extensions install venom-junie` |
+| Kiro | [kiro](kiro) | Copy the hook files into `~/.kiro/hooks/` |
+| Augment (Auggie) | [auggie](auggie) | `auggie plugin marketplace add venomlabs-dev/venom-full`, then enable `venom-full` |
+| Mistral Vibe | [vibe](vibe) | Copy the folder to `~/.vibe/plugins/venom-full` |
+| Kimi Code | [kimi](kimi) | `/plugins install <clone>/kimi` |
+| Muse Code | [muse](muse) | `muse plugins install <clone>/muse` |
+| Pi | [pi](pi) | `pi install git:github.com/venomlabs-dev/venom-full` |
+| OpenClaw | [openclaw](openclaw) | `openclaw plugins install <clone>/openclaw --accept-capabilities` |
+| Hermes Agent | [hermes](hermes) | `hermes plugins install venomlabs-dev/venom-full/hermes --enable` |
+| Cline | [cline](cline) | `sh <clone>/cline/install.sh` |
+| Crush | [crush](crush) | `sh <clone>/crush/install.sh --apply` |
+| Kilo Code | [opencode](opencode) | The OpenCode plugin runs in Kilo as is: `kilo plugin github:venomlabs-dev/venom-full` |
+
+`<clone>` is a local clone of this repository
+(`git clone https://github.com/venomlabs-dev/venom-full`).
+
+To change a text, edit [shared/guidance.json](shared/guidance.json) and run
+`npm run sync`, which updates every folder's copy; `npm test` fails if a copy
+is out of date. Nothing in these folders reaches Claude Code or Codex
+([test/guard.test.mjs](test/guard.test.mjs) checks it).
 
 ## How it works
 

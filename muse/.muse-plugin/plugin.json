@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "name": "venom-hooks",
+  "displayName": "Venom Hooks",
+  "version": "0.10.0",
+  "description": "Venom reminders for Muse Code: find the Venom task at session start, log outcomes after commits, pushes, PRs and deploys, and keep the task in view across compaction and subagents. Install the venom plugin for the server and skill.",
+  "compat": {
+    "source": "native",
+    "manifestDir": ".muse-plugin"
+  },
+  "capabilities": {
+    "skills": [],
+    "commands": [],
+    "hooks": [
+      {"id": "session-start", "event": "SessionStart", "command": ["sh", "hooks/session-start.sh"], "timeoutMs": 5000},
+      {"id": "pre-compact", "event": "PreCompact", "command": ["sh", "hooks/pre-compact.sh"], "timeoutMs": 5000},
+      {"id": "post-compact", "event": "PostCompact", "command": ["sh", "hooks/post-compact.sh"], "timeoutMs": 5000},
+      {"id": "subagent-start", "event": "SubagentStart", "command": ["sh", "hooks/subagent-start.sh"], "timeoutMs": 5000},
+      {"id": "post-tool", "event": "PostToolUse", "command": ["sh", "hooks/post-tool.sh"], "timeoutMs": 5000},
+      {"id": "stop", "event": "Stop", "command": ["sh", "hooks/stop.sh"], "timeoutMs": 5000}
+    ],
+    "mcpServers": [],
+    "reminders": []
+  }
+}
