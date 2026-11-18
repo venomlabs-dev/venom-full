@@ -92,6 +92,46 @@ test("JSON that escapes & < > as \\u0026 \\u003c \\u003e still finds milestones"
     assert.equal(hook("post-tool", payload, tmp), milestoneText("push"));
   }));
 
+test("commands after env assignments, sudo, if/then, braces and gh global flags count", () =>
+  withTmp((tmp) => {
+    assert.equal(hook("post-tool", shell("p1", "HUSKY=0 git commit -m x"), tmp), milestoneText("commit"));
+    assert.equal(hook("post-tool", shell("p2", "sudo git push"), tmp), milestoneText("push"));
+    assert.equal(hook("post-tool", shell("p3", "if true; then git push; fi"), tmp), milestoneText("push"));
+    assert.equal(hook("post-tool", shell("p4", "{ git push; }"), tmp), milestoneText("push"));
+    assert.equal(hook("post-tool", shell("p5", "gh -R o/r pr merge 3"), tmp), milestoneText("merge"));
+    assert.equal(hook("post-tool", shell("p6", "gh --repo o/r release create v1"), tmp), milestoneText("release"));
+  }));
+
+test("dry runs, help pages and heredoc bodies are not milestones", () =>
+  withTmp((tmp) => {
+    assert.equal(hook("post-tool", shell("d1", "git push --dry-run"), tmp), "");
+    assert.equal(hook("post-tool", shell("d2", "gh pr merge --help"), tmp), "");
+    assert.equal(hook("post-tool", shell("d3", "cat <<EOF > notes.md\ngit push\nEOF"), tmp), "");
+  }));
+
+test("only the tool name counts as a Venom log call, not text in a command", () =>
+  withTmp((tmp) => {
+    hook("post-tool", shell("l", "gh pr merge 1"), tmp);
+    hook("post-tool", shell("l", "grep append_task_log notes.txt"), tmp);
+    assert.equal(hook("stop", { session_id: "l" }, tmp), stopText("merge"));
+  }));
+
+test("an outcome more than an hour old isn't asked about", () =>
+  withTmp((tmp) => {
+    hook("post-tool", shell("old", "gh pr merge 1"), tmp);
+    const uid = execFileSync("id", ["-u"], { encoding: "utf8" }).trim();
+    execFileSync("touch", ["-t", "202001010000", join(tmp, `venom-hooks-${uid}`, "old.pending")]);
+    assert.equal(hook("stop", { session_id: "old" }, tmp), "");
+  }));
+
+test("hooks stay quiet when the state folder isn't the user's own", () =>
+  withTmp((tmp) => {
+    const uid = execFileSync("id", ["-u"], { encoding: "utf8" }).trim();
+    execFileSync("ln", ["-s", tmp, join(tmp, `venom-hooks-${uid}`)]);
+    assert.equal(hook("post-tool", shell("x", "git push"), tmp), "");
+    assert.equal(hook("session-start", {}, tmp), guidance.session_start);
+  }));
+
 test("wrappers can pass what they parsed", () =>
   withTmp((tmp) => {
     const env = { VENOM_HOOK_SESSION: "w", VENOM_HOOK_COMMAND: "git push" };

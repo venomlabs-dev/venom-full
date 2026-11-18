@@ -70,10 +70,28 @@ case $event in
   *) exit 0 ;;
 esac
 
+# With no session id in the payload, key state by the agent's process: the
+# first ancestor that isn't a shell (the hook's own sh and wrappers are).
+host_pid() {
+  p=$PPID n=0
+  while [ "$n" -lt 4 ] && [ -n "$p" ] && [ "$p" -gt 1 ] 2>/dev/null; do
+    c=$(ps -o comm= -p "$p" 2>/dev/null | sed 's#.*/##; s/^-//')
+    case $c in
+      sh | bash | zsh | dash | ksh | env | timeout | "") p=$(ps -o ppid= -p "$p" 2>/dev/null | tr -d ' '); n=$((n + 1)) ;;
+      *) break ;;
+    esac
+  done
+  printf '%s' "${p:-$PPID}"
+}
 session=${VENOM_HOOK_SESSION:-$(json_value 'session_id|sessionId|conversation_id|conversationId|session')}
-session=$(printf '%s' "${session:-ppid-$PPID}" | tr -cd 'A-Za-z0-9._-' | cut -c1-80)
+[ -n "$session" ] || session="host-$(host_pid)"
+session=$(printf '%s' "$session" | tr -cd 'A-Za-z0-9._-' | cut -c1-80)
+# State lives in a folder only this user owns. In a shared /tmp another user
+# could create it first or plant a link: then the hooks stay quiet instead.
 dir="${TMPDIR:-/tmp}/venom-hooks-$(id -u 2>/dev/null || echo 0)"
-mkdir -p "$dir" 2>/dev/null || exit 0
+(umask 077 && mkdir -p "$dir") 2>/dev/null
+{ [ -d "$dir" ] && [ ! -L "$dir" ] && [ -O "$dir" ]; } || exit 0
+chmod 700 "$dir" 2>/dev/null
 pending="$dir/$session.pending"
 
 # Recent: the file exists and was touched less than $2 minutes ago.
@@ -82,6 +100,8 @@ recent() { [ -f "$1" ] && [ -n "$(find "$1" -mmin "-$2" 2>/dev/null)" ]; }
 if [ "$event" = stop ]; then
   case $input in *'"stop_hook_active": true'* | *'"stop_hook_active":true'* | *'"stopHookActive": true'* | *'"stopHookActive":true'*) exit 0 ;; esac
   [ -f "$pending" ] || exit 0
+  # An outcome from more than an hour ago isn't "this turn" any more.
+  if ! recent "$pending" 60; then rm -f "$pending"; exit 0; fi
   kind=$(cat "$pending" 2>/dev/null)
   rm -f "$pending"
   recent "$dir/$session.stop" "$STOP_GAP_MINUTES" && exit 0
@@ -89,31 +109,42 @@ if [ "$event" = stop ]; then
   say "$(fill "$STOP" "$(what_for "$kind")")"
 fi
 
-# post-tool: a Venom log call clears the pending stop question.
-tool=${VENOM_HOOK_TOOL:-$input}
+# post-tool: a Venom log call clears the pending stop question. The tool name
+# comes from the payload's tool key, not the whole payload, so a shell command
+# that only mentions append_task_log doesn't count.
+tool=${VENOM_HOOK_TOOL:-$(json_value 'tool_name|toolName')}
+[ -n "$tool" ] || tool=$input
 case $tool in *append_task_log* | *append_project_log* | *edit_log_entry*) rm -f "$pending"; exit 0 ;; esac
 
 command=${VENOM_HOOK_COMMAND:-$(json_value 'command|cmd')}
 [ -n "$command" ] || exit 0
-# Quoted strings are data (a commit message that says "git push" is not a
-# push); JSON line breaks and && || ; | ( separate commands. Some agents (Go
-# JSON, e.g. Crush) send & < > as & < >: decode those first.
-command=$(printf '%s' "$command" | sed -E 's/\\u0026/\&/g; s/\\u003[cC]/</g; s/\\u003[eE]/>/g' |
+# Some agents (Go JSON, e.g. Crush) escape & < > as backslash-u codes: decode
+# them. A heredoc body is data: drop everything from the first <<. Quoted
+# strings are data too (a commit message that says "git push" is not a push).
+# JSON line breaks and && || ; | ( { separate commands.
+command=$(printf '%s' "$command" | sed -E 's/\\u0026/\&/g; s/\\u003[cC]/</g; s/\\u003[eE]/>/g')
+command=${command%%<<*}
+command=$(printf '%s' "$command" |
   sed -E 's/\\"([^"\\]|\\[^"])*\\"//g; s/"[^"]*"//g; s/'"'"'[^'"'"']*'"'"'//g; s/\\n/;/g')
-s='(^|[;&|(][[:space:]]*)'
+# A dry run or a help page isn't a milestone.
+case $command in *--dry-run* | *--help*) exit 0 ;; esac
+# A command starts after a separator, then optional VAR=value assignments and
+# sudo, time, then, do, else, exec, nohup, command or !.
+s='(^|[;&|({])[[:space:]]*(([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*|sudo|time|then|do|else|exec|nohup|command|!)[[:space:]]+)*'
 g="${s}git([[:space:]]+(-[Cc][[:space:]]+[^[:space:]]+|-[^[:space:]]+))*[[:space:]]+"
-e='([[:space:]]|[;&|)]|$)'
+h="${s}gh([[:space:]]+(-R[[:space:]]*[^[:space:]]+|--repo[= ][^[:space:]]+))*[[:space:]]+"
+e='([[:space:]]|[;&|)}]|$)'
 has() { printf '%s' "$command" | grep -q -E "$1"; }
 kind=""
 for k in merge release workflow deploy publish commit push pr issue; do
   case $k in
     commit) p="${g}commit$e" ;;
     push) p="${g}push$e" ;;
-    pr) p="${s}gh[[:space:]]+pr[[:space:]]+create$e" ;;
-    merge) p="${s}gh[[:space:]]+pr[[:space:]]+merge$e" ;;
-    release) p="${s}gh[[:space:]]+release[[:space:]]+create$e" ;;
-    issue) p="${s}gh[[:space:]]+issue[[:space:]]+close$e" ;;
-    workflow) p="${s}gh[[:space:]]+workflow[[:space:]]+run$e" ;;
+    pr) p="${h}pr[[:space:]]+create$e" ;;
+    merge) p="${h}pr[[:space:]]+merge$e" ;;
+    release) p="${h}release[[:space:]]+create$e" ;;
+    issue) p="${h}issue[[:space:]]+close$e" ;;
+    workflow) p="${h}workflow[[:space:]]+run$e" ;;
     deploy) p="${s}(npx[[:space:]]+)?((vercel|netlify|fly|flyctl|firebase|wrangler|cdk|serverless|sls)[[:space:]]+([^;&|]*[[:space:]])?deploy$e|vercel[[:space:]]+([^;&|]*[[:space:]])?--prod$e)|${s}(terraform[[:space:]]+apply|kubectl[[:space:]]+apply|helm[[:space:]]+upgrade)$e" ;;
     publish) p="${s}((npm|pnpm|yarn|cargo)[[:space:]]+publish|docker[[:space:]]+push|twine[[:space:]]+upload)$e" ;;
   esac

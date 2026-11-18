@@ -29,8 +29,9 @@ const TEXT_KEYS = ["session_start", "pre_compact", "compacted", "subagent", "mil
 
 function assertSafe(name, text) {
   if (typeof text !== "string" || !text) throw new Error(`${name} is missing`);
-  if (/["\\$`\n\r]/.test(text)) {
-    throw new Error(`${name} has a double quote, backslash, dollar sign, backtick or line break`);
+  // Hook scripts put texts in JSON and in a sed replacement as they are.
+  if (/["\\$`/&\x00-\x1f]/.test(text)) {
+    throw new Error(`${name} has a double quote, backslash, dollar sign, backtick, slash, ampersand or control character`);
   }
 }
 for (const key of TEXT_KEYS) assertSafe(key, guidance[key]);
