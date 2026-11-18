@@ -58,9 +58,10 @@ wasn't logged. They don't show your projects and mentions yet: that needs a
 signed-in client.
 
 Install the `venom` plugin (server and skill) first, then the package for your
-agent (except Kimi, whose one plugin has both). The hooks-only packages are all
-named `venom-hooks`, so they don't clash with `venom-full`, the Claude Code
-plugin at this repository's root. Each folder's README has the details, what reaches the model, and how
+agent (except Kimi and OpenClaw, whose one plugin has both). The shell-hook
+packages are named `venom-hooks`, so they don't clash with `venom-full`, the
+Claude Code plugin at this repository's root; the code plugins for Pi, Hermes
+and Cline's CLI keep their own names. Each folder's README has the details, what reaches the model, and how
 it was checked.
 
 | Agent | Folder | Install |

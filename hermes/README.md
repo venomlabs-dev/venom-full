@@ -1,17 +1,20 @@
 # Venom for Hermes Agent
 
-This Hermes plugin adds short Venom reminders to the model's context at the right moments, so the agent finds its Venom task before it starts, logs what it decided, and does not forget Venom after a commit, a merge or a deploy. It needs the `venom` plugin or MCP server from `venomlabs-dev/plugin` installed first. This plugin only adds the reminders.
+This Hermes plugin adds short Venom reminders to the model's context at the right moments, so the agent finds its Venom task before it starts, logs what it decided, and does not forget Venom after a commit, a merge or a deploy. It needs Venom's MCP server and `venom` skill first: Hermes refuses the `venomlabs-dev/plugin` repository as a plugin, so install the skill with `hermes skills install https://raw.githubusercontent.com/venomlabs-dev/plugin/main/skills/venom/SKILL.md` and add `venom` with `url: https://mcp.venomlabs.dev` and `auth: oauth` under `mcp_servers` in `~/.hermes/config.yaml`. This plugin only adds the reminders.
 
 ## Install
-
-```sh
-hermes plugins install venomlabs-dev/venom-full/hermes --enable
-```
 
 From a local clone:
 
 ```sh
-hermes plugins install /path/to/venom-full/hermes --enable
+git clone https://github.com/venomlabs-dev/venom-full
+hermes plugins install ./venom-full/hermes --enable
+```
+
+Hermes's docs also allow a GitHub subfolder (not tried yet):
+
+```sh
+hermes plugins install venomlabs-dev/venom-full/hermes --enable
 ```
 
 Check it: `hermes plugins list` shows `venom` as enabled.

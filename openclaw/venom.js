@@ -32,7 +32,7 @@ function stripQuotes(command) {
 const S = String.raw`(?:^|[;&|({]\s*)(?:(?:[A-Za-z_][A-Za-z0-9_]*=\S*|sudo|time|then|do|else|exec|nohup|command|!)\s+)*`;
 const G = S + String.raw`git(?:\s+(?:-[Cc]\s+\S+|-\S+))*\s+`;
 const H = S + String.raw`gh(?:\s+(?:-R\s*\S+|--repo[= ]\S+))*\s+`;
-const E = String.raw`(?:\s|[;&|)]|$)`;
+const E = String.raw`(?:\s|[;&|)}]|$)`;
 const PATTERNS = {
   commit: new RegExp(`${G}commit${E}`),
   push: new RegExp(`${G}push${E}`),

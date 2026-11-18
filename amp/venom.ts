@@ -99,7 +99,8 @@ export default function venom(amp: PluginAPI) {
 	})
 
 	amp.on('agent.start', async (event, ctx) => {
-		const thread = event.thread.id
+		const thread = event.thread?.id
+		if (!thread) return
 		const parts: string[] = []
 		const note = pending.get(thread)
 		if (note) {
@@ -124,7 +125,8 @@ export default function venom(amp: PluginAPI) {
 
 	amp.on('tool.result', async (event, ctx) => {
 		if (event.status !== 'done') return
-		const thread = event.thread.id
+		const thread = event.thread?.id
+		if (!thread) return
 		const tool = bareTool(event.tool)
 		if (LOG_TOOLS.has(tool)) {
 			// Lets the end-of-turn check see that the milestone was logged.
@@ -151,7 +153,8 @@ export default function venom(amp: PluginAPI) {
 	})
 
 	amp.on('agent.end', async (event, ctx) => {
-		const thread = event.thread.id
+		const thread = event.thread?.id
+		if (!thread) return
 		const active = continued.delete(thread)
 		if (event.status !== 'done') return
 		const reason = stopReason(

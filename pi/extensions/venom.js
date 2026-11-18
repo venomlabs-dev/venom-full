@@ -19,7 +19,7 @@ const guidance = JSON.parse(readFileSync(new URL("../guidance.json", import.meta
 const START = String.raw`(?:^|[;&|({]\s*)(?:(?:[A-Za-z_][A-Za-z0-9_]*=\S*|sudo|time|then|do|else|exec|nohup|command|!)\s+)*`;
 const GIT = START + String.raw`git\s+(?:-[Cc]\s+\S+\s+|-\S+\s+)*`;
 const GH = START + String.raw`gh\s+(?:(?:-R\s*\S+|--repo[= ]\S+)\s+)*`;
-const END = String.raw`(?=\s|[;&|)]|$)`;
+const END = String.raw`(?=\s|[;&|)}]|$)`;
 const PATTERNS = {
   commit: GIT + String.raw`commit` + END,
   push: GIT + String.raw`push` + END,
