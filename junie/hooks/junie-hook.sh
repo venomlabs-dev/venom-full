@@ -40,7 +40,9 @@ case $mode in
       grep -o -E '"session_id"[[:space:]]*:[[:space:]]*"[^"]*"' | head -n 1 |
       sed -E 's/.*:[[:space:]]*"//; s/"$//' | tr -cd 'A-Za-z0-9._-' | cut -c1-80)
     [ -n "$id" ] || id="junie-$junie_pid"
-    mkdir -p "$base" 2>/dev/null || exit 0
+    # Private state folder or nothing: without it the once-per-session gate can't work.
+    (umask 077 && mkdir -p "$base") 2>/dev/null
+    { [ -d "$base" ] && [ ! -L "$base" ] && [ -O "$base" ]; } || exit 0
     marker="$base/junie-started.$id"
     [ -f "$marker" ] && exit 0
     : > "$marker"

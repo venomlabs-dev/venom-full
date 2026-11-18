@@ -1,7 +1,7 @@
 // Junie wrapper: payloads follow https://junie.jetbrains.com/docs/junie-cli-hooks.html
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
@@ -75,4 +75,10 @@ test("stop_hook_active never asks again", () =>
   withTmp((tmp) => {
     run("post-tool", bash("gh release create v1"), tmp);
     assert.equal(run("stop", { ...stop, stop_hook_active: true }, tmp), "");
+  }));
+
+test("a state folder that is a link keeps the first-prompt gate quiet", () =>
+  withTmp((tmp) => {
+    symlinkSync(tmp, join(tmp, `venom-hooks-${process.getuid()}`));
+    assert.equal(run("prompt", prompt("lnk"), tmp), "");
   }));

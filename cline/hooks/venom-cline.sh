@@ -32,15 +32,23 @@ session=$(printf '%s' "$flat" | grep -o -E '"taskId"[[:space:]]*:[[:space:]]*"[^
   sed -E 's/^"taskId"[[:space:]]*:[[:space:]]*"//; s/"$//')
 export VENOM_HOOK_SESSION="$session"
 sid=$(printf '%s' "${session:-ppid-$PPID}" | tr -cd 'A-Za-z0-9._-' | cut -c1-80)
+# State lives in a folder only this user owns (same guard as the shared core);
+# if it can't be trusted, skip the once-per-task memory but still answer.
 dir="${TMPDIR:-/tmp}/venom-hooks-$(id -u 2>/dev/null || echo 0)"
+(umask 077 && mkdir -p "$dir") 2>/dev/null
+state=1
+{ [ -d "$dir" ] && [ ! -L "$dir" ] && [ -O "$dir" ]; } || state=0
 
 case $event in
   task-start)
     # The VS Code extension runs TaskStart before every turn, not once per
     # task, so say it once per task.
-    mkdir -p "$dir" 2>/dev/null || reply ""
-    [ -f "$dir/$sid.cline-started" ] && reply ""
-    touch "$dir/$sid.cline-started"
+    if [ "$state" = 1 ]; then
+      [ -f "$dir/$sid.cline-started" ] && reply ""
+      touch "$dir/$sid.cline-started"
+    else
+      reply ""
+    fi
     # A hook run for a subagent carries its parent's id.
     if printf '%s' "$flat" | grep -q -E '"parent_agent_id"[[:space:]]*:[[:space:]]*"[^"]+"'; then
       reply "$(printf '%s' "$input" | sh "$core" subagent)"

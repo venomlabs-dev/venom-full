@@ -45,7 +45,7 @@ const stopText = (k) => guidance.stop.replace("{what}", guidance.milestones[k]);
 
 test("package files exist and extension hooks parse", () => {
   const manifest = JSON.parse(readFileSync(join(here, "gemini-extension.json"), "utf8"));
-  assert.equal(manifest.name, "venom-full");
+  assert.equal(manifest.name, "venom-hooks");
   const hooks = JSON.parse(readFileSync(join(here, "hooks/hooks.json"), "utf8")).hooks;
   assert.deepEqual(Object.keys(hooks).sort(), ["AfterAgent", "AfterTool", "SessionStart"]);
   for (const groups of Object.values(hooks)) for (const g of groups) for (const h of g.hooks) {

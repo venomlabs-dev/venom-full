@@ -17,10 +17,11 @@ pi install ./venom-full/pi                              # these hooks
 pi mcp add venom --url https://mcp.venomlabs.dev        # the Venom server, then /mcp login venom
 ```
 
-`pi install` cannot take a subfolder of a git repository, so the hooks install
-from a local clone. Once the root `package.json` of venom-full carries
-`"pi": { "extensions": ["./pi/extensions/venom.js"] }`, this works directly:
-`pi install git:github.com/venomlabs-dev/venom-full`.
+`pi install` cannot take a subfolder of a git repository, so the clone-path
+install above is the one that was verified. The root `package.json` of
+venom-full now carries `"pi": { "extensions": ["./pi/extensions/venom.js"] }`,
+so `pi install git:github.com/venomlabs-dev/venom-full` should work too, but
+that form was never run: untested.
 
 ## What it adds
 
@@ -29,7 +30,7 @@ from a local clone. Once the root `package.json` of venom-full carries
 | `before_agent_start` (first prompt of a new session) | Find the Venom project and task, check mentions, log before the final reply (a hidden message) |
 | `tool_result` of `bash` (commit, push, PR, merge, release, issue close, workflow, deploy, publish) | The milestone note, appended to the shell output; once per kind every 5 minutes |
 | `session_compact` | The re-read-the-task note, queued for the next prompt |
-| `agent_before_settle` | After merge, release, workflow, deploy or publish with no Venom log call since: one more turn with the stop question, at most once per 15 minutes |
+| `agent_before_settle` | After merge, release, workflow, deploy or publish with no Venom log call since (and not older than 60 minutes): one more turn with the stop question, at most once per 15 minutes |
 | `tool_result` of `append_task_log`, `append_project_log`, `edit_log_entry` | Clears the pending stop question |
 
 Texts come from `guidance.json`, the same as every Venom agent package.

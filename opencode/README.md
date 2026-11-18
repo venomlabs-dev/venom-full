@@ -9,7 +9,14 @@ session start (find the Venom task, check mentions, log before the final
 reply), at compaction, in subagents and after commits, pushes, pull requests,
 releases, deploys and publishes. When a session goes idle after a merge,
 release, workflow, deploy or publish with no Venom log after it, the plugin
-sends one message asking to log it (at most once every 15 minutes). It works with OpenCode 2.x and 1.x (1.18.29 or later).
+sends one message asking to log it (at most once every 15 minutes, never after
+a cancelled turn). It targets OpenCode 2.x and 1.x (1.18.29 or later).
+
+**Status.** Session start, compaction, subagent notes, milestone notes and the
+idle question are unit-tested only: they have not yet been run in OpenCode or
+Kilo. The `session.idle` event name comes from the OpenCode docs. The one live
+check so far, in Kilo, showed the model receiving a milestone note; that was
+an earlier version of this plugin with milestones only.
 
 ## Install
 

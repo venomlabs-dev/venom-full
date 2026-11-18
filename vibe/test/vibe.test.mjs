@@ -1,7 +1,7 @@
 // Mistral Vibe wrappers: payloads follow https://docs.mistral.ai/vibe/code/cli/hooks
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
@@ -133,6 +133,22 @@ test("hooks.toml and plugin.json are wired to the wrappers", () => {
   }
   const manifest = JSON.parse(readFileSync(join(here, "plugin.json"), "utf8"));
   assert.equal(manifest.$schema, "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json");
-  assert.equal(manifest.name, "venom-full");
+  assert.equal(manifest.name, "venom-hooks");
   assert.equal(manifest.extensions["ai.mistral.vibe"].schemaVersion, 1);
 });
+
+test("the subagent marker lives in the private state folder, not in PLUGIN_DATA or the tmp root", () =>
+  withTmp((tmp) => {
+    const sub = { ...base("sub9", "pre_agent"), parent_session_id: "main" };
+    assert.equal(run(CONTEXT, ["subagent"], sub, tmp), ctx(guidance.subagent));
+    assert.ok(existsSync(join(tmp, `venom-hooks-${process.getuid()}`, "venom-subagent-sub9")));
+    assert.equal(existsSync(join(tmp, "venom-subagent-sub9")), false);
+    assert.equal(existsSync(join(tmp, "data")), false);
+  }));
+
+test("a state folder that is a link keeps the subagent hook quiet", () =>
+  withTmp((tmp) => {
+    symlinkSync(tmp, join(tmp, `venom-hooks-${process.getuid()}`));
+    const sub = { ...base("sub8", "pre_agent"), parent_session_id: "main" };
+    assert.equal(run(CONTEXT, ["subagent"], sub, tmp), "");
+  }));

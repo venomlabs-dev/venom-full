@@ -66,6 +66,30 @@ class Milestones(unittest.TestCase):
         self.assertIsNone(m(None))
 
 
+class MilestoneRules(unittest.TestCase):
+    def test_prefixes(self):
+        m = mod.milestone
+        self.assertEqual(m("CI=1 git push"), "push")
+        self.assertEqual(m("sudo git commit -m x"), "commit")
+        self.assertEqual(m("time git push"), "push")
+        self.assertEqual(m("if true; then git push; fi"), "push")
+        self.assertEqual(m("{ git commit -m x; }"), "commit")
+        self.assertEqual(m("! git push"), "push")
+        self.assertEqual(m("nohup npm publish"), "publish")
+        self.assertEqual(m("FOO=bar BAZ=1 gh pr create"), "pr")
+
+    def test_gh_repo_flags(self):
+        self.assertEqual(mod.milestone("gh -R org/repo pr merge 3"), "merge")
+        self.assertEqual(mod.milestone("gh --repo org/repo release create v1"), "release")
+
+    def test_dry_run_help_heredoc(self):
+        m = mod.milestone
+        self.assertIsNone(m("git push --dry-run"))
+        self.assertIsNone(m("gh pr create --help"))
+        self.assertIsNone(m("cat <<EOF\ngit push\nEOF"))
+        self.assertEqual(m("git commit -F - <<EOF\nmsg\nEOF"), "commit")
+
+
 class Hooks(unittest.TestCase):
     def test_session_start_once(self):
         h, _ = setup()
@@ -109,15 +133,22 @@ class Hooks(unittest.TestCase):
     def test_stop_asked_once_after_outcome(self):
         h, clock = setup()
         shell(h, "gh pr merge 5 --squash")
-        h["pre_llm_call"](session_id="s1")  # next turn clears: question is for this turn only
-        self.assertIsNone(h["pre_verify"](session_id="s1", attempt=0))
-        shell(h, "gh pr merge 6 --squash", call="c2")
+        h["pre_llm_call"](session_id="s1")  # a new turn keeps the question
         msg = h["pre_verify"](session_id="s1", attempt=0)
         self.assertEqual(msg, {"action": "continue",
                                "message": G["stop"].replace("{what}", "you merged a pull request")})
         self.assertIsNone(h["pre_verify"](session_id="s1", attempt=1))
         shell(h, "gh pr merge 7", call="c3")
         self.assertIsNone(h["pre_verify"](session_id="s1", attempt=0))  # within the stop gap
+
+    def test_stop_question_expires_after_an_hour(self):
+        h, clock = setup()
+        shell(h, "npm publish")
+        clock.minutes(61)
+        self.assertIsNone(h["pre_verify"](session_id="s1", attempt=0))
+        shell(h, "npm publish", call="c2")
+        clock.minutes(59)
+        self.assertIsNotNone(h["pre_verify"](session_id="s1", attempt=0))
 
     def test_commit_does_not_ask_at_stop(self):
         h, _ = setup()

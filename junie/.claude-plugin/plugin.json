@@ -1,7 +1,7 @@
 {
-  "name": "venom-junie",
+  "name": "venom-hooks",
   "version": "0.10.0",
-  "description": "Venom reminders for Junie: your team's projects and tasks at the first prompt, and a log reminder after commits, PRs, merges and deploys. Needs the venom extension.",
+  "description": "Venom reminders for Junie: a note at the first prompt to find the Venom task, and a log reminder after commits, PRs, merges and deploys. Needs the venom extension.",
   "author": { "name": "Venom Labs", "url": "https://venomlabs.dev" },
   "homepage": "https://venomlabs.dev",
   "repository": "https://github.com/venomlabs-dev/venom-full",

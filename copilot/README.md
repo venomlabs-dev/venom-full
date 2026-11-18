@@ -1,4 +1,4 @@
-# Venom Full for GitHub Copilot
+# Venom Hooks for GitHub Copilot
 
 Hooks for the `venom` plugin in GitHub Copilot CLI and in VS Code agent mode
 (both run the same Copilot harness and hook format). They add short Venom
@@ -7,14 +7,14 @@ after a commit, push, pull request, merge, release, deploy or publish, and
 once more before the turn ends if an outcome was never logged.
 
 This folder is an [Agent Plugins](https://agent-plugins.org) package named
-`venom-full`. It has no MCP server or skill: install the `venom` plugin first.
+`venom-hooks`. It has no MCP server or skill: install the `venom` plugin first.
 
 ## Install
 
 ```bash
 copilot plugin marketplace add venomlabs-dev/plugin
 copilot plugin install venom@venom
-copilot plugin install venomlabs-dev/venom-full:copilot
+copilot plugin install venomlabs-dev/venom-full:copilot   # untested; the local-clone form below was checked
 ```
 
 From a local clone: `copilot plugin install /path/to/venom-full/copilot`.
@@ -60,7 +60,7 @@ Copilot CLI 1.0.114 (npm `@github/copilot`), isolated HOME, no sign-in. The CLI
 ran against a local OpenAI-compatible mock (`COPILOT_PROVIDER_BASE_URL`,
 `COPILOT_OFFLINE=true`) that scripted tool calls:
 `copilot plugin install <local>/copilot` installs and `plugin list` shows
-`venom-full (v0.9.3)`; the session start text reached the model as a user
+`venom-hooks (v0.10.0)`; the session start text reached the model as a user
 message; a `git commit` and a `gh pr merge` result carried the milestone
 text; a merge with no log was followed by the stop reason as a new user turn,
 then silence; a fake `venom-append_task_log` MCP call cleared it; an `explore`

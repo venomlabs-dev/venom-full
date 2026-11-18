@@ -1,7 +1,7 @@
 // Grok Build wrapper: payloads follow what Grok 1.0.89 sends to hooks.
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
@@ -37,12 +37,12 @@ const shell = (sessionId, command, extra = {}) => ({
   hookEventName: "post_tool_use",
   sessionId,
   session_id: sessionId,
+  ...extra,
   toolName: "run_terminal_command",
   tool_name: "run_terminal_command",
   toolInput: { command },
   tool_input: { command },
   toolResult: { type: "Bash", output: [], output_for_prompt: "exit: 0\n", exit_code: 0, command },
-  ...extra,
 });
 const read = (sessionId) => ({
   hookEventName: "post_tool_use",
@@ -65,6 +65,24 @@ test("the first tool call of a subagent carries the subagent text", () =>
     const out = run("tool", shell("sub1", "ls", { subagentType: "general-purpose" }), tmp);
     assert.equal(out, post(guidance.subagent));
     assert.equal(run("tool", shell("sub1", "ls", { subagentType: "general-purpose" }), tmp), "");
+  }));
+
+test("a main session whose tool input mentions subagentType is not a subagent", () =>
+  withTmp((tmp) => {
+    const payload = {
+      hookEventName: "post_tool_use",
+      sessionId: "s1b",
+      toolName: "write_file",
+      toolInput: { path: "/x", content: 'config {"subagentType": "general-purpose"}' },
+      toolResult: { type: "WriteFile" },
+    };
+    assert.equal(run("tool", payload, tmp), post(guidance.session_start));
+  }));
+
+test("a state folder that is a symlink keeps the wrapper quiet", () =>
+  withTmp((tmp) => {
+    symlinkSync(tmp, join(tmp, `venom-hooks-${process.getuid()}`));
+    assert.equal(run("tool", read("s1c"), tmp), "");
   }));
 
 test("a milestone is added after the session-start text, then alone", () =>

@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh \"${DEVIN_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}}/hooks/devin-hook.sh\" session-start",
+            "command": "f=\"${DEVIN_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}}/hooks/devin-hook.sh\"; [ -f \"$f\" ] && sh \"$f\" session-start || true",
             "timeout": 10
           }
         ]
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh \"${DEVIN_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}}/hooks/devin-hook.sh\" post-tool",
+            "command": "f=\"${DEVIN_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}}/hooks/devin-hook.sh\"; [ -f \"$f\" ] && sh \"$f\" post-tool || true",
             "timeout": 10
           }
         ]
@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh \"${DEVIN_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}}/hooks/devin-hook.sh\" stop",
+            "command": "f=\"${DEVIN_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}}/hooks/devin-hook.sh\"; [ -f \"$f\" ] && sh \"$f\" stop || true",
             "timeout": 10
           }
         ]

@@ -1,6 +1,6 @@
 {
-  "name": "venom-full",
-  "displayName": "Venom Full",
+  "name": "venom-hooks",
+  "displayName": "Venom Hooks",
   "version": "0.10.0",
   "description": "Hooks that keep your Cursor agent using Venom: projects and mentions at session start, a log reminder after commits, merges and deploys, and one more nudge at the end of the turn. Install the venom plugin first.",
   "author": {

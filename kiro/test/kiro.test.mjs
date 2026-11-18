@@ -23,11 +23,11 @@ function setup(scope) {
   cpSync(join(here, "hooks/venom-hook.sh"), join(dest, "venom/venom-hook.sh"));
   cpSync(join(here, `hooks/venom-${scope}.json`), join(dest, "venom.json"));
   const file = JSON.parse(readFileSync(join(dest, "venom.json"), "utf8"));
-  const run = (name, payload) => {
+  const run = (name, payload, cwd = project) => {
     const hook = file.hooks.find((h) => h.name === name);
     assert.ok(hook, name);
     const r = spawnSync("sh", ["-c", hook.action.command], {
-      cwd: project,
+      cwd,
       input: JSON.stringify(payload),
       env: { PATH: process.env.PATH, HOME: home, TMPDIR: root },
       encoding: "utf8",
@@ -35,7 +35,7 @@ function setup(scope) {
     assert.equal(r.status, 0, r.stderr);
     return r.stdout.trim();
   };
-  return { root, file, run };
+  return { root, file, run, home };
 }
 
 const shell = (session, command) => ({
@@ -50,6 +50,20 @@ for (const scope of ["workspace", "user"]) {
       const triggers = file.hooks.map((h) => h.trigger);
       assert.deepEqual(triggers, ["SessionStart", "PreCompaction", "PostCompaction", "PostToolUse", "PostToolUse", "Stop"]);
       for (const h of file.hooks) assert.equal(h.action.type, "command");
+    } finally { rmSync(root, { recursive: true, force: true }); }
+  });
+
+  test(`${scope}: a missing hook script or a cwd outside the project is a quiet exit 0`, () => {
+    const { root, run, home } = setup(scope);
+    try {
+      const start = { hook_event_name: "SessionStart", cwd: "/p", session_id: "s9" };
+      const elsewhere = join(root, "elsewhere");
+      mkdirSync(elsewhere);
+      // The user-level command uses $HOME, so only the workspace one depends on cwd.
+      const expected = scope === "user" ? guidance.session_start : "";
+      assert.equal(run("venom-session-start", start, elsewhere), expected);
+      rmSync(join(scope === "user" ? home : join(root, "project"), ".kiro/hooks/venom/venom-hook.sh"));
+      assert.equal(run("venom-session-start", { ...start, session_id: "s10" }), "");
     } finally { rmSync(root, { recursive: true, force: true }); }
   });
 

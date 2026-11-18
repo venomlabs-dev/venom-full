@@ -1,20 +1,20 @@
 # Venom hooks for JetBrains Junie
 
-A Junie extension that adds Venom reminders to Junie CLI (and Junie hosts that run hooks): your team's Venom projects and tasks on the first prompt of a session, a reminder to log the outcome after a commit, push, PR, merge, release, deploy or publish, and one "did you log it?" question at the end of a turn after an outcome-type milestone. It needs the `venom` extension (the Venom MCP server and skill) installed first.
+A Junie extension that adds Venom reminders to Junie CLI (and Junie hosts that run hooks): a note on the first prompt of a session to find the Venom project and task, a reminder to log the outcome after a commit, push, PR, merge, release, deploy or publish, and one "did you log it?" question at the end of a turn after an outcome-type milestone. It needs the `venom` extension (the Venom MCP server and skill) installed first.
 
 ## Install
 
 ```text
 /extensions marketplace add venomlabs-dev/plugin
 /extensions install venom
-/extensions install venom-junie
+/extensions install venom-hooks
 ```
 
-`venom-junie` is listed in the Venom marketplace only once the plugin repository adds a subfolder entry for `venomlabs-dev/venom-full` (`junie/`). Until then, from a local clone of this repository:
+`venom-hooks` is listed in the Venom marketplace only once the plugin repository adds a subfolder entry for `venomlabs-dev/venom-full` (`junie/`). Until then, from a local clone of this repository:
 
 ```text
 /extensions marketplace add /path/to/venom-full/junie
-/extensions install venom-junie
+/extensions install venom-hooks
 ```
 
 Extension hooks are active only after the install through `/extensions`.
@@ -37,7 +37,8 @@ Skipped: `SessionStart` (Junie ignores its `additionalContext`, so the session-s
 - `UserPromptSubmit` runs only in the interactive TUI. In headless runs (`junie "task"`) and ACP/IDE hosts there is no session-start text; milestones and stop still work where those hosts dispatch `PostToolUse`/`Stop`.
 - Junie sends `session_id` only on `SessionStart` and `UserPromptSubmit`. For `PostToolUse` and `Stop` the wrapper keys state by the Junie process id (`ps`, POSIX).
 - Junie 26.9.7 (3110.7) documents `SessionStart`, `UserPromptSubmit`, `PreToolUse`, `Stop`, `StopFailure`, `PermissionRequest` and `SessionEnd`; `PostToolUse` appears in the current online docs only. On a version without it, milestones and the Venom-log clearing do nothing (a Stop question may then never be armed).
-- No projects/mentions list yet: that needs a signed-in client, planned later.
+- No projects or mentions list: only the Claude Code and Codex plugins show those.
+- Not verified: the reply shape (`hookSpecificOutput.additionalContext`) reaching the model in Junie, for `UserPromptSubmit`, `PostToolUse` and `Stop`. Junie itself was never run (see Verified).
 
 ## Verified
 

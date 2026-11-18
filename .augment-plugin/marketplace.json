@@ -7,7 +7,7 @@
   },
   "plugins": [
     {
-      "name": "venom-full",
+      "name": "venom-hooks",
       "description": "Reminds Auggie to log commits, pushes, PRs, merges, releases, deploys and publishes in Venom.",
       "source": "./auggie",
       "category": "productivity"

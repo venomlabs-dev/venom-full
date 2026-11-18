@@ -1,7 +1,7 @@
-# Venom Full for Cursor
+# Venom Hooks for Cursor
 
-Hooks for Cursor and the Cursor CLI that keep the agent using Venom: your
-projects and mentions at session start, a reminder to log after a commit,
+Hooks for Cursor and the Cursor CLI that keep the agent using Venom: a
+session-start note to find the Venom project and task, a reminder to log after a commit,
 push, PR, merge, release or deploy, one more nudge at the end of the turn if a
 merge, release, workflow run, deploy or publish was never logged, and a
 read-only note for subagents. It adds hooks only. Install the `venom` plugin
@@ -15,7 +15,7 @@ first (it has the MCP server, the rule and the skill).
 
 ```bash
 git clone https://github.com/venomlabs-dev/venom-full ~/venom-full
-cp -R ~/venom-full/cursor ~/.cursor/plugins/local/venom-full
+cp -R ~/venom-full/cursor ~/.cursor/plugins/local/venom-hooks
 ```
 
 Then run **Developer: Reload Window** in Cursor. Cursor skips symlinks that
@@ -54,7 +54,7 @@ works in a project's `.cursor/` there (use paths relative to the project).
 
 | Cursor event | Venom adds | Output field |
 |---|---|---|
-| `sessionStart` | find the Venom project and task, check mentions | `additional_context` |
+| `sessionStart` | find the Venom project and task, check mentions (no project or mention list: only the Claude Code and Codex plugins show those) | `additional_context` |
 | `subagentStart` | read Venom but don't write; report to the parent | `additional_context` (see limits) |
 | `postToolUse`, `Shell` | after commit/push/PR/merge/release/workflow/deploy/publish: log the outcome (once per 5 min) | `additional_context` |
 | `postToolUse`, Venom log tools | clears the pending end-of-turn question | none |

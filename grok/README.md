@@ -1,4 +1,4 @@
-# Venom Full for Grok Build
+# Venom Hooks for Grok Build
 
 Adds Venom reminders to [Grok Build](https://docs.x.ai/build) (`grok`) on top of
 the `venom` plugin: guidance on the first tool call of a session and of every
@@ -16,12 +16,12 @@ package. Both are Grok plugins; `--trust` activates their hooks.
 
 ```bash
 grok plugin install venomlabs-dev/plugin --trust
-grok plugin install venomlabs-dev/venom-full#grok --trust
+grok plugin install venomlabs-dev/venom-full#grok --trust   # untested; the local-clone form below was checked
 ```
 
 From a local clone: `grok plugin install /path/to/venom-full/grok --trust`.
 Start a new Grok session (or press `r` in `/plugins`) to load it. The plugin is
-named `venom-full-grok`, so it does not clash with `venom-full` (the Claude
+named `venom-hooks`, so it does not clash with `venom-full` (the Claude
 Code and Codex plugin, whose `mcp_tool` hooks Grok skips because it only runs
 `command` and `http` hooks).
 
@@ -34,7 +34,7 @@ Code and Codex plugin, whose `mcp_tool` hooks Grok skips because it only runs
 | `PostCompact` then next `PostToolUse` | "context was compacted, re-read the task" | same, one tool call later |
 | `PostToolUse` on a shell command | milestone reminder (5-minute repeat limit) | same |
 | `PostToolUse` on `append_task_log`, `append_project_log`, `edit_log_entry` | clears the pending stop question | prints nothing |
-| `Stop` | asks once after merge, release, workflow, deploy or publish with nothing logged | `hookSpecificOutput.additionalContext` (keeps the agent working) |
+| `Stop` | asks once after merge, release, workflow, deploy or publish with nothing logged | `hookSpecificOutput.additionalContext` (not verified: that Grok keeps working on it) |
 
 Skipped, because their output never reaches the model in Grok 1.0.89:
 `SessionStart` and `SubagentStart` (a `systemMessage` is shown to the user
@@ -54,11 +54,11 @@ allowing hook is discarded).
 
 Grok Build 1.0.89 (28be5bb1bf65), isolated HOME, signed-in headless runs:
 `grok plugin install <local folder> --trust`, `grok plugin list` and
-`grok inspect` show `venom-full-grok` with hooks. A headless turn that ran a
+`grok inspect` show `venom-hooks` (then named `venom-full-grok`) with hooks. A headless turn that ran a
 shell commit made PostToolUse deliver the milestone text to the model (the
 model quoted it, inside a system-reminder naming the plugin hook). A subagent
 run showed the real PostToolUse/SubagentStart/Stop payloads (own `sessionId`
-and `subagentType` inside a subagent) that the tests use. Not run live:
+and `subagentType` inside a subagent) that the tests use. Not verified: the Stop reply, i.e. that `additionalContext` makes Grok keep working (tests only). Not run live:
 the final first-call/compaction/Stop wrapper (tests only; stopped running the
 Grok binary after a keychain-safety rule: its binary mentions keychain paths
 in a sandbox deny list), and the `#grok` GitHub subfolder install.

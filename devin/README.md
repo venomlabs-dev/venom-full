@@ -1,4 +1,4 @@
-# Venom Full for Devin CLI and Devin Desktop
+# Venom Hooks for Devin CLI and Devin Desktop
 
 Adds Venom reminders to the context of Devin CLI and of Devin Desktop's agent
 (Devin Local, which replaced Windsurf's Cascade and shares Devin CLI's hooks and
@@ -17,15 +17,8 @@ Level: Plugin + some hooks. Hooks use the shared core
 
 ## Install
 
-Option A, as a Devin plugin (needs `devin auth login`, which Devin requires for
-every `devin plugins` command):
-
-```bash
-devin plugins install venomlabs-dev/venom-full#devin
-```
-
-Option B, a hooks file, no Devin login needed. Clone once, then add the hooks to
-a project or to your user config:
+Route 1, a hooks file (verified with `devin migrate hooks`, no Devin login
+needed). Clone once, then add the hooks to a project or to your user config:
 
 ```bash
 git clone --depth 1 https://github.com/venomlabs-dev/venom-full ~/.venom-full
@@ -38,7 +31,16 @@ For every project, paste the same three events under a `"hooks"` key in
 `~/.config/devin/config.json` (the contents of `hooks.v1.json` are the value).
 If you already have hooks there, add the three entries to your existing events.
 Run `/hooks` in Devin to see what is loaded. Update with
-`git -C ~/.venom-full pull`.
+`git -C ~/.venom-full pull`. Each command checks that the script exists and
+exits quietly (status 0) if not.
+
+Route 2, as a Devin plugin (**unverified**: `devin plugins` needs `devin auth
+login`, so the install, the plugin's `hooks.json` and the plugin-root variable
+were never tried):
+
+```bash
+devin plugins install venomlabs-dev/venom-full#devin   # untested
+```
 
 ## What each Devin event adds
 
@@ -60,7 +62,7 @@ Run `/hooks` in Devin to see what is loaded. Update with
 - **`UserPromptSubmit`**: can inject context, but the core has nothing for it.
 - No projects or unread-mentions list at session start: that needs a signed-in
   client, planned later.
-- Plugin hooks are best effort and fail open in Devin, and `Stop` is a block
+- Plugin hooks (route 2) are unverified, best effort and fail open in Devin, and `Stop` is a block
   decision, so a rare extra turn is possible (the core asks at most once per
   15 minutes).
 
@@ -76,9 +78,9 @@ Devin CLI 3000.14.30821 (macOS, isolated home, not signed in):
 - Not verified: `devin plugins install` and `devin plugins info` refuse to run
   without a login ("You must be logged in to manage plugins"), so the plugin
   install, the `hooks.json` wrapper shape and the plugin-root variable were
-  not tried. `hooks.json` uses the Claude-compatible `"hooks"` wrapper and
+  not tried (nor that the manifest's `"hooks": "./hooks.json"` is read). `hooks.json` uses the Claude-compatible `"hooks"` wrapper and
   `${DEVIN_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}}`: the binary
   references `PLUGIN_ROOT` and `CLAUDE_PLUGIN_ROOT` names for hooks, but not
   which one is set. Headless `devin -p` also needs a login, so no hook was
-  seen reaching the model. Sign in once and run `devin plugins info venom-full`
+  seen reaching the model. Sign in once and run `devin plugins info venom-hooks`
   and `/hooks` to confirm.

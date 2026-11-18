@@ -24,7 +24,7 @@ Check it: `hermes plugins list` shows `venom` as enabled.
 | `pre_llm_call`, a subagent's first turn | Read Venom if useful, do not write; put findings in the final report |
 | `post_compaction` then `pre_llm_call` | After a compaction: re-read the task with `read_task`, log decisions not yet in Venom |
 | `post_tool_call` and `transform_tool_result` after a shell command | A note after a commit, push, pull request, merge, release, closed issue, workflow run, deploy or publish: log the outcome with evidence. Said once per type every 5 minutes. Failed commands are skipped |
-| `pre_verify` | Asks once to log, after a merge, release, workflow run, deploy or publish with no Venom log call after it |
+| `pre_verify` | Asks once to log (the question survives new turns, and is dropped after 60 minutes), after a merge, release, workflow run, deploy or publish with no Venom log call after it |
 | `post_tool_call` on `append_task_log`, `append_project_log`, `edit_log_entry` | Clears the pending question |
 
 The texts live in `guidance.json`, shared with the other Venom agent packages.
@@ -42,3 +42,9 @@ The texts live in `guidance.json`, shared with the other Venom agent packages.
 python3 -m unittest discover hermes/test
 node --test 'hermes/test/*.test.mjs'
 ```
+
+## Verified
+
+- Unit-tested: 16 Python tests (`python3 -m unittest discover hermes/test`), including the milestone rules (env prefixes, `sudo`, `then`, `{`, `gh -R`, dry run, help, heredoc) and the 60-minute expiry of the stop question.
+- Hermes's own install scanner returns SAFE for this plugin.
+- Never installed or run in Hermes. The `hermes plugins install venomlabs-dev/venom-full/hermes` subfolder form comes from Hermes's docs and was not tried.

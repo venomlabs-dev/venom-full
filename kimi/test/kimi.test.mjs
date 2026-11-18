@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
@@ -96,4 +96,14 @@ test("other tools and output mentioning log tools are ignored", () => {
   run("PostToolUse", { ...bash(id, "echo hi"), tool_output: "append_task_log" });
   run("PostToolUse", base(id, { hook_event_name: "PostToolUse", tool_name: "Read", tool_input: { command: "git push" } }));
   assert.equal(run("Stop", stop(id)).code, 2);
+});
+
+test("a state folder that is a link keeps the wrapper quiet", () => {
+  const t = mkdtempSync(join(tmpdir(), "venom-kimi-link-"));
+  symlinkSync(t, join(t, `venom-hooks-${process.getuid()}`));
+  const r = spawnSync("sh", [join(pkg, "hooks/kimi-hook.sh"), "UserPromptSubmit"], {
+    input: JSON.stringify(prompt(session())), encoding: "utf8", env: { ...process.env, TMPDIR: t },
+  });
+  assert.deepEqual([r.status, r.stdout, r.stderr], [0, "", ""]);
+  rmSync(t, { recursive: true, force: true });
 });

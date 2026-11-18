@@ -33,6 +33,30 @@ test("milestones", () => {
   assert.equal(milestone("npx vercel --prod"), "deploy");
 });
 
+test("milestone rules: prefixes, gh -R, dry run, help, heredoc", () => {
+  assert.equal(milestone("CI=1 git push"), "push");
+  assert.equal(milestone("sudo git commit -m x"), "commit");
+  assert.equal(milestone("if true; then git push; fi"), "push");
+  assert.equal(milestone("{ git commit -m x; }"), "commit");
+  assert.equal(milestone("! git push"), "push");
+  assert.equal(milestone("gh -R org/repo pr merge 3"), "merge");
+  assert.equal(milestone("gh --repo org/repo release create v1"), "release");
+  assert.equal(milestone("git push --dry-run"), null);
+  assert.equal(milestone("gh pr create --help"), null);
+  assert.equal(milestone("cat <<EOF\ngit push\nEOF"), null);
+  assert.equal(milestone("git commit -F - <<EOF\nmsg\nEOF"), "commit");
+});
+
+test("the stop question is dropped after 60 minutes", () => {
+  const { h, tick } = setup();
+  h.tool_result(bash("npm publish"), ctx);
+  tick(61 * 60 * 1000);
+  assert.equal(h.agent_before_settle({ entries: [] }, ctx), undefined);
+  h.tool_result(bash("npm publish"), ctx);
+  tick(59 * 60 * 1000);
+  assert.equal(h.agent_before_settle({ entries: [] }, ctx).continue, true);
+});
+
 test("session start: said once, on the first prompt only", () => {
   const { h } = setup();
   h.session_start({ reason: "startup" });

@@ -44,7 +44,7 @@ test("the plugin registers one PostToolUse hook on bash, command type, plugin-ro
   assert.equal(group.hooks.length, 1);
   assert.equal(group.hooks[0].type, "command");
   assert.deepEqual(group.hooks[0].args, ["${AUGMENT_PLUGIN_ROOT}/hooks/post-tool.sh"]);
-  assert.equal(json(".augment-plugin/plugin.json").name, "venom-full");
+  assert.equal(json(".augment-plugin/plugin.json").name, "venom-hooks");
   assert.equal(json(".augment-plugin/marketplace.json").plugins[0].source, "./");
   assert.ok(statSync(join(root, "hooks/post-tool.sh")).mode & 0o100);
 });

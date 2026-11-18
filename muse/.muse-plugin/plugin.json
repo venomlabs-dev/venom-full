@@ -12,12 +12,12 @@
     "skills": [],
     "commands": [],
     "hooks": [
-      {"id": "session-start", "event": "SessionStart", "command": ["sh", "hooks/session-start.sh"], "timeoutMs": 5000},
-      {"id": "pre-compact", "event": "PreCompact", "command": ["sh", "hooks/pre-compact.sh"], "timeoutMs": 5000},
-      {"id": "post-compact", "event": "PostCompact", "command": ["sh", "hooks/post-compact.sh"], "timeoutMs": 5000},
-      {"id": "subagent-start", "event": "SubagentStart", "command": ["sh", "hooks/subagent-start.sh"], "timeoutMs": 5000},
-      {"id": "post-tool", "event": "PostToolUse", "command": ["sh", "hooks/post-tool.sh"], "timeoutMs": 5000},
-      {"id": "stop", "event": "Stop", "command": ["sh", "hooks/stop.sh"], "timeoutMs": 5000}
+      {"id": "session-start", "event": "SessionStart", "command": ["sh", "-c", "f=hooks/session-start.sh; [ -f \"$f\" ] && sh \"$f\" || true"], "timeoutMs": 5000},
+      {"id": "pre-compact", "event": "PreCompact", "command": ["sh", "-c", "f=hooks/pre-compact.sh; [ -f \"$f\" ] && sh \"$f\" || true"], "timeoutMs": 5000},
+      {"id": "post-compact", "event": "PostCompact", "command": ["sh", "-c", "f=hooks/post-compact.sh; [ -f \"$f\" ] && sh \"$f\" || true"], "timeoutMs": 5000},
+      {"id": "subagent-start", "event": "SubagentStart", "command": ["sh", "-c", "f=hooks/subagent-start.sh; [ -f \"$f\" ] && sh \"$f\" || true"], "timeoutMs": 5000},
+      {"id": "post-tool", "event": "PostToolUse", "command": ["sh", "-c", "f=hooks/post-tool.sh; [ -f \"$f\" ] && sh \"$f\" || true"], "timeoutMs": 5000},
+      {"id": "stop", "event": "Stop", "command": ["sh", "-c", "f=hooks/stop.sh; [ -f \"$f\" ] && sh \"$f\" || true"], "timeoutMs": 5000}
     ],
     "mcpServers": [],
     "reminders": []

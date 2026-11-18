@@ -22,9 +22,15 @@ if [ "$event" = subagent ]; then
     grep -o -E '"session_id"[[:space:]]*:[[:space:]]*"[^"]*"' | head -n 1 |
     sed -E 's/^"session_id"[[:space:]]*:[[:space:]]*"//; s/"$//' | tr -cd 'A-Za-z0-9._-' | cut -c1-80)
   if [ -n "$sid" ]; then
-    mark="${PLUGIN_DATA:-${TMPDIR:-/tmp}}/venom-subagent-$sid"
+    # The marker lives in the same private state folder as the core's files
+    # (only this user's, not a link), so the core's daily cleanup removes it.
+    dir="${TMPDIR:-/tmp}/venom-hooks-$(id -u 2>/dev/null || echo 0)"
+    (umask 077 && mkdir -p "$dir") 2>/dev/null
+    { [ -d "$dir" ] && [ ! -L "$dir" ] && [ -O "$dir" ]; } || exit 0
+    mark="$dir/venom-subagent-$sid"
     [ -f "$mark" ] && exit 0
-    mkdir -p "$(dirname "$mark")" 2>/dev/null && : > "$mark" 2>/dev/null
+    : > "$mark" 2>/dev/null
+    find "$dir" -type f -mtime +1 -exec rm -f {} + 2>/dev/null
   fi
 fi
 

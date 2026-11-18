@@ -27,6 +27,12 @@ project only, give a folder: `sh venom-full/cline/install.sh <project>/.cline/ho
 on **Enable Hooks** in Cline's Feature Settings. On the CLI, hooks are off in
 `--yolo` mode.
 
+Cline runs only one `TaskStart` and one `PostToolUse` file per hooks folder.
+If the folder already has one of those that isn't Venom's, the installer stops
+with a message and changes nothing: merge by hand (call
+`sh venom-cline.sh task-start` or `post-tool` from your own file), move yours
+away, or give another folder. Re-running it over Venom's own files is fine.
+
 CLI plugin, for the session-start note (the CLI doesn't pass a TaskStart
 hook's output to the model):
 
@@ -43,7 +49,7 @@ cline plugin install https://github.com/venomlabs-dev/venom-full/blob/main/cline
 | Cline event | Host | What Venom adds |
 | --- | --- | --- |
 | `TaskStart` hook file | VS Code | The session-start note, once per task. Said as the subagent note when the run has a parent agent. |
-| plugin `beforeRun` (`appendContext`) | CLI | The same note, once per session. |
+| plugin `beforeRun` (`appendContext`) | CLI | The same note, once per session id from the plugin's snapshot (the field name is not documented, so `conversationId`, `sessionId`, `taskId` and `agentId` are tried; with none it is once per process). |
 | `PostToolUse` hook file, after `run_commands` | CLI, VS Code | A reminder to log after a commit, push, PR, merge, release, closed issue, workflow run, deploy or publish: once per kind per 5 minutes. |
 
 Every note goes to the model as `contextModification` (hook files) or

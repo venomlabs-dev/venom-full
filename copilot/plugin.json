@@ -1,6 +1,6 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
-  "name": "venom-full",
+  "name": "venom-hooks",
   "version": "0.10.0",
   "description": "Venom hooks for GitHub Copilot CLI and VS Code agent mode: Venom guidance at session start, in subagents, after commits, PRs and deploys, and a check before the turn ends. Needs the venom plugin.",
   "author": {

@@ -13,11 +13,11 @@ git clone https://github.com/venomlabs-dev/plugin ~/.vibe/plugins/venom
 # 2. These hooks (only the vibe/ folder: the repository root is a Claude Code plugin, and Vibe would load it as one)
 git clone --depth 1 --filter=blob:none --sparse https://github.com/venomlabs-dev/venom-full /tmp/venom-full
 git -C /tmp/venom-full sparse-checkout set vibe
-cp -R /tmp/venom-full/vibe ~/.vibe/plugins/venom-full
+cp -R /tmp/venom-full/vibe ~/.vibe/plugins/venom-hooks
 rm -rf /tmp/venom-full
 ```
 
-Then restart Vibe or run `/reload-plugins`, and check `/plugins`: `venom-full` should list four hooks. Sign in to Venom from Vibe's MCP settings as usual.
+Then restart Vibe or run `/reload-plugins`, and check `/plugins`: `venom-hooks` should list four hooks. Sign in to Venom from Vibe's MCP settings as usual.
 
 ## What it adds
 
@@ -43,7 +43,7 @@ Skipped: pre- and post-compaction (Vibe has no compaction event), `notification`
 Mistral Vibe 3.1.3 (uv tool, isolated home), Python API only:
 
 - `inspect_plugin` on `vibe/`: valid, source format `agent_plugins_1_0`, four hooks, no diagnostics.
-- `PluginResolver` on a home with `venom` and `venom-full` in `~/.vibe/plugins/`: both load; the four hooks resolve as `venom-full:*` with `PLUGIN_ROOT` and `PLUGIN_DATA` set. Each hook command was run the way Vibe runs it (shell, plugin root as cwd, that environment, payloads from Vibe's docs) and printed the expected JSON.
+- `PluginResolver` on a home with `venom` and `venom-hooks` in `~/.vibe/plugins/`: both load; the four hooks resolve as `venom-hooks:*` with `PLUGIN_ROOT` and `PLUGIN_DATA` set. Each hook command was run the way Vibe runs it (shell, plugin root as cwd, that environment, payloads from Vibe's docs) and printed the expected JSON.
 - The `match` patterns were checked against Vibe's own matcher (`bash`, `venom.append_task_log`, main versus subagent).
 - `node --test vibe/test/*.test.mjs` (8 tests).
 

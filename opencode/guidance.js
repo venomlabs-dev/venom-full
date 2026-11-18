@@ -40,46 +40,48 @@ const MILESTONE_TEXT = {
   publish: "you published a package or image",
 };
 
-// Each subcommand of a shell line is checked, so "npm test && git push" counts.
-const START = String.raw`(?:^|[;&|(]\s*)`;
-const GIT = START + String.raw`git\s+(?:-[Cc]\s+\S+\s+|-\S+\s+)*`;
-const MILESTONES = [
-  ["commit", new RegExp(GIT + String.raw`commit\b`)],
-  ["push", new RegExp(GIT + String.raw`push\b`)],
-  ["pr", new RegExp(START + String.raw`gh\s+pr\s+create\b`)],
-  ["merge", new RegExp(START + String.raw`gh\s+pr\s+merge\b`)],
-  ["release", new RegExp(START + String.raw`gh\s+release\s+create\b`)],
-  ["issue", new RegExp(START + String.raw`gh\s+issue\s+close\b`)],
-  ["workflow", new RegExp(START + String.raw`gh\s+workflow\s+run\b`)],
-  [
-    "deploy",
-    new RegExp(
-      START +
-        String.raw`(?:npx\s+)?(?:vercel|netlify|fly|flyctl|firebase|wrangler|cdk|serverless|sls)\s+(?:\S+\s+)*?deploy\b` +
-        "|" +
-        START +
-        String.raw`(?:npx\s+)?vercel\s+(?:\S+\s+)*?--prod\b` +
-        "|" +
-        START +
-        String.raw`(?:terraform\s+apply|kubectl\s+apply|helm\s+upgrade)\b`,
-    ),
-  ],
-  [
-    "publish",
-    new RegExp(
-      START + String.raw`(?:(?:npm|pnpm|yarn|cargo)\s+publish|docker\s+push|twine\s+upload)\b`,
-    ),
-  ],
-];
+// Quoted strings are data (a commit message that says "git push" is not a
+// push), and line breaks separate commands. A heredoc body is data too, so
+// everything from the first << is dropped. Same rules as shared/venom-hook.sh.
+function stripQuotes(command) {
+  return command
+    .replace(/\\"([^"\\]|\\[^"])*\\"/g, "")
+    .replace(/"[^"]*"/g, "")
+    .replace(/'[^']*'/g, "")
+    .replace(/\r?\n/g, ";");
+}
+
+// A command starts after a separator, then optional VAR=value assignments and
+// sudo, time, then, do, else, exec, nohup, command or !.
+const S = String.raw`(?:^|[;&|({])\s*(?:(?:[A-Za-z_][A-Za-z0-9_]*=\S*|sudo|time|then|do|else|exec|nohup|command|!)\s+)*`;
+const G = S + String.raw`git(?:\s+(?:-[Cc]\s+\S+|-\S+))*\s+`;
+const H = S + String.raw`gh(?:\s+(?:-R\s*\S+|--repo[= ]\S+))*\s+`;
+const E = String.raw`(?:\s|[;&|)}]|$)`;
+const PATTERNS = {
+  commit: new RegExp(`${G}commit${E}`),
+  push: new RegExp(`${G}push${E}`),
+  pr: new RegExp(`${H}pr\\s+create${E}`),
+  merge: new RegExp(`${H}pr\\s+merge${E}`),
+  release: new RegExp(`${H}release\\s+create${E}`),
+  issue: new RegExp(`${H}issue\\s+close${E}`),
+  workflow: new RegExp(`${H}workflow\\s+run${E}`),
+  deploy: new RegExp(
+    `${S}(?:npx\\s+)?(?:(?:vercel|netlify|fly|flyctl|firebase|wrangler|cdk|serverless|sls)\\s+(?:[^;&|]*\\s)?deploy${E}` +
+      `|vercel\\s+(?:[^;&|]*\\s)?--prod${E})` +
+      `|${S}(?:terraform\\s+apply|kubectl\\s+apply|helm\\s+upgrade)${E}`,
+  ),
+  publish: new RegExp(`${S}(?:(?:npm|pnpm|yarn|cargo)\\s+publish|docker\\s+push|twine\\s+upload)${E}`),
+};
 // Outcomes outrank the steps to them: "git push && gh pr merge" is a merge.
-const OUTCOMES = new Set(["merge", "release", "workflow", "deploy", "publish"]);
+const ORDER = ["merge", "release", "workflow", "deploy", "publish", "commit", "push", "pr", "issue"];
 
 /** The milestone a shell command reaches, or null. */
 export function milestone(command) {
   if (typeof command !== "string") return null;
-  const line = command.trim();
-  const found = MILESTONES.filter(([, pattern]) => pattern.test(line)).map(([kind]) => kind);
-  return found.find((kind) => OUTCOMES.has(kind)) ?? found[0] ?? null;
+  const line = stripQuotes(command.split("<<")[0]);
+  // A dry run or a help page isn't a milestone.
+  if (/--dry-run|--help/.test(line)) return null;
+  return ORDER.find((kind) => PATTERNS[kind].test(line)) ?? null;
 }
 
 export function milestoneText(kind) {
@@ -160,7 +162,10 @@ export function createState(now = () => Date.now()) {
       lastMilestone.set(key, now());
       return milestoneText(kind);
     },
-    /** Whether a session is a subagent's, with the lookup cached per session. */
+    /**
+     * Whether a session is a subagent's, cached per session. Returns null
+     * ("unknown") when the lookup fails: callers then add no Venom text.
+     */
     async isSubagent(sessionID, lookupParent) {
       if (!sessionID) return false;
       if (!parents.has(sessionID)) {
@@ -168,7 +173,7 @@ export function createState(now = () => Date.now()) {
           parents.set(sessionID, (await lookupParent(sessionID)) ?? null);
         } catch {
           // Unknown this time: ask again on the next request instead of caching.
-          return false;
+          return null;
         }
       }
       return Boolean(parents.get(sessionID));

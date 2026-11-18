@@ -32,16 +32,41 @@ function parentOf(info) {
   return value?.parentID ?? value?.parentId ?? value?.parent?.id ?? null;
 }
 
+// What the last turn looked like, from a session's messages: whether the last
+// assistant message was aborted or errored (the user cancelled: don't start a
+// new turn) and the agent and model of the last user message, so the follow-up
+// runs as that agent and not the default one.
+export function lastTurn(result) {
+  const list = Array.isArray(result) ? result : (result?.data ?? []);
+  const infos = list.map((m) => m?.info ?? m).filter(Boolean);
+  const assistant = infos.findLast((m) => m.role === "assistant");
+  const user = infos.findLast((m) => m.role === "user");
+  const extras = {};
+  if (user?.agent) extras.agent = user.agent;
+  const model = user?.model;
+  if (model?.providerID && model?.modelID) extras.model = { providerID: model.providerID, modelID: model.modelID };
+  return { stopped: Boolean(assistant?.error), extras };
+}
+
 // Stop question: when a session goes idle after a merge, release, workflow,
 // deploy or publish that no Venom log followed, send one message asking to log.
-async function askStop(state, sessionID, lookupParent, send) {
+// Not when the subagent status or the last turn can't be read, and not when the
+// user cancelled the last turn.
+async function askStop(state, sessionID, lookupParent, lookupTurn, send) {
   if (!sessionID) return;
-  if (await state.isSubagent(sessionID, lookupParent)) {
+  const subagent = await state.isSubagent(sessionID, lookupParent);
+  if (subagent === null) return;
+  if (subagent) {
+    state.clearPending(sessionID);
+    return;
+  }
+  const turn = await lookupTurn(sessionID);
+  if (turn.stopped) {
     state.clearPending(sessionID);
     return;
   }
   const text = state.stopQuestion(sessionID);
-  if (text) await send(text);
+  if (text) await send(text, turn.extras);
 }
 
 // OpenCode 2.x
@@ -59,6 +84,12 @@ async function setup(ctx) {
   });
 
   const lookupParent = async (sessionID) => parentOf(await ctx.session.get({ sessionID }));
+  // The 2.x message listing isn't documented here: without it the follow-up
+  // goes out with the defaults.
+  const lookupTurn = async (sessionID) =>
+    typeof ctx.session.messages === "function"
+      ? lastTurn(await ctx.session.messages({ sessionID }))
+      : { stopped: false, extras: {} };
 
   await ctx.session.hook("compaction", (request) => {
     request.system.push({ type: "text", text: PRE_COMPACT });
@@ -69,6 +100,7 @@ async function setup(ctx) {
     // Subagents get the subagent note; every other session gets the session-start
     // guidance. Changes here last for one model call, so it is added on each.
     const subagent = await state.isSubagent(request.sessionID, lookupParent);
+    if (subagent === null) return; // unknown: add no Venom text
     if (!subagent && request.sessionID) {
       request.system.push({ type: "text", text: SESSION_START });
     }
@@ -101,21 +133,22 @@ async function setup(ctx) {
 
   // Idle sessions: ask the stop question. Needs the event stream (2.x).
   if (typeof ctx.event?.subscribe === "function") {
+    // No abort function is returned from setup: the 2.x plugin docs don't say
+    // setup may return one, so the watcher lives as long as the process.
     const controller = new AbortController();
     void (async () => {
       try {
         for await (const event of ctx.event.subscribe({ signal: controller.signal })) {
           if (event?.type !== "session.idle") continue;
           const sessionID = event.properties?.sessionID ?? event.sessionID;
-          await askStop(state, sessionID, lookupParent, (text) =>
-            ctx.session.prompt({ sessionID, text, delivery: "queue" }),
+          await askStop(state, sessionID, lookupParent, lookupTurn, (text, extras) =>
+            ctx.session.prompt({ sessionID, text, delivery: "queue", ...extras }),
           ).catch(() => {});
         }
       } catch {
         // The stream ended or was aborted: nothing more to watch.
       }
     })();
-    return () => controller.abort();
   }
 }
 
@@ -124,6 +157,9 @@ async function server({ client }) {
   const state = createState();
   const lookupParent = async (sessionID) =>
     parentOf(await client.session.get({ path: { id: sessionID } }));
+
+  const lookupTurn = async (sessionID) =>
+    lastTurn(await client.session.messages({ path: { id: sessionID } }));
 
   return {
     config: async (config) => {
@@ -140,8 +176,11 @@ async function server({ client }) {
       if (event?.type === "session.idle") {
         const sessionID = event.properties?.sessionID;
         const ask = client.session.promptAsync ?? client.session.prompt;
-        await askStop(state, sessionID, lookupParent, (text) =>
-          ask.call(client.session, { path: { id: sessionID }, body: { parts: [{ type: "text", text }] } }),
+        await askStop(state, sessionID, lookupParent, lookupTurn, (text, extras) =>
+          ask.call(client.session, {
+            path: { id: sessionID },
+            body: { ...extras, parts: [{ type: "text", text, synthetic: true }] },
+          }),
         ).catch(() => {});
       }
     },
@@ -150,6 +189,7 @@ async function server({ client }) {
     },
     "experimental.chat.system.transform": async (input, output) => {
       const subagent = await state.isSubagent(input.sessionID, lookupParent);
+      if (subagent === null) return; // unknown: add no Venom text
       if (!subagent && input.sessionID) output.system.push(SESSION_START);
       if (state.takeCompacted(input.sessionID)) output.system.push(COMPACTED);
       if (subagent) output.system.push(SUBAGENT);

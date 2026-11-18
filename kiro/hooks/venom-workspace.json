@@ -7,7 +7,7 @@
       "trigger": "SessionStart",
       "action": {
         "type": "command",
-        "command": "sh .kiro/hooks/venom/venom-hook.sh session-start"
+        "command": "f=.kiro/hooks/venom/venom-hook.sh; [ -f \"$f\" ] || f=\"$(git rev-parse --show-toplevel 2>/dev/null)/$f\"; [ -f \"$f\" ] && sh \"$f\" session-start || true"
       },
       "timeout": 10,
       "enabled": true
@@ -18,7 +18,7 @@
       "trigger": "PreCompaction",
       "action": {
         "type": "command",
-        "command": "sh .kiro/hooks/venom/venom-hook.sh pre-compact"
+        "command": "f=.kiro/hooks/venom/venom-hook.sh; [ -f \"$f\" ] || f=\"$(git rev-parse --show-toplevel 2>/dev/null)/$f\"; [ -f \"$f\" ] && sh \"$f\" pre-compact || true"
       },
       "timeout": 10,
       "enabled": true
@@ -29,7 +29,7 @@
       "trigger": "PostCompaction",
       "action": {
         "type": "command",
-        "command": "sh .kiro/hooks/venom/venom-hook.sh compacted"
+        "command": "f=.kiro/hooks/venom/venom-hook.sh; [ -f \"$f\" ] || f=\"$(git rev-parse --show-toplevel 2>/dev/null)/$f\"; [ -f \"$f\" ] && sh \"$f\" compacted || true"
       },
       "timeout": 10,
       "enabled": true
@@ -41,7 +41,7 @@
       "matcher": "shell",
       "action": {
         "type": "command",
-        "command": "sh .kiro/hooks/venom/venom-hook.sh post-tool"
+        "command": "f=.kiro/hooks/venom/venom-hook.sh; [ -f \"$f\" ] || f=\"$(git rev-parse --show-toplevel 2>/dev/null)/$f\"; [ -f \"$f\" ] && sh \"$f\" post-tool || true"
       },
       "timeout": 10,
       "enabled": true
@@ -53,7 +53,7 @@
       "matcher": ".*(append_task_log|append_project_log|edit_log_entry)",
       "action": {
         "type": "command",
-        "command": "sh .kiro/hooks/venom/venom-hook.sh post-tool"
+        "command": "f=.kiro/hooks/venom/venom-hook.sh; [ -f \"$f\" ] || f=\"$(git rev-parse --show-toplevel 2>/dev/null)/$f\"; [ -f \"$f\" ] && sh \"$f\" post-tool || true"
       },
       "timeout": 10,
       "enabled": true
@@ -64,7 +64,7 @@
       "trigger": "Stop",
       "action": {
         "type": "command",
-        "command": "sh .kiro/hooks/venom/venom-hook.sh stop"
+        "command": "f=.kiro/hooks/venom/venom-hook.sh; [ -f \"$f\" ] || f=\"$(git rev-parse --show-toplevel 2>/dev/null)/$f\"; [ -f \"$f\" ] && sh \"$f\" stop || true"
       },
       "timeout": 10,
       "enabled": true

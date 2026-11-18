@@ -27,6 +27,9 @@ cp /path/to/venom-full/kiro/hooks/venom-workspace.json .kiro/hooks/venom.json
 ```
 
 Restart the Kiro session. Hooks run with `sh`, so macOS, Linux and WSL work.
+Each command checks that its script exists and exits quietly (status 0) if not;
+the project form also looks in the git root when Kiro's working directory is a
+subfolder.
 
 ## What Kiro gets
 
@@ -39,7 +42,8 @@ Restart the Kiro session. Hooks run with `sh`, so macOS, Linux and WSL work.
 | PostToolUse (Venom log tools) | post-tool | clears the pending end-of-turn question |
 | Stop | stop | asks once to log after merge, release, workflow, deploy or publish |
 
-Output is plain stdout (Kiro adds exit-0 stdout to the agent's context).
+Output is plain stdout. Not verified: that Kiro adds a `Stop` or `PostToolUse` hook's stdout to the
+agent's context (its docs only say exit-0 stdout is added; nothing was seen working).
 
 ## Limits
 
@@ -47,7 +51,7 @@ Output is plain stdout (Kiro adds exit-0 stdout to the agent's context).
   stdout reaching the model is not documented, and a Venom note per prompt would be noise.
 - No projects/mentions list at session start (needs a signed-in client, planned later).
 - User-level `~/.kiro/hooks` is documented for CLI V3 only; the IDE reads `.kiro/hooks` in the workspace.
-- Kiro does not document how Stop and PostToolUse stdout is handled beyond "exit 0 adds stdout to context", and the trigger names `PreCompaction` and `PostCompaction` come from the trigger table. See Verified.
+- Not verified: how Kiro handles Stop and PostToolUse stdout; its docs say no more than "exit 0 adds stdout to context", and the trigger names `PreCompaction` and `PostCompaction` come from the trigger table. See Verified.
 
 ## Verified
 

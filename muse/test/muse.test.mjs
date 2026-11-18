@@ -33,7 +33,7 @@ const milestone = (kind) => guidance.milestone.replace("{what}", guidance.milest
 const stopText = (kind) => guidance.stop.replace("{what}", guidance.milestones[kind]);
 
 test("manifest hooks all point at existing, distinct scripts", () => {
-  const files = manifest.capabilities.hooks.map((h) => h.command[1]);
+  const files = manifest.capabilities.hooks.map((h) => h.command[2].match(/^f=(hooks\/[a-z-]+\.sh);/)[1]);
   assert.equal(new Set(files).size, files.length);
   for (const f of files) assert.ok(existsSync(join(dir, f)), f);
   assert.deepEqual(manifest.capabilities.hooks.map((h) => h.event),
@@ -70,4 +70,26 @@ test("a Venom log call clears the stop question", () =>
     run("post-tool.sh", bash("d", "git push && gh pr merge 4"), tmp);
     run("post-tool.sh", base("PostToolUse", { session_id: "d", tool_name: "mcp__venom__append_task_log", tool_input: { task: "t", text: "x" } }), tmp);
     assert.equal(run("stop.sh", base("Stop", { session_id: "d" }), tmp), "");
+  }));
+
+test("every manifest command guards its path: quiet exit 0 from another folder, works from the plugin folder", () =>
+  withTmp((tmp) => {
+    const start = base("SessionStart", { source: "startup" });
+    const go = (cwd) => {
+      const h = manifest.capabilities.hooks.find((x) => x.id === "session-start");
+      const r = spawnSync(h.command[0], h.command.slice(1), {
+        cwd, input: JSON.stringify(start), env: { PATH: process.env.PATH, TMPDIR: tmp }, encoding: "utf8",
+      });
+      assert.equal(r.status, 0, r.stderr);
+      return r.stdout.trim();
+    };
+    assert.equal(go(tmp), "");
+    assert.equal(go(dir), ctx("SessionStart", guidance.session_start));
+  }));
+
+test("with no session id the state is keyed by the agent process, so a milestone then stop still pairs", () =>
+  withTmp((tmp) => {
+    const noId = (event, extra) => ({ hook_event_name: event, ...extra });
+    run("post-tool.sh", noId("PostToolUse", { tool_name: "bash", tool_input: { command: "gh pr merge 3" } }), tmp);
+    assert.equal(run("stop.sh", noId("Stop", {}), tmp), JSON.stringify({ decision: "block", reason: stopText("merge") }));
   }));

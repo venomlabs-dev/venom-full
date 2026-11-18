@@ -1,6 +1,6 @@
 # Venom hooks for Factory Droid
 
-`venom-droid` is a Droid plugin that adds short Venom reminders to Droid's
+`venom-hooks` is a Droid plugin that adds short Venom reminders to Droid's
 context at the right moments: where to look at the start of a session, what to
 keep after compaction, and when to log a milestone (commit, push, pull request,
 merge, release, deploy, publish). It carries no MCP server of its own: install
@@ -16,14 +16,14 @@ droid plugin marketplace add venomlabs-dev/plugin
 droid plugin install venom@plugin --scope user
 droid mcp add venom https://mcp.venomlabs.dev --type http
 droid plugin marketplace add venomlabs-dev/venom-full
-droid plugin install venom-droid@venom-full --scope user
+droid plugin install venom-hooks@venom-full --scope user
 ```
 
 Droid names each marketplace after its repository, so the plugins are
-`venom@plugin` and `venom-droid@venom-full`. The `droid mcp add` line is there
+`venom@plugin` and `venom-hooks@venom-full`. The `droid mcp add` line is there
 because Droid 1.14.0 doesn't accept the `venom` plugin's own server entry.
 
-Don't install `venom-full` in Droid: its hooks are ignored and Droid warns about
+Don't install `venom-full` (the Claude Code plugin at the repository root) in Droid: its hooks are ignored and Droid warns about
 each one. Then sign in to Venom from Droid's `/mcp` as usual.
 
 For a local check, add a marketplace whose entry points at this folder (see
@@ -74,7 +74,7 @@ unchanged:
   "plugins": [
     { "name": "venom", "description": "Your team's agents share projects, tasks, decisions and skills through the Venom MCP server.", "source": "./", "category": "productivity" },
     {
-      "name": "venom-droid",
+      "name": "venom-hooks",
       "description": "Venom reminders for Droid: session start, compaction, milestones. Install venom too.",
       "source": { "source": "git-subdir", "url": "https://github.com/venomlabs-dev/venom-full", "path": "droid" },
       "category": "productivity"
@@ -87,7 +87,7 @@ unchanged:
 
 - Droid 1.14.0 (isolated home, not signed in): a local marketplace entry with a
   relative source, and one with `git-subdir` (local git repo as stand-in),
-  both installed `venom-droid`; `droid plugin list` showed it Enabled with no
+  both installed `venom-hooks`; `droid plugin list` showed it Enabled with no
   hook issues, and the cache held `.factory-plugin/`, `hooks/hooks.json` and
   executable scripts.
 - Wrappers run against payloads shaped like the docs' hook input:

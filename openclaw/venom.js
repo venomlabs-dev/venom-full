@@ -10,6 +10,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 export const guidance = JSON.parse(readFileSync(join(here, "guidance.json"), "utf8"));
 
 const MINUTE = 60 * 1000;
+const STOP_EXPIRY_MINUTES = 60;
 const fill = (template, kind) => template.replace("{what}", guidance.milestones[kind]);
 export const milestoneText = (kind) => fill(guidance.milestone, kind);
 export const stopText = (kind) => fill(guidance.stop, kind);
@@ -18,6 +19,7 @@ export const stopText = (kind) => fill(guidance.stop, kind);
 // push), and line breaks separate commands.
 function stripQuotes(command) {
   return command
+    .split("<<")[0] // a heredoc body is data
     .replace(/\\"([^"\\]|\\[^"])*\\"/g, "")
     .replace(/"[^"]*"/g, "")
     .replace(/'[^']*'/g, "")
@@ -25,17 +27,20 @@ function stripQuotes(command) {
 }
 
 // Each subcommand of a shell line is checked, so "npm test && git push" counts.
-const S = String.raw`(?:^|[;&|(]\s*)`;
+// A command starts after a separator, then optional VAR=value assignments and
+// sudo, time, then, do, else, exec, nohup, command or ! (as in the shared script).
+const S = String.raw`(?:^|[;&|({]\s*)(?:(?:[A-Za-z_][A-Za-z0-9_]*=\S*|sudo|time|then|do|else|exec|nohup|command|!)\s+)*`;
 const G = S + String.raw`git(?:\s+(?:-[Cc]\s+\S+|-\S+))*\s+`;
+const H = S + String.raw`gh(?:\s+(?:-R\s*\S+|--repo[= ]\S+))*\s+`;
 const E = String.raw`(?:\s|[;&|)]|$)`;
 const PATTERNS = {
   commit: new RegExp(`${G}commit${E}`),
   push: new RegExp(`${G}push${E}`),
-  pr: new RegExp(`${S}gh\\s+pr\\s+create${E}`),
-  merge: new RegExp(`${S}gh\\s+pr\\s+merge${E}`),
-  release: new RegExp(`${S}gh\\s+release\\s+create${E}`),
-  issue: new RegExp(`${S}gh\\s+issue\\s+close${E}`),
-  workflow: new RegExp(`${S}gh\\s+workflow\\s+run${E}`),
+  pr: new RegExp(`${H}pr\\s+create${E}`),
+  merge: new RegExp(`${H}pr\\s+merge${E}`),
+  release: new RegExp(`${H}release\\s+create${E}`),
+  issue: new RegExp(`${H}issue\\s+close${E}`),
+  workflow: new RegExp(`${H}workflow\\s+run${E}`),
   deploy: new RegExp(
     `${S}(?:npx\\s+)?(?:(?:vercel|netlify|fly|flyctl|firebase|wrangler|cdk|serverless|sls)\\s+(?:[^;&|]*\\s)?deploy${E}` +
       `|vercel\\s+(?:[^;&|]*\\s)?--prod${E})` +
@@ -52,6 +57,7 @@ const ORDER = ["merge", "release", "workflow", "deploy", "publish", "commit", "p
 export function milestone(command) {
   if (typeof command !== "string" || !command.trim()) return null;
   const line = stripQuotes(command);
+  if (/--dry-run|--help/.test(line)) return null;
   return ORDER.find((kind) => PATTERNS[kind].test(line)) ?? null;
 }
 
@@ -73,6 +79,10 @@ export function createState(now = () => Date.now()) {
       started.add(key);
       return true;
     },
+    /** A subagent by session-key pattern or because subagent_spawned named it. */
+    isSubagent(key) {
+      return subagents.has(key) || isSubagentSession(key);
+    },
     markSubagent(key) {
       if (key) subagents.add(key);
     },
@@ -80,7 +90,7 @@ export function createState(now = () => Date.now()) {
     milestoneNote(key, command) {
       const kind = milestone(command);
       if (!kind) return null;
-      if (guidance.stop_kinds.includes(kind)) pending.set(key, kind);
+      if (guidance.stop_kinds.includes(kind)) pending.set(key, [kind, now()]);
       const id = `${key}:${kind}`;
       const last = lastMilestone.get(id);
       if (last !== undefined && now() - last < guidance.milestone_gap_minutes * MINUTE) return null;
@@ -93,9 +103,10 @@ export function createState(now = () => Date.now()) {
     },
     /** The stop question, once per outcome and at most every stop_gap_minutes; null if none. */
     stopNote(key) {
-      const kind = pending.get(key);
+      const [kind, at] = pending.get(key) ?? [];
       if (!kind) return null;
       pending.delete(key);
+      if (now() - at > STOP_EXPIRY_MINUTES * MINUTE) return null; // an outcome from long ago isn't "this turn"
       const last = lastStop.get(key);
       if (last !== undefined && now() - last < guidance.stop_gap_minutes * MINUTE) return null;
       lastStop.set(key, now());

@@ -109,6 +109,6 @@ test("hooks.json and plugin.json are wired to the wrapper", () => {
     for (const e of entries) assert.match(e.command, /\$\{CURSOR_PLUGIN_ROOT\}\/hooks\/cursor-hook\.sh/);
   }
   const plugin = JSON.parse(readFileSync(join(dir, ".cursor-plugin/plugin.json"), "utf8"));
-  assert.equal(plugin.name, "venom-full");
+  assert.equal(plugin.name, "venom-hooks");
   assert.equal(plugin.hooks, "hooks/hooks.json");
 });

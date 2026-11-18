@@ -5,7 +5,7 @@
 // sends only the postToolUse form.
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
@@ -115,4 +115,38 @@ test("the CLI plugin adds the session text once, the subagent text for subagents
   assert.equal(plugin.hooks.beforeRun({ snapshot: { conversationId: "c" } }), undefined);
   const again = await import(join(here, "plugin/venom.js?second"));
   assert.deepEqual(again.default.hooks.beforeRun({ snapshot: { parentAgentId: "a1" } }), { appendContext: guidance.subagent });
+});
+
+test("TaskStart skips state but still answers when the state folder is a symlink", () =>
+  withTmp((tmp) => {
+    const target = mkdtempSync(join(tmpdir(), "venom-cline-target-"));
+    try {
+      symlinkSync(target, join(tmp, `venom-hooks-${process.getuid()}`));
+      assert.equal(run("TaskStart", { taskId: "t1", taskStart: { taskMetadata: {} } }, tmp), reply(""));
+      assert.equal(readdirSync(target).length, 0);
+    } finally {
+      rmSync(target, { recursive: true, force: true });
+    }
+  }));
+
+test("install.sh refuses to overwrite a hook file that isn't Venom's, and updates its own", () =>
+  withTmp((tmp) => {
+    const dest = join(tmp, "hooks");
+    mkdirSync(dest);
+    writeFileSync(join(dest, "PostToolUse"), "#!/bin/sh\necho mine\n");
+    const bad = spawnSync("sh", [join(here, "install.sh"), dest], { encoding: "utf8" });
+    assert.notEqual(bad.status, 0);
+    assert.match(bad.stderr, /already exists and is not Venom's/);
+    assert.equal(readFileSync(join(dest, "PostToolUse"), "utf8"), "#!/bin/sh\necho mine\n");
+    assert.equal(existsSync(join(dest, "TaskStart")), false, "nothing was changed");
+    rmSync(join(dest, "PostToolUse"));
+    assert.equal(spawnSync("sh", [join(here, "install.sh"), dest], { encoding: "utf8" }).status, 0);
+    assert.equal(spawnSync("sh", [join(here, "install.sh"), dest], { encoding: "utf8" }).status, 0);
+  }));
+
+test("the CLI plugin says the session text once per session id", async () => {
+  const { default: plugin } = await import(join(here, "plugin/venom.js?ids"));
+  assert.ok(plugin.hooks.beforeRun({ snapshot: { conversationId: "a" } }));
+  assert.equal(plugin.hooks.beforeRun({ snapshot: { conversationId: "a" } }), undefined);
+  assert.ok(plugin.hooks.beforeRun({ snapshot: { conversationId: "b" } }));
 });

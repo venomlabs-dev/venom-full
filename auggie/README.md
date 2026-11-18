@@ -28,18 +28,20 @@ The hooks plugin, from this repository:
 auggie plugin marketplace add venomlabs-dev/venom-full
 ```
 
-then press Space on `venom-full` in `/plugins` to enable it (or set
-`"enabledPlugins": { "venom-full@venom-full": true }` in `~/.augment/settings.json`).
-This needs `.augment-plugin/marketplace.json` at the repository root (source
-`./auggie`), which is not added yet. Until then, from a clone:
+then press Space on `venom-hooks` in `/plugins` to enable it (or set
+`"enabledPlugins": { "venom-hooks@venom-full": true }` in `~/.augment/settings.json`).
+The root `.augment-plugin/marketplace.json` (source `./auggie`) provides it.
+The GitHub form is untested (only a stand-in repository was added); the
+local-clone form below was checked:
 
 ```bash
 git clone https://github.com/venomlabs-dev/venom-full
 auggie --plugin-dir ./venom-full/auggie        # loads and enables it for that run
 ```
 
-The session-start extension (optional, local clone; `auggie install` cannot take
-a git subfolder):
+The session-start, subagent and compaction notes come from the extension, which
+the marketplace install does not bring. Install it too (local clone;
+`auggie install` cannot take a git subfolder):
 
 ```bash
 auggie install ./venom-full/auggie
@@ -77,7 +79,7 @@ model turn was run:
 - A stand-in git repository with the root marketplace described above:
   `auggie plugin marketplace add file://...` cloned it; with
   `enabledPlugins` set, `auggie --check-startup` reported no problems, and
-  reported `[venom-full@venom-full] failed to parse hooks/hooks.json` when the
+  reported `[venom-full@venom-full] (the plugin was named venom-full then) failed to parse hooks/hooks.json` when the
   file was broken, so the loader reads our `hooks/hooks.json`.
 - `auggie --plugin-dir <this folder>` loads the plugin the same way.
 - `auggie install <this folder>` adds the package (`auggie list`), and

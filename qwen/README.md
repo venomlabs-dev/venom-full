@@ -31,7 +31,7 @@ Not wired: UserPromptSubmit (the shared core has no event for it; the projects a
 
 ## Verified
 
-- Qwen Code 0.28.0 (npm `@qwen-code/qwen-code`), isolated HOME, no sign-in. `qwen extensions install <local qwen folder> --consent` installs it and `qwen extensions list` shows `venom-full` enabled; the installed copy holds the manifest and `hooks/`.
+- Qwen Code 0.28.0 (npm `@qwen-code/qwen-code`), isolated HOME, no sign-in. `qwen extensions install <local qwen folder> --consent` installs it and `qwen extensions list` shows `venom-hooks` enabled; the installed copy holds the manifest and `hooks/`.
 - Headless run (`qwen --auth-type openai --yolo -p`) against a local mock OpenAI-compatible server, inspecting the requests the model received: the session-start text arrived in the session context; after `git commit` and `gh pr merge` the milestone text was appended to the shell tool result; after the merge the turn ended with the Stop block and the stop text reached the model as a user message, once.
 - `npm test` covers the wrapper with payloads shaped like Qwen Code's hook docs.
 

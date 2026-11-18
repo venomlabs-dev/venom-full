@@ -14,17 +14,20 @@ import { readFileSync } from "node:fs";
 
 const guidance = JSON.parse(readFileSync(new URL("../guidance.json", import.meta.url), "utf8"));
 
-const START = String.raw`(?:^|[;&|(]\s*)`;
+// A command starts after a separator, then optional VAR=value assignments and
+// sudo, time, then, do, else, exec, nohup, command or ! (as in the shared script).
+const START = String.raw`(?:^|[;&|({]\s*)(?:(?:[A-Za-z_][A-Za-z0-9_]*=\S*|sudo|time|then|do|else|exec|nohup|command|!)\s+)*`;
 const GIT = START + String.raw`git\s+(?:-[Cc]\s+\S+\s+|-\S+\s+)*`;
+const GH = START + String.raw`gh\s+(?:(?:-R\s*\S+|--repo[= ]\S+)\s+)*`;
 const END = String.raw`(?=\s|[;&|)]|$)`;
 const PATTERNS = {
   commit: GIT + String.raw`commit` + END,
   push: GIT + String.raw`push` + END,
-  pr: START + String.raw`gh\s+pr\s+create` + END,
-  merge: START + String.raw`gh\s+pr\s+merge` + END,
-  release: START + String.raw`gh\s+release\s+create` + END,
-  issue: START + String.raw`gh\s+issue\s+close` + END,
-  workflow: START + String.raw`gh\s+workflow\s+run` + END,
+  pr: GH + String.raw`pr\s+create` + END,
+  merge: GH + String.raw`pr\s+merge` + END,
+  release: GH + String.raw`release\s+create` + END,
+  issue: GH + String.raw`issue\s+close` + END,
+  workflow: GH + String.raw`workflow\s+run` + END,
   deploy:
     START +
     String.raw`(?:npx\s+)?(?:(?:vercel|netlify|fly|flyctl|firebase|wrangler|cdk|serverless|sls)\s+(?:[^;&|]*\s)?deploy|vercel\s+(?:[^;&|]*\s)?--prod)` +
@@ -41,15 +44,19 @@ const ORDER = ["merge", "release", "workflow", "deploy", "publish", "commit", "p
 const MILESTONES = ORDER.map((kind) => [kind, new RegExp(PATTERNS[kind])]);
 const LOG_TOOLS = /append_task_log|append_project_log|edit_log_entry/;
 const MIN = 60 * 1000;
+const STOP_EXPIRY_MINUTES = 60;
 
 /** The milestone a shell command reaches, or null. Quoted text is data. */
 export function milestone(command) {
   if (typeof command !== "string") return null;
+  // A heredoc body is data; a dry run or a help page is not a milestone.
   const line = command
+    .split("<<")[0]
     .replace(/"(?:[^"\\]|\\.)*"/g, "")
     .replace(/'[^']*'/g, "")
     .replace(/\n/g, ";")
     .trim();
+  if (/--dry-run|--help/.test(line)) return null;
   return MILESTONES.find(([, pattern]) => pattern.test(line))?.[0] ?? null;
 }
 
@@ -64,7 +71,7 @@ function textOf(content) {
 export default function venom(pi, now = () => Date.now()) {
   let greet = true; // say the session-start text on the next prompt
   const seen = new Map(); // "session:kind" -> time the milestone was last said
-  const pending = new Map(); // session -> outcome kind awaiting a Venom log call
+  const pending = new Map(); // session -> [outcome kind, time] awaiting a Venom log call
   const lastStop = new Map(); // session -> time the stop question was last asked
   const sid = (ctx) => {
     try {
@@ -102,7 +109,7 @@ export default function venom(pi, now = () => Date.now()) {
     if (event.toolName !== "bash" || event.isError) return;
     const kind = milestone(event.input?.command);
     if (!kind) return;
-    if (guidance.stop_kinds.includes(kind)) pending.set(session, kind);
+    if (guidance.stop_kinds.includes(kind)) pending.set(session, [kind, now()]);
     const key = `${session}:${kind}`;
     const last = seen.get(key);
     if (last !== undefined && now() - last < guidance.milestone_gap_minutes * MIN) return;
@@ -115,9 +122,10 @@ export default function venom(pi, now = () => Date.now()) {
   // The last chance before Pi goes idle: ask once, with one more turn.
   pi.on("agent_before_settle", (event, ctx) => {
     const session = sid(ctx);
-    const kind = pending.get(session);
+    const [kind, at] = pending.get(session) ?? [];
     if (!kind) return;
     pending.delete(session);
+    if (now() - at > STOP_EXPIRY_MINUTES * MIN) return; // an outcome from long ago isn't "this turn"
     const last = lastStop.get(session);
     if (last !== undefined && now() - last < guidance.stop_gap_minutes * MIN) return;
     lastStop.set(session, now());

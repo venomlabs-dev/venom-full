@@ -125,3 +125,35 @@ test("the 5 minute limit uses the clock", () => {
   t += 2 * 60000;
   assert.equal(state.milestoneNote("k", "git commit -m z"), milestoneText("commit"));
 });
+
+test("milestone rules: prefixes, gh -R, dry run, help, heredoc", () => {
+  assert.equal(milestone("CI=1 git push"), "push");
+  assert.equal(milestone("sudo git commit -m x"), "commit");
+  assert.equal(milestone("if true; then git push; fi"), "push");
+  assert.equal(milestone("{ git commit -m x; }"), "commit");
+  assert.equal(milestone("! git push"), "push");
+  assert.equal(milestone("gh -R org/repo pr merge 3"), "merge");
+  assert.equal(milestone("gh --repo org/repo release create v1"), "release");
+  assert.equal(milestone("git push --dry-run"), null);
+  assert.equal(milestone("gh pr create --help"), null);
+  assert.equal(milestone("cat <<EOF\ngit push\nEOF"), null);
+  assert.equal(milestone("git commit -F - <<EOF\nmsg\nEOF"), "commit");
+});
+
+test("the stop question is dropped after 60 minutes", () => {
+  let t = 0;
+  const state = createState(() => t);
+  state.milestoneNote("k", "npm publish");
+  t += 61 * 60000;
+  assert.equal(state.stopNote("k"), null);
+  state.milestoneNote("k", "npm publish");
+  t += 59 * 60000;
+  assert.equal(state.stopNote("k"), stopText("publish"));
+});
+
+test("a session named by subagent_spawned gets no stop question", async () => {
+  const { handlers } = setup();
+  await handlers.subagent_spawned({ childSessionKey: "child-1" }, {});
+  await handlers.after_tool_call(shell("gh pr merge 4"), ctx("child-1"));
+  assert.equal(handlers.before_agent_finalize({ sessionKey: "child-1" }, ctx("child-1")), undefined);
+});

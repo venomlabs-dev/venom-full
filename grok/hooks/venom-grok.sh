@@ -20,8 +20,10 @@ session=$(printf '%s' "$input" | tr '\n' ' ' |
   sed -E 's/^"[^"]*"[[:space:]]*:[[:space:]]*"//; s/"$//')
 session=$(printf '%s' "${session:-ppid-$PPID}" | tr -cd 'A-Za-z0-9._-' | cut -c1-80)
 export VENOM_HOOK_SESSION=$session
+# State lives in a folder only this user owns (not a link); otherwise stay quiet.
 dir="${TMPDIR:-/tmp}/venom-hooks-$(id -u 2>/dev/null || echo 0)"
-mkdir -p "$dir" 2>/dev/null || exit 0
+(umask 077 && mkdir -p "$dir") 2>/dev/null
+{ [ -d "$dir" ] && [ ! -L "$dir" ] && [ -O "$dir" ]; } || exit 0
 
 core() { printf '%s' "$input" | sh "$here/venom-hook.sh" "$1" 2>/dev/null; }
 
@@ -49,7 +51,11 @@ add() { [ -n "$1" ] && text="${text:+$text }$1"; }
 
 if [ ! -f "$dir/$session.started" ]; then
   : > "$dir/$session.started"
-  case $input in
+  # Only the top-level key counts: cut the payload at the tool input/result
+  # object, so a "subagentType" inside tool input (a file's text) can't match.
+  head=$(printf '%s' "$input" | tr '\n' ' ' |
+    sed -E 's/"(toolInput|tool_input|toolResult|tool_result)"[[:space:]]*:.*$//')
+  case $head in
     *'"subagentType"'*) add "$(core subagent)" ;;
     *) add "$(core session-start)" ;;
   esac

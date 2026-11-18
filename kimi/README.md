@@ -3,7 +3,8 @@
 A Kimi plugin that gives [Kimi Code CLI](https://code.kimi.com) the whole Venom
 setup from one install: the Venom MCP server (`https://mcp.venomlabs.dev`), the
 `venom` skill (loaded at session start) and hooks that remind the agent to use
-Venom. It replaces installing the `venom` plugin separately for Kimi.
+Venom. **This one plugin replaces the `venom` plugin in Kimi: don't install
+both** (two servers and two skills would clash).
 
 ## Install
 

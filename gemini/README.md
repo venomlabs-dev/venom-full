@@ -1,10 +1,10 @@
-# Venom Full for Gemini CLI
+# Venom Hooks for Gemini CLI
 
 Hooks that make Gemini CLI use [Venom](https://venomlabs.dev): a reminder at
 session start to find the Venom project and task, a reminder to log after a
 commit, push, pull request, merge, release, deploy or publish, and one
 follow-up question at the end of a turn if an outcome was never logged. It is a
-second Gemini CLI extension, `venom-full`, that holds hooks only. The `venom`
+second Gemini CLI extension, `venom-hooks`, that holds hooks only. The `venom`
 extension still provides the MCP server and skill.
 
 ## Install
@@ -23,7 +23,7 @@ expects `gemini-extension.json` at its root, so it can't take the `gemini/`
 subfolder (and the repository root must not carry one: it would load in
 Claude Code and Codex). Use the local clone as above. While editing, use
 `gemini extensions link ./venom-full/gemini` instead of install. Update with
-`git pull` and `gemini extensions update venom-full` (or re-install).
+`git pull` and `gemini extensions update venom-hooks` (or re-install).
 Gemini asks once to trust the extension folder; project hooks from extensions
 need that trust.
 

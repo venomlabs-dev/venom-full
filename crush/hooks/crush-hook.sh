@@ -42,14 +42,33 @@ session=${CRUSH_SESSION_ID:-$(json_value session_id)}
 tool=${CRUSH_TOOL_NAME:-$(json_value tool_name)}
 project=${CRUSH_PROJECT_DIR:-${CRUSH_CWD:-$(json_value cwd)}}
 safe() { printf '%s' "$1" | tr -cd 'A-Za-z0-9._-' | cut -c1-80; }
-session=$(safe "${session:-none}")
+session=$(safe "$session")
 projkey=$(printf '%s' "$project" | cksum | cut -d' ' -f1)
 
+# With no session id, the wrapper's own markers are keyed by the agent process:
+# the first ancestor that isn't a shell. The core does the same by itself when
+# it is given no session.
+host_pid() {
+  p=$PPID n=0
+  while [ "$n" -lt 4 ] && [ -n "$p" ] && [ "$p" -gt 1 ] 2>/dev/null; do
+    c=$(ps -o comm= -p "$p" 2>/dev/null | sed 's#.*/##; s/^-//')
+    case $c in
+      sh | bash | zsh | dash | ksh | env | timeout | "") p=$(ps -o ppid= -p "$p" 2>/dev/null | tr -d ' '); n=$((n + 1)) ;;
+      *) break ;;
+    esac
+  done
+  printf '%s' "${p:-$PPID}"
+}
+mark=${session:-host-$(host_pid)}
+
+# State lives in a folder only this user owns (same guard as the shared core).
 dir="${TMPDIR:-/tmp}/venom-hooks-$(id -u 2>/dev/null || echo 0)"
-mkdir -p "$dir" 2>/dev/null || exit 0
-started="$dir/crush-started.$session"
+(umask 077 && mkdir -p "$dir") 2>/dev/null
+{ [ -d "$dir" ] && [ ! -L "$dir" ] && [ -O "$dir" ]; } || exit 0
+started="$dir/crush-started.$mark"
 compacted="$dir/crush-compacted.$projkey"
 
+# No session id: pass none, so the core picks its own (the agent process).
 run_core() { printf '%s' "$input" | VENOM_HOOK_SESSION="$session" VENOM_HOOK_TOOL="$tool" sh "$core" "$1" 2>/dev/null | head -n 1; }
 
 case $mode in

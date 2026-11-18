@@ -218,7 +218,7 @@ test("OpenCode 2: subagents get no session start; idle after a merge asks once",
   ctx.event = stream;
   ctx.session.prompt = async (input) => prompts.push(input);
   const stop = await plugin.setup(ctx);
-  assert.equal(typeof stop, "function");
+  assert.equal(stop, undefined, "setup returns no abort function");
 
   const child = { sessionID: "child", system: [] };
   await hooks["session.context"](child);
@@ -241,7 +241,7 @@ test("OpenCode 2: subagents get no session start; idle after a merge asks once",
   stream.push({ type: "session.idle", properties: { sessionID: "child" } });
   await tick();
   assert.equal(prompts.length, 1);
-  stop();
+  void stop;
 });
 
 test("OpenCode 1: session start, and the stop question on idle", async () => {
@@ -250,6 +250,12 @@ test("OpenCode 1: session start, and the stop question on idle", async () => {
     session: {
       get: async ({ path }) => ({ data: { id: path.id, parentID: path.id === "child" ? "p" : undefined } }),
       promptAsync: async (input) => sent.push(input),
+      messages: async () => ({
+        data: [
+          { info: { role: "user", agent: "build", model: { providerID: "anthropic", modelID: "m1" } } },
+          { info: { role: "assistant" } },
+        ],
+      }),
     },
   };
   const hooks = await plugin.server({ client });
@@ -260,7 +266,16 @@ test("OpenCode 1: session start, and the stop question on idle", async () => {
   await hooks["tool.execute.after"]({ tool: "bash", sessionID: "s1", args: { command: "gh release create v1" } }, { output: "ok" });
   await hooks.event({ event: { type: "session.idle", properties: { sessionID: "s1" } } });
   await hooks.event({ event: { type: "session.idle", properties: { sessionID: "s1" } } });
-  assert.deepEqual(sent, [{ path: { id: "s1" }, body: { parts: [{ type: "text", text: stopText("release") }] } }]);
+  assert.deepEqual(sent, [
+    {
+      path: { id: "s1" },
+      body: {
+        agent: "build",
+        model: { providerID: "anthropic", modelID: "m1" },
+        parts: [{ type: "text", text: stopText("release"), synthetic: true }],
+      },
+    },
+  ]);
 
   await hooks["tool.execute.after"]({ tool: "bash", sessionID: "s3", args: { command: "npm publish" } }, { output: "ok" });
   await hooks["tool.execute.after"]({ tool: "venom_edit_log_entry", sessionID: "s3", args: {} }, { output: "ok" });
@@ -268,4 +283,72 @@ test("OpenCode 1: session start, and the stop question on idle", async () => {
   await hooks["tool.execute.after"]({ tool: "bash", sessionID: "child", args: { command: "gh pr merge 1" } }, { output: "ok" });
   await hooks.event({ event: { type: "session.idle", properties: { sessionID: "child" } } });
   assert.equal(sent.length, 1);
+});
+
+test("OpenCode 1: no stop question after an aborted turn or when the parent lookup fails", async () => {
+  const sent = [];
+  let aborted = true;
+  let lookupFails = false;
+  const client = {
+    session: {
+      get: async ({ path }) => {
+        if (lookupFails) throw new Error("down");
+        return { data: { id: path.id } };
+      },
+      promptAsync: async (input) => sent.push(input),
+      messages: async () => ({
+        data: [{ info: { role: "user" } }, { info: { role: "assistant", error: aborted ? { name: "MessageAbortedError" } : undefined } }],
+      }),
+    },
+  };
+  const hooks = await plugin.server({ client });
+  const merge = (id) => hooks["tool.execute.after"]({ tool: "bash", sessionID: id, args: { command: "gh pr merge 1" } }, { output: "ok" });
+  const idle = (id) => hooks.event({ event: { type: "session.idle", properties: { sessionID: id } } });
+  await merge("a");
+  await idle("a");
+  assert.equal(sent.length, 0, "cancelled turn");
+  aborted = false;
+  await idle("a");
+  assert.equal(sent.length, 0, "the cancelled turn's question was dropped");
+
+  // A failed parent lookup is "unknown": no session start, no stop question.
+  await merge("b");
+  lookupFails = true;
+  const system = { system: [] };
+  await hooks["experimental.chat.system.transform"]({ sessionID: "b" }, system);
+  assert.deepEqual(system.system, []);
+  await idle("b");
+  assert.equal(sent.length, 0);
+  lookupFails = false;
+  await idle("b");
+  assert.equal(sent.length, 1, "asked once the lookup works again");
+});
+
+test("OpenCode 2: a failed parent lookup adds no Venom text, and keeps the compaction note", async () => {
+  const { ctx, hooks } = fakeV2();
+  ctx.session.get = async () => {
+    throw new Error("down");
+  };
+  await plugin.setup(ctx);
+  await hooks["session.compaction"]({ sessionID: "s1", system: [] });
+  const request = { sessionID: "s1", system: [] };
+  await hooks["session.context"](request);
+  assert.deepEqual(request.system, []);
+});
+
+test("milestones: quotes, line breaks, prefixes, gh flags, dry runs and heredocs", () => {
+  assert.equal(milestone('echo "git push" && grep \'gh pr merge\' x'), null);
+  assert.equal(milestone('npm test && git commit -m "wip"'), "commit");
+  assert.equal(milestone("git status\ngit push"), "push");
+  assert.equal(milestone("HUSKY=0 git commit -m x"), "commit");
+  assert.equal(milestone("sudo git push"), "push");
+  assert.equal(milestone("if true; then git push; fi"), "push");
+  assert.equal(milestone("{ git push; }"), "push");
+  assert.equal(milestone("time git push"), "push");
+  assert.equal(milestone("! git push"), "push");
+  assert.equal(milestone("gh -R o/r pr merge 3"), "merge");
+  assert.equal(milestone("gh --repo o/r release create v1"), "release");
+  assert.equal(milestone("git push --dry-run"), null);
+  assert.equal(milestone("gh pr merge --help"), null);
+  assert.equal(milestone("cat <<EOF > notes.md\ngit push\nEOF"), null);
 });

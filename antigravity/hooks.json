@@ -1,5 +1,5 @@
 {
-  "venom-full": {
+  "venom-hooks": {
     "SessionStart": [
       { "type": "command", "command": "sh ./hooks/antigravity-hook.sh session-start", "timeout": 10 }
     ],

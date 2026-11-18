@@ -7,6 +7,12 @@ tell subagents to report to their parent. It is a native Muse plugin
 (`.muse-plugin/plugin.json`) that carries only command hooks. The Venom server and
 the `venom` skill come from the `venom` plugin, so install that first.
 
+**Not verified anywhere in Muse: nothing here has run inside Muse Code.** The
+manifest shape, the hook commands, the reply fields and that Muse loads and
+runs the hooks all come from docs and binary strings (see Verification).
+Each hook command checks that its script exists (relative to the plugin
+folder) and exits quietly if not.
+
 ## Install
 
 ```bash

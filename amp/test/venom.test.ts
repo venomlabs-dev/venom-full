@@ -148,12 +148,8 @@ test('session.start survives a failed parent lookup', async () => {
 	assert.equal(await handlers['session.start']({ thread: { id: 'T1' } }, ctx), undefined)
 })
 
-test('Ship and Push to Branch prompts ask to log to Venom', async () => {
+test('no changes.prompt handler; session.start without a thread does nothing', async () => {
 	const { handlers, ctx } = setup({})
-	const ship = await handlers['changes.prompt']({ thread: { id: 'T1' }, workflow: 'ship' }, ctx)
-	assert.match(ship.append, /^Venom milestone: you shipped this thread's changes\. If this advances a Venom task, log the outcome/)
-	const push = await handlers['changes.prompt']({ thread: { id: 'T1' }, workflow: 'push_branch' }, ctx)
-	assert.match(push.append, /you pushed this branch/)
-	assert.equal(await handlers['changes.prompt']({ thread: { id: 'T1' }, workflow: 'other' }, ctx), undefined)
-	assert.doesNotMatch(ship.append + push.append, /["\\$`\n]/)
+	assert.equal(handlers['changes.prompt'], undefined)
+	assert.equal(await handlers['session.start']({}, ctx), undefined)
 })

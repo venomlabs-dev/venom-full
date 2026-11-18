@@ -1,4 +1,4 @@
-# Venom Full for Antigravity
+# Venom Hooks for Antigravity
 
 Hooks for Google Antigravity (CLI `agy`, IDE and app) that remind the agent to
 use Venom: at session start, and after a milestone (commit, push, pull request,
@@ -11,11 +11,11 @@ only: install the `venom` plugin first for the MCP server and skill.
 
 ```bash
 agy plugin install https://github.com/venomlabs-dev/plugin     # venom plugin first
-agy plugin install https://github.com/venomlabs-dev/venom-full/tree/main/antigravity
+agy plugin install https://github.com/venomlabs-dev/venom-full/tree/main/antigravity   # untested
 ```
 
 From a local clone: `agy plugin install /path/to/venom-full/antigravity`.
-Check with `agy plugin list` (venom-full shows "1 hook") or `/hooks` in the TUI.
+Check with `agy plugin list` (venom-hooks shows "1 hook") or `/hooks` in the TUI.
 
 ## What it adds
 
@@ -40,6 +40,9 @@ always follows a tool result.
   uses was not checked (Venom MCP not signed in there).
 - The wrapper relies on hooks running with the plugin root as working
   directory (verified on 1.5.11) and uses relative paths.
+- Not verified: that `{"decision":"continue","reason":...}` from `Stop` makes
+  Antigravity continue the turn (only the shape was written from the docs; the
+  Stop path is covered by wrapper tests only).
 
 ## Verified
 

@@ -99,10 +99,12 @@ test("hook files point at the wrapper and use real Devin events", () => {
     for (const [ev, arg] of [["SessionStart", "session-start"], ["PostToolUse", "post-tool"], ["Stop", "stop"]]) {
       const h = hooks[ev][0].hooks[0];
       assert.equal(h.type, "command");
-      assert.match(h.command, new RegExp(`devin-hook\\.sh" ${arg}$`));
+      assert.match(h.command, new RegExp(`devin-hook\\.sh"; \\[ -f "\\$f" \\] && sh "\\$f" ${arg} \\|\\| true$`));
     }
   }
   const m = new RegExp(file.PostToolUse[0].matcher);
   assert.ok(m.test("exec") && m.test("mcp__venom__append_task_log") && !m.test("read") && !m.test("execute_x"));
-  assert.equal(JSON.parse(readFileSync(join(root, ".devin-plugin/plugin.json"), "utf8")).name, "venom-full");
+  const manifest = JSON.parse(readFileSync(join(root, ".devin-plugin/plugin.json"), "utf8"));
+  assert.equal(manifest.name, "venom-hooks");
+  assert.equal(manifest.hooks, "./hooks.json");
 });

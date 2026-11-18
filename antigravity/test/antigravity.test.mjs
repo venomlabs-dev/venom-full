@@ -1,7 +1,7 @@
 // The Antigravity wrapper, run with payloads captured from Antigravity CLI 1.5.11.
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
@@ -68,4 +68,12 @@ test("a Venom log call clears the pending stop question", () =>
     run("post-tool", shell("q1", "npm publish"), tmp);
     run("post-tool", tool("q1", "mcp_venom_append_task_log", { task: "t" }), tmp);
     assert.equal(run("stop", stop("q1"), tmp), "");
+  }));
+
+test("a state folder that is a link: no outbox is written or read", () =>
+  withTmp((tmp) => {
+    symlinkSync(tmp, join(tmp, `venom-hooks-${process.getuid()}`));
+    assert.equal(run("post-tool", shell("lk", "git commit -m \"wip\""), tmp), "");
+    assert.equal(run("pre-invocation", pre("lk"), tmp), "");
+    assert.equal(existsSync(join(tmp, "lk.outbox")), false);
   }));

@@ -25,7 +25,9 @@ json_value() {
 session=$(json_value 'session_id')
 session=$(printf '%s' "${session:-ppid-$PPID}" | tr -cd 'A-Za-z0-9._-' | cut -c1-80)
 dir="${TMPDIR:-/tmp}/venom-hooks-$(id -u 2>/dev/null || echo 0)"
-mkdir -p "$dir" 2>/dev/null || exit 0
+# Private state folder or nothing (a shared /tmp could hold someone else's folder or a link).
+(umask 077 && mkdir -p "$dir") 2>/dev/null
+{ [ -d "$dir" ] && [ ! -L "$dir" ] && [ -O "$dir" ]; } || exit 0
 queue="$dir/$session.kimi-queue"
 started="$dir/$session.kimi-started"
 export VENOM_HOOK_SESSION="$session"

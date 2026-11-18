@@ -58,31 +58,33 @@ wasn't logged. They don't show your projects and mentions yet: that needs a
 signed-in client.
 
 Install the `venom` plugin (server and skill) first, then the package for your
-agent. Each folder's README has the details, what reaches the model, and how
+agent (except Kimi, whose one plugin has both). The hooks-only packages are all
+named `venom-hooks`, so they don't clash with `venom-full`, the Claude Code
+plugin at this repository's root. Each folder's README has the details, what reaches the model, and how
 it was checked.
 
 | Agent | Folder | Install |
 | --- | --- | --- |
-| Cursor | [cursor](cursor) | Copy the folder to `~/.cursor/plugins/local/venom-full`; Cursor CLI: `--plugin-dir` |
-| GitHub Copilot CLI and VS Code | [copilot](copilot) | `copilot plugin install venomlabs-dev/venom-full:copilot` |
+| Cursor | [cursor](cursor) | `cp -R <clone>/cursor ~/.cursor/plugins/local/venom-hooks`; Cursor CLI: `cursor-agent --plugin-dir <clone>/cursor` |
+| GitHub Copilot CLI and VS Code | [copilot](copilot) | `copilot plugin install <clone>/copilot` (`copilot plugin install venomlabs-dev/venom-full:copilot` is untested) |
 | Gemini CLI | [gemini](gemini) | `gemini extensions install <clone>/gemini` |
-| Antigravity | [antigravity](antigravity) | `agy plugin install <clone>/antigravity` |
-| Grok Build | [grok](grok) | `grok plugin install venomlabs-dev/venom-full#grok --trust` |
+| Antigravity | [antigravity](antigravity) | `agy plugin install <clone>/antigravity` (the GitHub `tree/main/antigravity` URL is untested) |
+| Grok Build | [grok](grok) | `grok plugin install <clone>/grok --trust` (`venomlabs-dev/venom-full#grok` is untested) |
 | Qwen Code | [qwen](qwen) | `qwen extensions install <clone>/qwen` |
-| Factory Droid | [droid](droid) | `droid plugin marketplace add venomlabs-dev/venom-full`, then `droid plugin install venom-droid@venom-full` |
-| Devin CLI and Devin Desktop | [devin](devin) | `devin plugins install venomlabs-dev/venom-full#devin`, or the hooks file |
-| JetBrains Junie | [junie](junie) | `/extensions marketplace add <clone>/junie`, then `/extensions install venom-junie` |
-| Kiro | [kiro](kiro) | Copy the hook files into `~/.kiro/hooks/` |
-| Augment (Auggie) | [auggie](auggie) | `auggie plugin marketplace add venomlabs-dev/venom-full`, then enable `venom-full` |
-| Mistral Vibe | [vibe](vibe) | Copy the folder to `~/.vibe/plugins/venom-full` |
-| Kimi Code | [kimi](kimi) | `/plugins install <clone>/kimi` |
-| Muse Code | [muse](muse) | `muse plugins install <clone>/muse` |
-| Pi | [pi](pi) | `pi install git:github.com/venomlabs-dev/venom-full` |
-| OpenClaw | [openclaw](openclaw) | `openclaw plugins install <clone>/openclaw --accept-capabilities` |
-| Hermes Agent | [hermes](hermes) | `hermes plugins install venomlabs-dev/venom-full/hermes --enable` |
-| Cline | [cline](cline) | `sh <clone>/cline/install.sh` |
-| Crush | [crush](crush) | `sh <clone>/crush/install.sh --apply` |
-| Kilo Code | [opencode](opencode) | The OpenCode plugin runs in Kilo as is: `kilo plugin github:venomlabs-dev/venom-full` |
+| Factory Droid | [droid](droid) | `droid plugin marketplace add venomlabs-dev/venom-full`, then `droid plugin install venom-hooks@venom-full` |
+| Devin CLI and Devin Desktop | [devin](devin) | Hooks file: `cp <clone>/devin/hooks.v1.json .devin/hooks.v1.json` (checked with `devin migrate hooks`). The plugin route (`devin plugins install venomlabs-dev/venom-full#devin`) is unverified |
+| JetBrains Junie | [junie](junie) | `/extensions marketplace add <clone>/junie`, then `/extensions install venom-hooks` (Junie itself was not run) |
+| Kiro | [kiro](kiro) | Copy the hook files from `<clone>/kiro/hooks/` into `~/.kiro/hooks/` (see the folder README) |
+| Augment (Auggie) | [auggie](auggie) | `auggie --plugin-dir <clone>/auggie` for the hooks, and `auggie install <clone>/auggie` for the session-start, subagent and compaction notes (the extension). `auggie plugin marketplace add venomlabs-dev/venom-full`, then enable `venom-hooks`, is untested on GitHub |
+| Mistral Vibe | [vibe](vibe) | Copy the folder to `~/.vibe/plugins/venom-hooks` |
+| Kimi Code | [kimi](kimi) | `/plugins install <clone>/kimi`. This one plugin replaces the `venom` plugin in Kimi (server, skill and hooks): don't install both |
+| Muse Code | [muse](muse) | `muse plugins install <clone>/muse`, then `muse plugins approve venom-hooks` (not verified in Muse) |
+| Pi | [pi](pi) | `pi install <clone>/pi` (checked); `pi install git:github.com/venomlabs-dev/venom-full` (untested) |
+| OpenClaw | [openclaw](openclaw) | `openclaw plugins install <clone>/openclaw --accept-capabilities`. Ships the server and skill too |
+| Hermes Agent | [hermes](hermes) | `hermes plugins install <clone>/hermes --enable`; the `venomlabs-dev/venom-full/hermes` form is from Hermes's docs, untested |
+| Cline | [cline](cline) | `sh <clone>/cline/install.sh` (stops rather than overwrite hook files you already have), plus the CLI plugin in [cline](cline) |
+| Crush | [crush](crush) | `sh <clone>/crush/install.sh --apply`. Start-up and milestone reminders only: Crush can't ask at the end of a turn |
+| Kilo Code | [opencode](opencode) | The OpenCode plugin: `kilo plugin github:venomlabs-dev/venom-full`. In Kilo the model received its milestone note (earlier, milestones-only version); the newer session-start and end-of-turn parts are unit-tested only |
 
 `<clone>` is a local clone of this repository
 (`git clone https://github.com/venomlabs-dev/venom-full`).

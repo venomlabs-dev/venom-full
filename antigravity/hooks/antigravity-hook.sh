@@ -24,6 +24,11 @@ session=${ANTIGRAVITY_CONVERSATION_ID:-$(json_value conversationId)}
 session=$(printf '%s' "${session:-ppid-$PPID}" | tr -cd 'A-Za-z0-9._-' | cut -c1-80)
 dir="${TMPDIR:-/tmp}/venom-hooks-$(id -u 2>/dev/null || echo 0)"
 outbox="$dir/$session.outbox"
+# The outbox needs a folder only this user owns (not a link, as the core requires).
+state_ok() {
+  (umask 077 && mkdir -p "$dir") 2>/dev/null
+  [ -d "$dir" ] && [ ! -L "$dir" ] && [ -O "$dir" ]
+}
 
 core_run() { printf '%s' "$2" | VENOM_HOOK_SESSION="$session" VENOM_HOOK_COMMAND="${3:-}" VENOM_HOOK_TOOL="${4:-}" sh "$core" "$1" 2>/dev/null; }
 
@@ -46,12 +51,13 @@ case $event in
     [ -n "$command" ] && [ -n "$(json_value error)" ] && exit 0
     text=$(core_run post-tool '{}' "$command" "$name")
     if [ -n "$text" ]; then
-      mkdir -p "$dir" 2>/dev/null && printf '%s\n' "$text" > "$outbox"
+      state_ok && printf '%s\n' "$text" > "$outbox"
     elif [ -z "$command" ]; then
       rm -f "$outbox"
     fi
     ;;
   pre-invocation)
+    state_ok || exit 0
     [ -f "$outbox" ] || exit 0
     text=$(cat "$outbox" 2>/dev/null)
     rm -f "$outbox"

@@ -13,7 +13,6 @@ import {
   createState,
   guidance,
   isShellTool,
-  isSubagentSession,
   isVenomLogTool,
 } from "./venom.js";
 
@@ -92,7 +91,7 @@ export default {
     api.on("before_agent_finalize", (event, ctx) => {
       if (event?.stopHookActive) return;
       const key = keyOf(event, ctx);
-      if (!key || isSubagentSession(key)) return;
+      if (!key || state.isSubagent(key)) return;
       const text = state.stopNote(key);
       if (!text) return;
       return {

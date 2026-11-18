@@ -30,21 +30,25 @@ logger = logging.getLogger(__name__)
 
 GUIDANCE_PATH = Path(__file__).resolve().parent / "guidance.json"
 SHELL_TOOLS = {"terminal", "shell", "bash", "execute_command"}
+STOP_EXPIRY_MINUTES = 60
 LOG_TOOLS = ("append_task_log", "append_project_log", "edit_log_entry")
 
 # Checked in this order, like shared/venom-hook.sh: outcomes outrank the steps to them.
 _ORDER = ("merge", "release", "workflow", "deploy", "publish", "commit", "push", "pr", "issue")
-_S = r"(?:^|[;&|(]\s*)"
-_E = r"(?=[\s;&|)]|$)"
+# A command starts after a separator, then optional VAR=value assignments and sudo, time,
+# then, do, else, exec, nohup, command or ! (as in the shared script).
+_S = r"(?:^|[;&|({]\s*)(?:(?:[A-Za-z_][A-Za-z0-9_]*=\S*|sudo|time|then|do|else|exec|nohup|command|!)\s+)*"
+_E = r"(?=[\s;&|)}]|$)"
 _G = _S + r"git(?:\s+(?:-[Cc]\s+\S+|-\S+))*\s+"
+_H = _S + r"gh(?:\s+(?:-R\s*\S+|--repo[= ]\S+))*\s+"
 _PATTERNS = {
     "commit": _G + r"commit" + _E,
     "push": _G + r"push" + _E,
-    "pr": _S + r"gh\s+pr\s+create" + _E,
-    "merge": _S + r"gh\s+pr\s+merge" + _E,
-    "release": _S + r"gh\s+release\s+create" + _E,
-    "issue": _S + r"gh\s+issue\s+close" + _E,
-    "workflow": _S + r"gh\s+workflow\s+run" + _E,
+    "pr": _H + r"pr\s+create" + _E,
+    "merge": _H + r"pr\s+merge" + _E,
+    "release": _H + r"release\s+create" + _E,
+    "issue": _H + r"issue\s+close" + _E,
+    "workflow": _H + r"workflow\s+run" + _E,
     "deploy": (
         _S + r"(?:npx\s+)?(?:(?:vercel|netlify|fly|flyctl|firebase|wrangler|cdk|serverless|sls)\s+(?:[^;&|]*\s)?deploy"
         + _E + r"|vercel\s+(?:[^;&|]*\s)?--prod" + _E + r")"
@@ -67,10 +71,13 @@ def milestone(command: Any) -> Optional[str]:
     """The milestone a shell command reaches, or None. Quoted text is data."""
     if not isinstance(command, str):
         return None
-    line = _ESCAPED_QUOTES.sub("", command)
+    line = command.split("<<", 1)[0]  # a heredoc body is data
+    line = _ESCAPED_QUOTES.sub("", line)
     line = _DOUBLE_QUOTES.sub("", line)
     line = _SINGLE_QUOTES.sub("", line)
     line = line.replace("\r", "").replace("\n", ";")
+    if "--dry-run" in line or "--help" in line:  # not a milestone
+        return None
     for kind in _ORDER:
         if _COMPILED[kind].search(line):
             return kind
@@ -86,7 +93,7 @@ class Venom:
         self.lock = threading.Lock()
         self.told: set = set()
         self.compacted: set = set()
-        self.pending: Dict[str, str] = {}
+        self.pending: Dict[str, tuple] = {}  # session -> (kind, time)
         self.last_milestone: Dict[str, float] = {}
         self.last_stop: Dict[str, float] = {}
         self.notes: Dict[str, str] = {}
@@ -103,7 +110,6 @@ class Venom:
         sid = session_id or ""
         parts = []
         with self.lock:
-            self.pending.pop(sid, None)  # a stop question is only about the turn it follows
             if sid not in self.told:
                 self.told.add(sid)
                 parts.append(self.g["subagent"] if parent_session_id else self.g["session_start"])
@@ -137,7 +143,7 @@ class Venom:
             return
         with self.lock:
             if kind in self.g["stop_kinds"]:
-                self.pending[sid] = kind
+                self.pending[sid] = (kind, self.clock())
             key = f"{sid}:{kind}"
             if self._recent(self.last_milestone, key, self.g["milestone_gap_minutes"]):
                 return
@@ -167,8 +173,12 @@ class Venom:
         if attempt:
             return None
         with self.lock:
-            kind = self.pending.pop(sid, None)
-            if not kind or self._recent(self.last_stop, sid, self.g["stop_gap_minutes"]):
+            entry = self.pending.pop(sid, None)
+            # An outcome from more than an hour ago isn't "this turn" any more.
+            if not entry or self.clock() - entry[1] > STOP_EXPIRY_MINUTES * 60:
+                return None
+            kind = entry[0]
+            if self._recent(self.last_stop, sid, self.g["stop_gap_minutes"]):
                 return None
             self.last_stop[sid] = self.clock()
         return {"action": "continue", "message": self.g["stop"].replace("{what}", self._what(kind))}

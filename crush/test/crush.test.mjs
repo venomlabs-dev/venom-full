@@ -2,7 +2,7 @@
 // Crush's & escaping of & in JSON.
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
@@ -86,3 +86,30 @@ test("a Venom log call is silent and unknown modes do nothing", () =>
     assert.equal(existsSync(pending), false);
     assert.equal(run("nonsense", {}, tmp), "");
   }));
+
+test("a state folder that is a symlink is not used: quiet, no writes", () =>
+  withTmp((tmp) => {
+    const target = mkdtempSync(join(tmpdir(), "venom-crush-target-"));
+    try {
+      symlinkSync(target, join(tmp, `venom-hooks-${process.getuid()}`));
+      assert.equal(run("pre-tool", pre("s1"), tmp), "");
+      assert.equal(readdirSync(target).length, 0);
+    } finally {
+      rmSync(target, { recursive: true, force: true });
+    }
+  }));
+
+test("without a session id the start text is once per agent process, not once a day", () =>
+  withTmp((tmp) => {
+    const noSession = { ...pre("x"), session_id: undefined };
+    assert.equal(run("pre-tool", noSession, tmp), ctx(guidance.session_start));
+    assert.equal(run("pre-tool", noSession, tmp), "");
+  }));
+
+test("install.sh quotes the hook path so a clone path with spaces works", () => {
+  const out = spawnSync("sh", [join(root, "crush/install.sh")], { encoding: "utf8" });
+  assert.equal(out.status, 0);
+  for (const line of out.stdout.split("\n").filter((l) => l.startsWith("hook add"))) {
+    assert.match(line, /--command '"[^"]+crush-hook\.sh" [a-z-]+'/);
+  }
+});
