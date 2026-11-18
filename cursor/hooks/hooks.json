@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "\"${CURSOR_PLUGIN_ROOT}/hooks/cursor-hook.sh\" session-start",
+        "timeout": 10
+      }
+    ],
+    "subagentStart": [
+      {
+        "command": "\"${CURSOR_PLUGIN_ROOT}/hooks/cursor-hook.sh\" subagent",
+        "timeout": 10
+      }
+    ],
+    "postToolUse": [
+      {
+        "matcher": "Shell",
+        "command": "\"${CURSOR_PLUGIN_ROOT}/hooks/cursor-hook.sh\" post-tool",
+        "timeout": 10
+      },
+      {
+        "matcher": ".*(append_task_log|append_project_log|edit_log_entry).*",
+        "command": "\"${CURSOR_PLUGIN_ROOT}/hooks/cursor-hook.sh\" post-tool",
+        "timeout": 10
+      }
+    ],
+    "stop": [
+      {
+        "command": "\"${CURSOR_PLUGIN_ROOT}/hooks/cursor-hook.sh\" stop",
+        "timeout": 10,
+        "loop_limit": 1
+      }
+    ]
+  }
+}

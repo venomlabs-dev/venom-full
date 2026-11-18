@@ -1,0 +1,40 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=\"${DEVIN_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}}/hooks/devin-hook.sh\"; [ -f \"$f\" ] && sh \"$f\" session-start || true",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "^(exec|mcp__.*(append_task_log|append_project_log|edit_log_entry))$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=\"${DEVIN_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}}/hooks/devin-hook.sh\"; [ -f \"$f\" ] && sh \"$f\" post-tool || true",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=\"${DEVIN_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}}/hooks/devin-hook.sh\"; [ -f \"$f\" ] && sh \"$f\" stop || true",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

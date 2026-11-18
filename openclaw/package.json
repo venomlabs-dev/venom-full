@@ -1,0 +1,33 @@
+{
+  "name": "@venomlabs/openclaw",
+  "version": "0.10.0",
+  "description": "Venom for OpenClaw: multiplayer AI for your team. Adds the Venom MCP server, the venom skill, and Venom guidance at session start, after compaction, in subagents and after commits, PRs and deploys.",
+  "type": "module",
+  "main": "./index.js",
+  "files": [
+    "index.js",
+    "venom.js",
+    "guidance.json",
+    "openclaw.plugin.json",
+    "skills/",
+    "README.md"
+  ],
+  "openclaw": {
+    "extensions": ["./index.js"],
+    "compat": {
+      "pluginApi": ">=2026.11.5"
+    }
+  },
+  "keywords": ["openclaw", "openclaw-plugin", "venom", "mcp", "multiplayer-ai", "agents"],
+  "homepage": "https://venomlabs.dev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/venomlabs-dev/venom-full.git",
+    "directory": "openclaw"
+  },
+  "license": "MIT",
+  "author": "Venom Labs <support@venomlabs.dev> (https://venomlabs.dev)",
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  }
+}

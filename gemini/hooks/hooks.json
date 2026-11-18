@@ -1,0 +1,46 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear",
+        "hooks": [
+          {
+            "name": "venom-session-start",
+            "type": "command",
+            "command": "sh \"${extensionPath}${/}hooks${/}gemini-hook.sh\" session-start",
+            "timeout": 10000,
+            "description": "Venom: find the project and task before the first reply"
+          }
+        ]
+      }
+    ],
+    "AfterTool": [
+      {
+        "matcher": "run_shell_command|.*append_task_log|.*append_project_log|.*edit_log_entry",
+        "hooks": [
+          {
+            "name": "venom-after-tool",
+            "type": "command",
+            "command": "sh \"${extensionPath}${/}hooks${/}gemini-hook.sh\" post-tool",
+            "timeout": 10000,
+            "description": "Venom: remind to log after commits, pushes, PRs, merges, releases, deploys and publishes"
+          }
+        ]
+      }
+    ],
+    "AfterAgent": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "venom-stop",
+            "type": "command",
+            "command": "sh \"${extensionPath}${/}hooks${/}gemini-hook.sh\" stop",
+            "timeout": 10000,
+            "description": "Venom: ask once to log after an outcome-type milestone"
+          }
+        ]
+      }
+    ]
+  }
+}

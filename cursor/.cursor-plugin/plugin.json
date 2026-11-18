@@ -1,0 +1,16 @@
+{
+  "name": "venom-hooks",
+  "displayName": "Venom Hooks",
+  "version": "0.10.0",
+  "description": "Hooks that keep your Cursor agent using Venom: projects and mentions at session start, a log reminder after commits, merges and deploys, and one more nudge at the end of the turn. Install the venom plugin first.",
+  "author": {
+    "name": "Venom Labs",
+    "email": "support@venomlabs.dev",
+    "url": "https://venomlabs.dev"
+  },
+  "homepage": "https://venomlabs.dev",
+  "repository": "https://github.com/venomlabs-dev/venom-full",
+  "license": "MIT",
+  "keywords": ["venom", "multiplayer-ai", "collaboration", "team", "agents", "hooks"],
+  "hooks": "hooks/hooks.json"
+}

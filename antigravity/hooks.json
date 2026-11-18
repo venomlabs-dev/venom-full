@@ -1,0 +1,21 @@
+{
+  "venom-hooks": {
+    "SessionStart": [
+      { "type": "command", "command": "sh ./hooks/antigravity-hook.sh session-start", "timeout": 10 }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          { "type": "command", "command": "sh ./hooks/antigravity-hook.sh post-tool", "timeout": 10 }
+        ]
+      }
+    ],
+    "PreInvocation": [
+      { "type": "command", "command": "sh ./hooks/antigravity-hook.sh pre-invocation", "timeout": 10 }
+    ],
+    "Stop": [
+      { "type": "command", "command": "sh ./hooks/antigravity-hook.sh stop", "timeout": 10 }
+    ]
+  }
+}

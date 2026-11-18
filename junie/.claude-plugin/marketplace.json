@@ -1,0 +1,13 @@
+{
+  "name": "venom-hooks",
+  "description": "Venom hooks for JetBrains Junie (local or subfolder marketplace).",
+  "owner": { "name": "Venom Labs", "url": "https://venomlabs.dev" },
+  "plugins": [
+    {
+      "name": "venom-hooks",
+      "description": "Venom reminders for Junie: a note at the first prompt to find the Venom task, a log reminder after commits, PRs, merges and deploys.",
+      "source": "./",
+      "category": "productivity"
+    }
+  ]
+}

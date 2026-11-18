@@ -10,7 +10,8 @@
 // - Subagent threads: read Venom, report to the parent instead of writing.
 // - After a shell command that commits, pushes, opens or merges a PR,
 //   releases, deploys or publishes: a reminder to log the outcome.
-// - End of turn: if a milestone came after the last Venom log, ask once more.
+// - End of turn: if a milestone came after the last Venom log, ask once more
+//   (one follow-up turn, no more).
 //
 // Install: amp plugins add https://raw.githubusercontent.com/venomlabs-dev/venom-full/main/amp/venom.ts
 // (or save this file in ~/.config/amp/plugins/).
@@ -86,8 +87,20 @@ export default function venom(amp: PluginAPI) {
 	// Milestone notes that couldn't ride on a tool result go with the next prompt.
 	const pending = new Map<string, string>()
 
+	// session.start can't add model context (it returns nothing), so the first
+	// prompt's agent.start carries the session-start guidance. Here we only look
+	// up whether this thread is a subagent's, so that prompt doesn't wait for it.
+	amp.on('session.start', async (event, ctx) => {
+		const thread = event.thread?.id
+		if (!thread) return
+		if (!subagent.has(thread)) {
+			subagent.set(thread, Boolean(await ctx.thread.parentThreadID().catch(() => null)))
+		}
+	})
+
 	amp.on('agent.start', async (event, ctx) => {
-		const thread = event.thread.id
+		const thread = event.thread?.id
+		if (!thread) return
 		const parts: string[] = []
 		const note = pending.get(thread)
 		if (note) {
@@ -112,7 +125,8 @@ export default function venom(amp: PluginAPI) {
 
 	amp.on('tool.result', async (event, ctx) => {
 		if (event.status !== 'done') return
-		const thread = event.thread.id
+		const thread = event.thread?.id
+		if (!thread) return
 		const tool = bareTool(event.tool)
 		if (LOG_TOOLS.has(tool)) {
 			// Lets the end-of-turn check see that the milestone was logged.
@@ -139,7 +153,8 @@ export default function venom(amp: PluginAPI) {
 	})
 
 	amp.on('agent.end', async (event, ctx) => {
-		const thread = event.thread.id
+		const thread = event.thread?.id
+		if (!thread) return
 		const active = continued.delete(thread)
 		if (event.status !== 'done') return
 		const reason = stopReason(
@@ -151,6 +166,6 @@ export default function venom(amp: PluginAPI) {
 		)
 		if (!reason || active) return
 		continued.add(thread)
-		return { action: 'continue', userMessage: reason }
+		return { action: 'continue', userMessage: reason, maxContinuations: 1 }
 	})
 }

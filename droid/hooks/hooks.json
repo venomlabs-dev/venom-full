@@ -1,0 +1,37 @@
+{
+  "SessionStart": [
+    {
+      "matcher": "startup|resume|clear|compact",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "\"${DROID_PLUGIN_ROOT}/hooks/context.sh\" SessionStart",
+          "timeout": 10
+        }
+      ]
+    }
+  ],
+  "PostToolUse": [
+    {
+      "matcher": "Execute|.*(append_task_log|append_project_log|edit_log_entry)$",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "\"${DROID_PLUGIN_ROOT}/hooks/context.sh\" PostToolUse",
+          "timeout": 10
+        }
+      ]
+    }
+  ],
+  "Stop": [
+    {
+      "hooks": [
+        {
+          "type": "command",
+          "command": "\"${DROID_PLUGIN_ROOT}/hooks/stop.sh\"",
+          "timeout": 10
+        }
+      ]
+    }
+  ]
+}

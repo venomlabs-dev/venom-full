@@ -1,0 +1,4 @@
+#!/bin/sh
+# Venom: reminds the agent to log after a commit, push, PR, merge, release or
+# deploy. See ../README.md.
+exec sh "$(dirname "$0")/venom-cline.sh" post-tool

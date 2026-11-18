@@ -1,0 +1,3 @@
+#!/bin/sh
+# Venom: tells the agent to find its Venom project and task. See ../README.md.
+exec sh "$(dirname "$0")/venom-cline.sh" task-start

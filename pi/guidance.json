@@ -1,0 +1,23 @@
+{
+  "_source": "Matched to services/mcp/src/guidance.py in the Venom monorepo (what get_guidance returns to Claude Code and Codex). Edit here, then run: node scripts/sync-shared.mjs. Texts must not contain double quotes, backslashes, dollar signs, backticks or line breaks: hook scripts put them in JSON and shell strings as they are.",
+  "session_start": "Venom: before your first reply about the team's work, find the Venom project and task it belongs to (search with a few keywords, or list_projects and read_task) and check list_mentions. If it is new work to build or change something and no task matches, create one first. Before your final reply, log decisions, outcomes and next steps to that task.",
+  "pre_compact": "In the summary, keep the Venom project and task refs being worked on, any decisions not yet logged to Venom, and unanswered Venom mentions.",
+  "compacted": "Venom: context was compacted. If you were working on a Venom task, re-read it with read_task before continuing. Log any decisions from before compaction that are not in Venom yet.",
+  "subagent": "Venom: you are a subagent. Read Venom if it helps your assignment, but do not write to it. Put decisions, findings and blockers in your final report so your parent can log them. Exception: if your parent gave you a Venom task to own, log to that task.",
+  "milestone": "Venom milestone: {what}. If this advances a Venom task, log the outcome with evidence (commit or PR link) and the next step, and update the status if it changed. A commit, push or PR alone does not make a task done unless the task says so.",
+  "stop": "Venom: {what} this turn and nothing was logged to Venom after it. If it produced a decision, outcome, blocker or next step a teammate would need, log it to the Venom task now, with the commit, PR or deploy as evidence. If the work isn't at a point worth recording yet, don't log anything; just finish your reply.",
+  "milestones": {
+    "commit": "you committed",
+    "push": "you pushed",
+    "pr": "you opened a pull request",
+    "merge": "you merged a pull request",
+    "release": "you created a release",
+    "issue": "you closed an issue",
+    "workflow": "you started a GitHub workflow",
+    "deploy": "you deployed",
+    "publish": "you published a package or image"
+  },
+  "stop_kinds": ["merge", "release", "workflow", "deploy", "publish"],
+  "milestone_gap_minutes": 5,
+  "stop_gap_minutes": 15
+}

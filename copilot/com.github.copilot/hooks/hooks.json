@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "bash": "sh \"${PLUGIN_ROOT}/hooks/venom-copilot.sh\" session-start",
+        "timeoutSec": 10
+      }
+    ],
+    "SubagentStart": [
+      {
+        "type": "command",
+        "bash": "sh \"${PLUGIN_ROOT}/hooks/venom-copilot.sh\" subagent",
+        "timeoutSec": 10
+      }
+    ],
+    "PostToolUse": [
+      {
+        "type": "command",
+        "matcher": "Bash|.*append_task_log|.*append_project_log|.*edit_log_entry",
+        "bash": "sh \"${PLUGIN_ROOT}/hooks/venom-copilot.sh\" post-tool",
+        "timeoutSec": 10
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "bash": "sh \"${PLUGIN_ROOT}/hooks/venom-copilot.sh\" stop",
+        "timeoutSec": 10
+      }
+    ]
+  }
+}
