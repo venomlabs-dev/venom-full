@@ -14,6 +14,7 @@
   ],
   "license": "MIT",
   "scripts": {
-    "test": "node --test opencode/test/*.test.mjs amp/test/*.test.ts"
+    "test": "node --test 'test/*.test.mjs' '*/test/*.test.mjs' 'amp/test/*.test.ts'",
+    "sync": "node scripts/sync-shared.mjs"
   }
 }
