@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
-import plugin, { SKILL_DIR, SKILL_PATH } from "../index.js";
+import plugin, { SKILL_DIR, SKILL_PATH, signedIn } from "../index.js";
+
+// No real sign-in in tests: the signed-in text is stubbed (see the test below).
+signedIn.fetch = async () => "";
 import {
   COMPACTED,
   PRE_COMPACT,
@@ -351,4 +354,26 @@ test("milestones: quotes, line breaks, prefixes, gh flags, dry runs and heredocs
   assert.equal(milestone("git push --dry-run"), null);
   assert.equal(milestone("gh pr merge --help"), null);
   assert.equal(milestone("cat <<EOF > notes.md\ngit push\nEOF"), null);
+});
+
+test("OpenCode 1: signed in, projects and mentions follow the session-start text, fetched once", async () => {
+  const asked = [];
+  signedIn.fetch = async (session) => (asked.push(session), "Venom projects in Acme you can find work in:\n- Web (web)");
+  try {
+    const client = {
+      session: { get: async ({ path }) => ({ data: { id: path.id, parentID: path.id === "child" ? "p" : undefined } }) },
+    };
+    const hooks = await plugin.server({ client });
+    for (let i = 0; i < 2; i++) {
+      const system = { system: [] };
+      await hooks["experimental.chat.system.transform"]({ sessionID: "s1" }, system);
+      assert.deepEqual(system.system, [SESSION_START, "Venom projects in Acme you can find work in:\n- Web (web)"]);
+    }
+    const child = { system: [] };
+    await hooks["experimental.chat.system.transform"]({ sessionID: "child" }, child);
+    assert.deepEqual(child.system, [SUBAGENT]);
+    assert.deepEqual(asked, ["s1"]);
+  } finally {
+    signedIn.fetch = async () => "";
+  }
 });

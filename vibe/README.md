@@ -33,7 +33,7 @@ Skipped: pre- and post-compaction (Vibe has no compaction event), `notification`
 
 ## Limits
 
-- No list of your projects and unread mentions at session start yet: that needs a signed-in client, planned later.
+- Your projects and unread mentions at session start come with the sign-in (`sh hooks/venom-hook.sh login` in this folder's installed copy; see [Sign in](../README.md#sign-in-for-your-projects-and-mentions)). Built and unit-tested; not yet seen in a live session of this agent.
 - The "stop" question uses Vibe's post_agent retry (at most 3 per turn). The agent may answer it with a short reply if nothing is worth logging.
 - A forked session that carries a parent session id may be treated as a subagent (unverified).
 - Plugins are experimental in Vibe and hooks run from the session's pinned plugin copy: update the plugin, then start a new session.

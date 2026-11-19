@@ -60,8 +60,7 @@ devin plugins install venomlabs-dev/venom-full#devin   # untested
   reaches the model, so it isn't wired. If Devin adds one, map it to the core's
   `compacted` event.
 - **`UserPromptSubmit`**: can inject context, but the core has nothing for it.
-- No projects or unread-mentions list at session start: that needs a signed-in
-  client, planned later.
+- Your projects and unread mentions at session start come with the sign-in (`sh hooks/venom-hook.sh login` in this folder's installed copy; see [Sign in](../README.md#sign-in-for-your-projects-and-mentions)). Built and unit-tested; not yet seen in a live session of this agent.
 - Plugin hooks (route 2) are unverified, best effort and fail open in Devin, and `Stop` is a block
   decision, so a rare extra turn is possible (the core asks at most once per
   15 minutes).

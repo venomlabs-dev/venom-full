@@ -52,8 +52,7 @@ Skipped, and why:
 
 ## Limits
 
-- No projects or unread-mentions list yet: that needs a signed-in client calling
-  Venom (planned later). The texts are the same static ones other agents get.
+- Your projects and unread mentions at session start come with the sign-in (`sh hooks/venom-hook.sh login` in this folder's installed copy; see [Sign in](../README.md#sign-in-for-your-projects-and-mentions)). Built and unit-tested; not yet seen in a live session of this agent.
 - The subagent note relies on `SessionStart` firing in Task subagent sessions
   with `calling_session_id` (documented, not observed: see below).
 - The `Stop` question uses a block, so Droid starts one more short turn; it

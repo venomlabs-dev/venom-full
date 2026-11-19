@@ -49,7 +49,7 @@ wrapper stays silent there, as subagents report to their parent.
   there is no post-compaction event.
 - `userPromptSubmitted` output is dropped for config hooks, so no per-prompt
   mentions. The projects and mentions list at session start (as in Claude
-  Code) needs a signed-in client and is planned later.
+  Code) comes with the sign-in; see [Sign in](../README.md#sign-in-for-your-projects-and-mentions).
 - The built-in `general-purpose` subagent doesn't emit `subagentStart`.
 - A shell command that fails still counts as a milestone: Copilot reports it
   as a successful tool call.

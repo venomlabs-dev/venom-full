@@ -63,8 +63,7 @@ context block on the next model request.
   going. No compaction notes either: `PreCompact` isn't wired in Cline yet.
 - Subagent notes only show if Cline runs hooks or plugins in subagent
   sessions; not checked.
-- Projects and unread mentions at session start need a signed-in client:
-  planned later.
+- Your projects and unread mentions at session start come with the sign-in (`sh hooks/venom-hook.sh login` in this folder's installed copy; see [Sign in](../README.md#sign-in-for-your-projects-and-mentions)). Built and unit-tested; not yet seen in a live session of this agent.
 - The hook files print `{"cancel":false}` when there is nothing to add
   (Cline's docs require the `cancel` field), instead of nothing.
 - Hook files run for every tool call: they cost a few milliseconds and run in

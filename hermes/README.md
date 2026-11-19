@@ -36,7 +36,7 @@ The texts live in `guidance.json`, shared with the other Venom agent packages.
 
 - Hermes has no hook before a compaction, so the keep-these-refs text for the summary is not sent. The after-compaction text is.
 - `pre_verify` runs only on turns where the agent edited code, so the finish question is asked only then.
-- There is no list of projects or mentions yet; that needs a signed-in client and is planned for later.
+- Your projects and unread mentions at session start come with the sign-in (`sh hooks/venom-hook.sh login` in this folder's installed copy; see [Sign in](../README.md#sign-in-for-your-projects-and-mentions)). Built and unit-tested; not yet seen in a live session of this agent.
 - State is kept in memory for the Hermes process.
 
 ## Tests

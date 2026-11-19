@@ -10,9 +10,37 @@
 //     publish with no Venom log call after it: one more turn with a question.
 // Pi has no built-in subagents (they are extensions that start another pi
 // process), so there is no subagent text. Reminders never fail the agent.
+// Signed in (sh hooks/venom-hook.sh login), the first prompt also brings the
+// person's Venom projects and unread mentions, through the shared script.
+import { execFile } from "node:child_process";
 import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 
 const guidance = JSON.parse(readFileSync(new URL("../guidance.json", import.meta.url), "utf8"));
+
+const CORE = fileURLToPath(new URL("../hooks/venom-hook.sh", import.meta.url));
+
+/** What Venom's sign-in adds at session start (`venom-hook.sh session-extra`):
+ * the person's projects and unread mentions, or how to sign in. "" on any
+ * failure; the script caps its own wait at about 3 seconds. */
+export function signedInText(session, agent) {
+  return new Promise((done) => {
+    try {
+      const child = execFile(
+        "sh",
+        [CORE, "session-extra"],
+        {
+          timeout: 5000,
+          env: { ...process.env, VENOM_HOOK_FORMAT: "text", VENOM_HOOK_SESSION: String(session || ""), VENOM_HOOK_AGENT: agent },
+        },
+        (error, stdout) => done(error ? "" : String(stdout).trim()),
+      );
+      child.stdin?.end();
+    } catch {
+      done("");
+    }
+  });
+}
 
 // A command starts after a separator, then optional VAR=value assignments and
 // sudo, time, then, do, else, exec, nohup, command or ! (as in the shared script).
@@ -68,8 +96,9 @@ function textOf(content) {
   return Array.isArray(content) ? content.map((c) => (c?.type === "text" ? c.text : "")).join(" ") : "";
 }
 
-export default function venom(pi, now = () => Date.now()) {
+export default function venom(pi, now = () => Date.now(), signedIn = (session) => signedInText(session, "pi")) {
   let greet = true; // say the session-start text on the next prompt
+  let extra = null; // what the sign-in adds, fetched at session start: { text, ready }
   const seen = new Map(); // "session:kind" -> time the milestone was last said
   const pending = new Map(); // session -> [outcome kind, time] awaiting a Venom log call
   const lastStop = new Map(); // session -> time the stop question was last asked
@@ -81,15 +110,32 @@ export default function venom(pi, now = () => Date.now()) {
     }
   };
 
-  pi.on("session_start", (event) => {
+  pi.on("session_start", (event, ctx) => {
     // A resumed or reloaded session already has the text in its history.
     greet = event.reason === "startup" || event.reason === "new" || event.reason === "fork";
+    if (!greet) return;
+    // Fetched now, so the first prompt rarely waits; if it isn't back by
+    // then, it comes with the next prompt.
+    const fetched = { text: "", ready: false };
+    extra = fetched;
+    signedIn(sid(ctx)).then(
+      (text) => Object.assign(fetched, { text, ready: true }),
+      () => Object.assign(fetched, { ready: true }),
+    );
   });
 
   pi.on("before_agent_start", (event) => {
-    if (!greet || event.messageType === "custom") return;
-    greet = false;
-    return { message: { customType: "venom", content: guidance.session_start, display: false } };
+    if (event.messageType === "custom") return;
+    const parts = [];
+    if (greet) {
+      greet = false;
+      parts.push(guidance.session_start);
+    }
+    if (extra?.ready) {
+      if (extra.text) parts.push(extra.text);
+      extra = null;
+    }
+    if (parts.length) return { message: { customType: "venom", content: parts.join("\n\n"), display: false } };
   });
 
   pi.on("session_compact", () => {

@@ -1,20 +1,24 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import { test } from "node:test";
-import venom, { milestone } from "../extensions/venom.js";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { createServer } from "node:http";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import venom, { milestone, signedInText } from "../extensions/venom.js";
 
 const g = JSON.parse(readFileSync(new URL("../guidance.json", import.meta.url), "utf8"));
 const shared = JSON.parse(readFileSync(new URL("../../shared/guidance.json", import.meta.url), "utf8"));
 const ctx = { sessionManager: { getSessionId: () => "s1" } };
 const milestoneNote = (what) => `\n\n${shared.milestone.replace("{what}", what)}`;
 
-function setup() {
+function setup(signedIn = async () => "") {
   const handlers = {};
   const sent = [];
   let now = 0;
   venom(
     { on: (n, f) => (handlers[n] = f), sendMessage: (m, o) => sent.push([m, o]) },
     () => now,
+    signedIn,
   );
   return { h: handlers, sent, tick: (ms) => (now += ms) };
 }
@@ -111,4 +115,46 @@ test("stop: a commit alone does not ask; a Venom log call clears it", () => {
   h.tool_result(bash("npm publish"), ctx);
   assert.equal(h.tool_result({ toolName: "mcp__venom__append_task_log", input: {}, content: [] }, ctx), undefined);
   assert.equal(h.agent_before_settle({ entries: [] }, ctx), undefined);
+});
+
+test("signed in: projects and mentions follow the session-start text", async () => {
+  const asked = [];
+  const { h } = setup(async (session) => (asked.push(session), "Venom projects in Acme you can find work in:\n- Web (web)"));
+  h.session_start({ reason: "startup" }, ctx);
+  await new Promise((r) => setImmediate(r));
+  const out = h.before_agent_start({ messageType: "user" }, ctx);
+  assert.equal(out.message.content, `${g.session_start}\n\nVenom projects in Acme you can find work in:\n- Web (web)`);
+  assert.deepEqual(asked, ["s1"]);
+  assert.equal(h.before_agent_start({ messageType: "user" }, ctx), undefined);
+  // A resumed session already has it.
+  h.session_start({ reason: "resume" }, ctx);
+  await new Promise((r) => setImmediate(r));
+  assert.equal(h.before_agent_start({ messageType: "user" }, ctx), undefined);
+  assert.equal(asked.length, 1);
+});
+
+test("signedInText runs the bundled script and returns what Venom sent", async () => {
+  const server = createServer((req, res) => {
+    res.writeHead(200, { "Content-Type": "text/plain; charset=utf-8" });
+    res.end("Venom projects in Acme you can find work in:\n- Web (web)");
+  });
+  await new Promise((r) => server.listen(0, "127.0.0.1", r));
+  const tmp = mkdtempSync(join(tmpdir(), "venom-pi-"));
+  const saved = { VENOM_HOOK_CONFIG: process.env.VENOM_HOOK_CONFIG, TMPDIR: process.env.TMPDIR };
+  try {
+    mkdirSync(join(tmp, "conf"), { mode: 0o700 });
+    const url = `http://127.0.0.1:${server.address().port}`;
+    writeFileSync(join(tmp, "conf", "hooks-token"), `token=vhk_t\nserver=${url}\norganization=Acme\n`, { mode: 0o600 });
+    process.env.VENOM_HOOK_CONFIG = join(tmp, "conf");
+    process.env.TMPDIR = tmp;
+    assert.equal(await signedInText("s1", "pi"), "Venom projects in Acme you can find work in:\n- Web (web)");
+  } finally {
+    for (const [key, value] of Object.entries(saved)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+    server.closeAllConnections();
+    await new Promise((r) => server.close(r));
+    rmSync(tmp, { recursive: true, force: true });
+  }
 });

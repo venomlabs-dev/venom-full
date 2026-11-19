@@ -45,8 +45,7 @@ Skipped:
 
 ## Limits
 
-- No list of your projects or unread mentions at session start: that needs a
-  signed-in client (planned).
+- Your projects and unread mentions at session start come with the sign-in (`sh hooks/venom-hook.sh login` in this folder's installed copy; see [Sign in](../README.md#sign-in-for-your-projects-and-mentions)). Built and unit-tested; not yet seen in a live session of this agent.
 - Hooks only run when `hooksConfig.enabled` is true (the default).
 - The `AfterAgent` question makes Gemini run one extra model turn.
 

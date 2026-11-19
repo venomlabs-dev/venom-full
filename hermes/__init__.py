@@ -20,7 +20,9 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import re
+import subprocess
 import threading
 import time
 from pathlib import Path
@@ -29,6 +31,31 @@ from typing import Any, Callable, Dict, Optional
 logger = logging.getLogger(__name__)
 
 GUIDANCE_PATH = Path(__file__).resolve().parent / "guidance.json"
+CORE_PATH = Path(__file__).resolve().parent / "hooks" / "venom-hook.sh"
+
+
+def signed_in_text(session_id: str) -> str:
+    """What Venom's sign-in adds at session start (venom-hook.sh session-extra):
+    the person's projects and unread mentions, or how to sign in. "" on any
+    failure; the script caps its own wait at about 3 seconds."""
+    env = dict(
+        os.environ,
+        VENOM_HOOK_FORMAT="text",
+        VENOM_HOOK_SESSION=session_id or "",
+        VENOM_HOOK_AGENT="hermes",
+    )
+    try:
+        done = subprocess.run(
+            ["sh", str(CORE_PATH), "session-extra"],
+            input="",
+            capture_output=True,
+            text=True,
+            timeout=5,
+            env=env,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return ""
+    return done.stdout.strip() if done.returncode == 0 else ""
 SHELL_TOOLS = {"terminal", "shell", "bash", "execute_command"}
 STOP_EXPIRY_MINUTES = 60
 LOG_TOOLS = ("append_task_log", "append_project_log", "edit_log_entry")
@@ -87,9 +114,15 @@ def milestone(command: Any) -> Optional[str]:
 class Venom:
     """Per-process memory of what each session has been told."""
 
-    def __init__(self, guidance: Dict[str, Any], clock: Callable[[], float] = time.monotonic):
+    def __init__(
+        self,
+        guidance: Dict[str, Any],
+        clock: Callable[[], float] = time.monotonic,
+        signed_in: Callable[[str], str] = signed_in_text,
+    ):
         self.g = guidance
         self.clock = clock
+        self.signed_in = signed_in
         self.lock = threading.Lock()
         self.told: set = set()
         self.compacted: set = set()
@@ -109,13 +142,21 @@ class Venom:
     def before_turn(self, session_id: str, parent_session_id: str = "", is_first_turn: bool = False) -> Optional[str]:
         sid = session_id or ""
         parts = []
+        first = False
         with self.lock:
             if sid not in self.told:
                 self.told.add(sid)
+                first = not parent_session_id
                 parts.append(self.g["subagent"] if parent_session_id else self.g["session_start"])
             if sid in self.compacted:
                 self.compacted.discard(sid)
                 parts.append(self.g["compacted"])
+        if first:
+            # Signed in: the person's projects and unread mentions (outside
+            # the lock; the script waits about 3 seconds at most).
+            extra = self.signed_in(sid)
+            if extra:
+                parts.insert(1, extra)
         return "\n\n".join(parts) or None
 
     # post_compaction

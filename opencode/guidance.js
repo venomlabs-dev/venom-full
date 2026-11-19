@@ -86,10 +86,9 @@ export function milestone(command) {
 
 export function milestoneText(kind) {
   return (
-    `Venom milestone: ${MILESTONE_TEXT[kind]}. If this advances a Venom task, ` +
-    "log the outcome with evidence (commit or PR link) and the next step, and " +
-    "update the status if it changed. A commit, push or PR alone does not make " +
-    "a task done unless the task says so."
+    `Venom milestone: ${MILESTONE_TEXT[kind]}. If this moves a Venom task, ` +
+    "log it once for the whole ship, not per step: the outcome, its link and " +
+    "the next step. Set done only when the task's own check is met."
   );
 }
 

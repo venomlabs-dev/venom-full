@@ -51,7 +51,7 @@ The texts and limits are shared with the other Venom packages
 - Without `allowConversationAccess` the plugin works except the stop question
   (OpenClaw only allows `before_agent_finalize` for plugins with that grant).
 - No pre-compaction text: `before_compaction` cannot change the summary.
-- No projects or mentions list at session start: that needs a signed-in client (planned).
+- Your projects and unread mentions at session start come with the sign-in (`sh hooks/venom-hook.sh login` in this folder's installed copy; see [Sign in](../README.md#sign-in-for-your-projects-and-mentions)). Built and unit-tested; not yet seen in a live session of this agent.
 - Venom reminders reach every OpenClaw session, including chat channels.
 - `after_tool_call` is observe-only, so milestone text is steered into the run
   with `steerActiveRun`; that and the injection API are documented but

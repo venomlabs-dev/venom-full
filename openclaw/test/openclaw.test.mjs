@@ -13,7 +13,7 @@ const guidance = JSON.parse(readFileSync(join(root, "guidance.json"), "utf8"));
 const milestoneText = (k) => guidance.milestone.replace("{what}", guidance.milestones[k]);
 const stopText = (k) => guidance.stop.replace("{what}", guidance.milestones[k]);
 
-function setup({ steer = true } = {}) {
+function setup({ steer = true, signedIn = async () => "" } = {}) {
   const handlers = {};
   const queued = [];
   const steered = [];
@@ -26,7 +26,7 @@ function setup({ steer = true } = {}) {
       },
     },
   };
-  plugin.register(api);
+  plugin.register(api, signedIn);
   return { handlers, queued, steered };
 }
 const shell = (command, error) => ({ toolName: "exec", params: { command }, ...(error ? { error } : {}) });
@@ -156,4 +156,12 @@ test("a session named by subagent_spawned gets no stop question", async () => {
   await handlers.subagent_spawned({ childSessionKey: "child-1" }, {});
   await handlers.after_tool_call(shell("gh pr merge 4"), ctx("child-1"));
   assert.equal(handlers.before_agent_finalize({ sessionKey: "child-1" }, ctx("child-1")), undefined);
+});
+
+test("signed in: projects and mentions come with the session-start text", async () => {
+  const asked = [];
+  const { handlers, queued } = setup({ signedIn: async (key) => (asked.push(key), "Venom projects in Acme you can find work in:\n- Web (web)") });
+  await handlers.session_start({ sessionId: "s1", sessionKey: "agent:main:main" }, { sessionId: "s1" });
+  assert.equal(queued[0].text, `${guidance.session_start}\n\nVenom projects in Acme you can find work in:\n- Web (web)`);
+  assert.deepEqual(asked, ["agent:main:main"]);
 });

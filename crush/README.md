@@ -62,7 +62,7 @@ Crush then uses its built-in authorization-code flow with dynamic client registr
 - No stop question: `TurnEnd` is observe-only, so nothing can ask "log this?" at the end of a turn. The milestone note after the command is the nudge.
 - No pre-compaction text (`PreCompact` can only block) and no subagent text: Crush fires no hooks inside subagents, and the outer task call can only be rewritten, not annotated.
 - Session start arrives with the first tool result, not before the first reply.
-- No projects or mentions list yet (needs a signed-in client, planned later).
+- Your projects and unread mentions at session start come with the sign-in (`sh hooks/venom-hook.sh login` in this folder's installed copy; see [Sign in](../README.md#sign-in-for-your-projects-and-mentions)). Built and unit-tested; not yet seen in a live session of this agent.
 - Hooks are `command` only, and a path with spaces needs hand-quoting.
 - JSON from Crush escapes `&`, `<`, `>`; the wrapper restores them so `cd x && git commit` is seen.
 

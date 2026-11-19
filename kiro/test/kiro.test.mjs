@@ -1,7 +1,7 @@
 // Runs the commands from the Kiro hook files, installed the way the README says.
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { test } from "node:test";
@@ -15,6 +15,9 @@ const stopText = (k) => guidance.stop.replace("{what}", guidance.milestones[k]);
 // scope: "workspace" installs into <project>/.kiro/hooks, "user" into $HOME/.kiro/hooks.
 function setup(scope) {
   const root = mkdtempSync(join(tmpdir(), "venom-kiro-"));
+  // Today's signed-out sign-in note is already given (shared/venom-hook.sh).
+  mkdirSync(join(root, `venom-hooks-${process.getuid()}`), { recursive: true, mode: 0o700 });
+  writeFileSync(join(root, `venom-hooks-${process.getuid()}`, "nudged"), "");
   const home = join(root, "home");
   const project = join(root, "project");
   const dest = join(scope === "user" ? home : project, ".kiro/hooks");

@@ -32,10 +32,10 @@ class FakeCtx:
         self.hooks[name] = fn
 
 
-def setup():
+def setup(signed_in=lambda _sid: ""):
     clock = Clock()
     ctx = FakeCtx()
-    mod.register(ctx, mod.Venom(G, clock))
+    mod.register(ctx, mod.Venom(G, clock, signed_in=signed_in))
     return ctx.hooks, clock
 
 
@@ -96,6 +96,24 @@ class Hooks(unittest.TestCase):
         out = h["pre_llm_call"](session_id="s1", parent_session_id="", is_first_turn=True)
         self.assertEqual(out, {"context": G["session_start"]})
         self.assertIsNone(h["pre_llm_call"](session_id="s1", is_first_turn=False))
+
+    def test_signed_in_session_start_brings_projects_and_mentions(self):
+        asked = []
+        h, _ = setup(lambda sid: asked.append(sid) or "Venom projects in Acme you can find work in:\n- Web (web)")
+        out = h["pre_llm_call"](session_id="s1", parent_session_id="", is_first_turn=True)
+        self.assertEqual(out, {"context": G["session_start"] + "\n\nVenom projects in Acme you can find work in:\n- Web (web)"})
+        self.assertEqual(asked, ["s1"])
+        # Subagents report to their parent: no projects or mentions for them.
+        h["pre_llm_call"](session_id="child", parent_session_id="s1", is_first_turn=True)
+        self.assertEqual(asked, ["s1"])
+
+    def test_signed_in_text_falls_back_to_nothing(self):
+        original = mod.CORE_PATH
+        try:
+            mod.CORE_PATH = mod.Path("/no/such/venom-hook.sh")
+            self.assertEqual(mod.signed_in_text("s1"), "")
+        finally:
+            mod.CORE_PATH = original
 
     def test_subagent_gets_subagent_text_only(self):
         h, _ = setup()

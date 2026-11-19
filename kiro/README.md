@@ -49,7 +49,7 @@ agent's context (its docs only say exit-0 stdout is added; nothing was seen work
 
 - No subagent event in Kiro, so no subagent reminder. Prompt Submit is not wired: its
   stdout reaching the model is not documented, and a Venom note per prompt would be noise.
-- No projects/mentions list at session start (needs a signed-in client, planned later).
+- Your projects and unread mentions at session start come with the sign-in (`sh hooks/venom-hook.sh login` in this folder's installed copy; see [Sign in](../README.md#sign-in-for-your-projects-and-mentions)). Built and unit-tested; not yet seen in a live session of this agent.
 - User-level `~/.kiro/hooks` is documented for CLI V3 only; the IDE reads `.kiro/hooks` in the workspace.
 - Not verified: how Kiro handles Stop and PostToolUse stdout; its docs say no more than "exit 0 adds stdout to context", and the trigger names `PreCompaction` and `PostCompaction` come from the trigger table. See Verified.
 

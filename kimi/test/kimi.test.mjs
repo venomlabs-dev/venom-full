@@ -16,7 +16,7 @@ let n = 0;
 function session() { return `session_${process.pid}_${++n}`; }
 function run(event, payload) {
   const r = spawnSync("sh", [join(pkg, "hooks/kimi-hook.sh"), event], {
-    input: JSON.stringify(payload), encoding: "utf8", env: { ...process.env, TMPDIR: tmp },
+    input: JSON.stringify(payload), encoding: "utf8", env: { PATH: process.env.PATH, TMPDIR: tmp },
   });
   return { code: r.status, out: r.stdout, err: r.stderr };
 }
@@ -102,7 +102,7 @@ test("a state folder that is a link keeps the wrapper quiet", () => {
   const t = mkdtempSync(join(tmpdir(), "venom-kimi-link-"));
   symlinkSync(t, join(t, `venom-hooks-${process.getuid()}`));
   const r = spawnSync("sh", [join(pkg, "hooks/kimi-hook.sh"), "UserPromptSubmit"], {
-    input: JSON.stringify(prompt(session())), encoding: "utf8", env: { ...process.env, TMPDIR: t },
+    input: JSON.stringify(prompt(session())), encoding: "utf8", env: { PATH: process.env.PATH, TMPDIR: t },
   });
   assert.deepEqual([r.status, r.stdout, r.stderr], [0, "", ""]);
   rmSync(t, { recursive: true, force: true });

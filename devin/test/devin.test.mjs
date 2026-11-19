@@ -15,7 +15,7 @@ function run(event, payload) {
   const r = spawnSync("sh", [wrapper, event], {
     input: JSON.stringify(payload),
     encoding: "utf8",
-    env: { ...process.env, TMPDIR: tmp },
+    env: { PATH: process.env.PATH, TMPDIR: tmp },
   });
   assert.equal(r.status, 0);
   return r.stdout;
@@ -86,7 +86,7 @@ test("a command that only names a log tool does not clear it", () => {
 
 test("unknown events and empty input print nothing and exit 0", () => {
   assert.equal(run("pre-compact", {}), "");
-  const r = spawnSync("sh", [wrapper, "post-tool"], { input: "", encoding: "utf8", env: { ...process.env, TMPDIR: tmp } });
+  const r = spawnSync("sh", [wrapper, "post-tool"], { input: "", encoding: "utf8", env: { PATH: process.env.PATH, TMPDIR: tmp } });
   assert.equal(r.status, 0);
   assert.equal(r.stdout, "");
 });
