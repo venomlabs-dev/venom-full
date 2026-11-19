@@ -54,8 +54,30 @@ sends Claude Code and Codex. They add Venom's guidance at the start of a
 session and, where the agent allows it, after compaction and in subagents; a
 reminder to log after commits, pushes, pull requests, merges, releases,
 deploys and publishes; and one question at the end of a turn when an outcome
-wasn't logged. They don't show your projects and mentions yet: that needs a
-signed-in client.
+wasn't logged.
+
+### Sign in for your projects and mentions
+
+Sign in once per machine, and every agent's Venom hooks on it start each
+session with your Venom projects and unread mentions, like Claude Code does:
+
+```bash
+sh <the package folder>/hooks/venom-hook.sh login
+```
+
+It prints a link. Open it, sign in to Venom if you need to, check that the code
+matches, pick the organization and approve. Your agent can run the command for
+you and show you the link. `status` shows who is signed in, and `logout` signs
+out. You can also disconnect "Venom hooks on <machine>" under Settings → Agent
+connection in Venom.
+
+- **What it can do:** only fetch that start-of-session list. It can't read or
+  change your tasks.
+- **Where it's kept:** `~/.config/venom/hooks-token` (or
+  `$XDG_CONFIG_HOME/venom`), readable only by you. Never the system keychain.
+- **When it can't reach Venom** (signed out, offline, or no answer within 3
+  seconds), the hooks use their fixed texts, as before. While signed out, the
+  agent hears how to sign in at most once a day.
 
 Install the `venom` plugin (server and skill) first, then the package for your
 agent (except Kimi and OpenClaw, whose one plugin has both). The shell-hook

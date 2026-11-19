@@ -49,7 +49,7 @@ ignored by Kimi), `PreToolUse` (can only veto).
 - Milestone reminders after a commit or push arrive with the next prompt, not
   right after the command.
 - Subagents get no "report to your parent" note: Kimi can't inject into them.
-- No projects or unread-mentions list yet: that needs a signed-in client.
+- Your projects and unread mentions at session start come with the sign-in (`sh hooks/venom-hook.sh login` in this folder's installed copy; see [Sign in](../README.md#sign-in-for-your-projects-and-mentions)). Built and unit-tested; not yet seen in a live session of this agent.
 - `kimi -p` (headless) ends before a Stop continuation can run.
 
 ## Verified

@@ -14,6 +14,7 @@ import {
   guidance,
   isShellTool,
   isVenomLogTool,
+  signedInText,
 } from "./venom.js";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -23,7 +24,8 @@ export default {
   name: "Venom",
   description:
     "Venom for OpenClaw: multiplayer AI for your team. Adds the Venom MCP server, the venom skill, and Venom guidance at session start, after compaction, in subagents and after commits, PRs and deploys.",
-  register(api) {
+  // signedIn: what the Venom sign-in adds at session start (a test stub).
+  register(api, signedIn = signedInText) {
     const state = createState();
     const log = (message) => api.logger?.debug?.(`venom: ${message}`);
     let counter = 0;
@@ -58,7 +60,10 @@ export default {
     api.on("session_start", async (event, ctx) => {
       const key = keyOf(event, ctx);
       if (!state.takeStart(key)) return;
-      await enqueue(key, guidance.session_start, `venom:start:${key}`);
+      // Signed in: the person's projects and unread mentions come with it.
+      const extra = await signedIn(key);
+      const text = extra ? `${guidance.session_start}\n\n${extra}` : guidance.session_start;
+      await enqueue(key, text, `venom:start:${key}`);
     });
 
     api.on("subagent_spawned", async (event, ctx) => {

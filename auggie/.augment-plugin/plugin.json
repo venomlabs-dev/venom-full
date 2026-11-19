@@ -1,6 +1,6 @@
 {
   "name": "venom-hooks",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "Venom hooks for Auggie: a note after commits, pushes, pull requests, merges, releases, deploys and publishes to log the outcome in Venom. Use with the venom plugin.",
   "author": {
     "name": "Venom Labs",

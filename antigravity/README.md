@@ -33,7 +33,7 @@ always follows a tool result.
 
 ## Limits
 
-- No projects or mentions list at session start (needs a signed-in client).
+- Your projects and unread mentions at session start come with the sign-in (`sh hooks/venom-hook.sh login` in this folder's installed copy; see [Sign in](../README.md#sign-in-for-your-projects-and-mentions)). Built and unit-tested; not yet seen in a live session of this agent.
 - No subagent or compaction guidance.
 - Venom log tools are recognised by name containing `append_task_log`,
   `append_project_log` or `edit_log_entry`; the exact MCP tool name Antigravity

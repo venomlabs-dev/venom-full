@@ -31,6 +31,8 @@ dir="${TMPDIR:-/tmp}/venom-hooks-$(id -u 2>/dev/null || echo 0)"
 queue="$dir/$session.kimi-queue"
 started="$dir/$session.kimi-started"
 export VENOM_HOOK_SESSION="$session"
+# Kimi reads plain text from these hooks, not JSON.
+export VENOM_HOOK_FORMAT=text
 
 # core_text <core event> [tool name for the core to use instead of scanning the payload]
 core_text() { printf '%s' "$input" | VENOM_HOOK_TOOL="${2:-}" sh "$core" "$1" 2>/dev/null; }

@@ -81,10 +81,10 @@ test("the unused stop and log-clearing paths stay silent", () => {
 });
 
 // The extension: session start, subagent, compaction.
-function setup() {
+function setup(signedIn = async () => "") {
   const handlers = {};
   const sent = [];
-  venom({ on: (n, f) => (handlers[n] = f), sendMessage: (m, o) => sent.push([m, o]) });
+  venom({ on: (n, f) => (handlers[n] = f), sendMessage: (m, o) => sent.push([m, o]) }, signedIn);
   return { h: handlers, sent };
 }
 
@@ -111,4 +111,29 @@ test("extension: compaction queues the re-read note for the next prompt", () => 
   assert.deepEqual(sent, [
     [{ customType: "venom", content: shared.compacted, display: false }, { deliverAs: "nextTurn" }],
   ]);
+});
+
+test("extension: signed in, projects and mentions follow the session-start text", async () => {
+  const asked = [];
+  const { h } = setup(async (session) => (asked.push(session), "Venom projects in Acme you can find work in:\n- Web (web)"));
+  h.session_start({ reason: "startup", sessionId: "a1" });
+  await new Promise((r) => setImmediate(r));
+  const out = h.before_agent_start({ messageType: "user" }, {});
+  assert.equal(out.message.content, `${shared.session_start}\n\nVenom projects in Acme you can find work in:\n- Web (web)`);
+  assert.deepEqual(asked, ["a1"]);
+  assert.equal(h.before_agent_start({ messageType: "user" }, {}), undefined);
+});
+
+test("extension: a late answer comes with the next prompt; subagents get none", async () => {
+  let answer;
+  const { h } = setup(() => new Promise((r) => (answer = r)));
+  h.session_start({ reason: "startup" });
+  assert.equal(h.before_agent_start({ messageType: "user" }, {}).message.content, shared.session_start);
+  answer("Late projects");
+  await new Promise((r) => setImmediate(r));
+  assert.equal(h.before_agent_start({ messageType: "user" }, {}).message.content, "Late projects");
+  const sub = setup(async () => "Projects");
+  sub.h.session_start({ reason: "startup" });
+  await new Promise((r) => setImmediate(r));
+  assert.equal(sub.h.before_agent_start({ messageType: "user" }, { role: "subagent" }).message.content, shared.subagent);
 });

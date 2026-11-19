@@ -2,12 +2,36 @@
 // can be tested without OpenClaw. The texts and limits come from guidance.json
 // (copied from shared/guidance.json by scripts/sync-shared.mjs): the same
 // texts Claude Code and Codex get from the Venom server's get_guidance tool.
+import { execFile } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = dirname(fileURLToPath(import.meta.url));
 export const guidance = JSON.parse(readFileSync(join(here, "guidance.json"), "utf8"));
+const CORE = join(here, "hooks/venom-hook.sh");
+
+/** What Venom's sign-in adds at session start (`venom-hook.sh session-extra`):
+ * the person's projects and unread mentions, or how to sign in. "" on any
+ * failure; the script caps its own wait at about 3 seconds. */
+export function signedInText(session, agent = "openclaw") {
+  return new Promise((done) => {
+    try {
+      const child = execFile(
+        "sh",
+        [CORE, "session-extra"],
+        {
+          timeout: 5000,
+          env: { ...process.env, VENOM_HOOK_FORMAT: "text", VENOM_HOOK_SESSION: String(session || ""), VENOM_HOOK_AGENT: agent },
+        },
+        (error, stdout) => done(error ? "" : String(stdout).trim()),
+      );
+      child.stdin?.end();
+    } catch {
+      done("");
+    }
+  });
+}
 
 const MINUTE = 60 * 1000;
 const STOP_EXPIRY_MINUTES = 60;

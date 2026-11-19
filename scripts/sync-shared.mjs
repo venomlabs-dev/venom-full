@@ -37,21 +37,29 @@ function assertSafe(name, text) {
 for (const key of TEXT_KEYS) assertSafe(key, guidance[key]);
 for (const [kind, text] of Object.entries(guidance.milestones)) assertSafe(`milestones.${kind}`, text);
 
-const block = [
-  "# >>> texts: generated from shared/guidance.json by scripts/sync-shared.mjs",
-  ...TEXT_KEYS.map((k) => `${k.toUpperCase()}="${guidance[k]}"`),
-  ...Object.entries(guidance.milestones).map(([k, v]) => `WHAT_${k.toUpperCase()}="${v}"`),
-  `STOP_KINDS="${guidance.stop_kinds.join(" ")}"`,
-  `MILESTONE_GAP_MINUTES=${Number(guidance.milestone_gap_minutes)}`,
-  `STOP_GAP_MINUTES=${Number(guidance.stop_gap_minutes)}`,
-  "# <<< texts",
-].join("\n");
+// Each copy also names its agent (the folder), so the Venom server can count
+// signed-in session starts per agent.
+const block = (agent) =>
+  [
+    "# >>> texts: generated from shared/guidance.json by scripts/sync-shared.mjs",
+    ...TEXT_KEYS.map((k) => `${k.toUpperCase()}="${guidance[k]}"`),
+    ...Object.entries(guidance.milestones).map(([k, v]) => `WHAT_${k.toUpperCase()}="${v}"`),
+    `STOP_KINDS="${guidance.stop_kinds.join(" ")}"`,
+    `MILESTONE_GAP_MINUTES=${Number(guidance.milestone_gap_minutes)}`,
+    `STOP_GAP_MINUTES=${Number(guidance.stop_gap_minutes)}`,
+    `AGENT="${agent}"`,
+    "# <<< texts",
+  ].join("\n");
 
 const current = readFileSync(SHARED_SH, "utf8");
 const start = current.indexOf("# >>> texts");
 const end = current.indexOf("# <<< texts") + "# <<< texts".length;
 if (start < 0 || end < start) throw new Error("shared/venom-hook.sh has no texts block");
-const script = current.slice(0, start) + block + current.slice(end);
+const scriptFor = (agent) => {
+  if (!/^[a-z0-9-]*$/.test(agent)) throw new Error(`${agent} is not a folder name an agent can have`);
+  return current.slice(0, start) + block(agent) + current.slice(end);
+};
+const script = scriptFor("");
 
 const problems = [];
 function write(file, content, mode) {
@@ -74,14 +82,14 @@ const folders = readdirSync(root).filter(
 for (const folder of folders) {
   const sh = join(root, folder, "hooks/venom-hook.sh");
   const json = join(root, folder, "guidance.json");
-  if (existsSync(sh) || targets.includes(folder)) write(sh, script, 0o755);
+  if (existsSync(sh) || targets.includes(folder)) write(sh, scriptFor(folder), 0o755);
   if (existsSync(json) || (withJson && targets.includes(folder))) {
     write(json, readFileSync(SHARED_JSON, "utf8"));
   }
 }
 for (const t of targets) {
   if (!folders.includes(t) && !check) {
-    write(join(root, t, "hooks/venom-hook.sh"), script, 0o755);
+    write(join(root, t, "hooks/venom-hook.sh"), scriptFor(t), 0o755);
     if (withJson) write(join(root, t, "guidance.json"), readFileSync(SHARED_JSON, "utf8"));
   }
 }

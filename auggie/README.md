@@ -69,7 +69,7 @@ Texts are the shared Venom texts (`hooks/venom-hook.sh`, `guidance.json`).
 - The plugin only matches `bash`. Auggie runs the hook on subagent tool calls too.
 - Extensions are Auggie 1.x's pi-based extension API (a preview). The hooks
   plugin does not depend on it.
-- No project or mention lists yet: that needs a signed-in client.
+- Your projects and unread mentions at session start come with the sign-in (`sh hooks/venom-hook.sh login` in this folder's installed copy; see [Sign in](../README.md#sign-in-for-your-projects-and-mentions)). Built and unit-tested; not yet seen in a live session of this agent.
 
 ## Verified
 

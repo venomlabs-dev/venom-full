@@ -41,7 +41,7 @@ Texts come from `guidance.json`, the same as every Venom agent package.
   `pi` process), so there is nothing to detect.
 - No pre-compaction text: Pi's `session_before_compact` can only replace the
   summary or cancel, not add to it.
-- No project or mention lists yet; that needs a signed-in client.
+- Your projects and unread mentions at session start come with the sign-in (`sh hooks/venom-hook.sh login` in this folder's installed copy; see [Sign in](../README.md#sign-in-for-your-projects-and-mentions)). Built and unit-tested; not yet seen in a live session of this agent.
 - State is kept in memory for the Pi process.
 
 ## Verified

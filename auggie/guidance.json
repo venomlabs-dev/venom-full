@@ -4,7 +4,7 @@
   "pre_compact": "In the summary, keep the Venom project and task refs being worked on, any decisions not yet logged to Venom, and unanswered Venom mentions.",
   "compacted": "Venom: context was compacted. If you were working on a Venom task, re-read it with read_task before continuing. Log any decisions from before compaction that are not in Venom yet.",
   "subagent": "Venom: you are a subagent. Read Venom if it helps your assignment, but do not write to it. Put decisions, findings and blockers in your final report so your parent can log them. Exception: if your parent gave you a Venom task to own, log to that task.",
-  "milestone": "Venom milestone: {what}. If this advances a Venom task, log the outcome with evidence (commit or PR link) and the next step, and update the status if it changed. A commit, push or PR alone does not make a task done unless the task says so.",
+  "milestone": "Venom milestone: {what}. If this moves a Venom task, log it once for the whole ship, not per step: the outcome, its link and the next step. Set done only when the task's own check is met.",
   "stop": "Venom: {what} this turn and nothing was logged to Venom after it. If it produced a decision, outcome, blocker or next step a teammate would need, log it to the Venom task now, with the commit, PR or deploy as evidence. If the work isn't at a point worth recording yet, don't log anything; just finish your reply.",
   "milestones": {
     "commit": "you committed",

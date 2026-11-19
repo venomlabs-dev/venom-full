@@ -2,6 +2,7 @@
 // skill, and Venom guidance at session start, at compaction, in subagents,
 // after milestones and, once, when a session goes idle without a log.
 // It supports OpenCode 2.x (`setup`) and 1.x (`server`) from one export.
+import { execFile } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -20,6 +21,44 @@ import {
 const here = dirname(fileURLToPath(import.meta.url));
 export const SKILL_DIR = join(here, "skills", "venom");
 export const SKILL_PATH = join(SKILL_DIR, "SKILL.md");
+const CORE = join(here, "hooks", "venom-hook.sh");
+
+/** What Venom's sign-in adds at session start (`venom-hook.sh session-extra`):
+ * the person's projects and unread mentions, or how to sign in. "" on any
+ * failure; the script caps its own wait at about 3 seconds. */
+export function signedInText(session) {
+  return new Promise((done) => {
+    try {
+      const child = execFile(
+        "sh",
+        [CORE, "session-extra"],
+        {
+          timeout: 5000,
+          env: { ...process.env, VENOM_HOOK_FORMAT: "text", VENOM_HOOK_SESSION: String(session || ""), VENOM_HOOK_AGENT: "opencode" },
+        },
+        (error, stdout) => done(error ? "" : String(stdout).trim()),
+      );
+      child.stdin?.end();
+    } catch {
+      done("");
+    }
+  });
+}
+
+// Where the signed-in text comes from; tests replace `fetch`.
+export const signedIn = { fetch: signedInText };
+
+/** One fetch per session, kept for the session's later model calls. */
+function signedInCache() {
+  const texts = new Map();
+  return (sessionID) => {
+    if (!texts.has(sessionID)) {
+      texts.set(sessionID, signedIn.fetch(sessionID).catch(() => ""));
+      if (texts.size > 200) texts.delete(texts.keys().next().value);
+    }
+    return texts.get(sessionID);
+  };
+}
 
 function skillParts() {
   const content = readFileSync(SKILL_PATH, "utf8");
@@ -72,6 +111,7 @@ async function askStop(state, sessionID, lookupParent, lookupTurn, send) {
 // OpenCode 2.x
 async function setup(ctx) {
   const state = createState();
+  const signedInFor = signedInCache();
 
   await ctx.mcp.transform((editor) => {
     if (!hasVenom(editor.list())) editor.set("venom", { type: "remote", url: MCP_URL });
@@ -103,6 +143,8 @@ async function setup(ctx) {
     if (subagent === null) return; // unknown: add no Venom text
     if (!subagent && request.sessionID) {
       request.system.push({ type: "text", text: SESSION_START });
+      const extra = await signedInFor(request.sessionID);
+      if (extra) request.system.push({ type: "text", text: extra });
     }
     if (state.takeCompacted(request.sessionID)) {
       request.system.push({ type: "text", text: COMPACTED });
@@ -155,6 +197,7 @@ async function setup(ctx) {
 // OpenCode 1.x
 async function server({ client }) {
   const state = createState();
+  const signedInFor = signedInCache();
   const lookupParent = async (sessionID) =>
     parentOf(await client.session.get({ path: { id: sessionID } }));
 
@@ -190,7 +233,11 @@ async function server({ client }) {
     "experimental.chat.system.transform": async (input, output) => {
       const subagent = await state.isSubagent(input.sessionID, lookupParent);
       if (subagent === null) return; // unknown: add no Venom text
-      if (!subagent && input.sessionID) output.system.push(SESSION_START);
+      if (!subagent && input.sessionID) {
+        output.system.push(SESSION_START);
+        const extra = await signedInFor(input.sessionID);
+        if (extra) output.system.push(extra);
+      }
       if (state.takeCompacted(input.sessionID)) output.system.push(COMPACTED);
       if (subagent) output.system.push(SUBAGENT);
     },

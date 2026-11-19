@@ -23,7 +23,7 @@ qwen extensions install <path to a clone of venomlabs-dev/venom-full>/qwen
 | PostToolUse: Venom log tools (`append_task_log`, `append_project_log`, `edit_log_entry`) | post-tool (clears the pending stop question) | none |
 | Stop | stop (asked once after merge, release, workflow, deploy or publish with no Venom log after it) | `{"decision":"block","reason":...}`, so the agent answers once more |
 
-Not wired: UserPromptSubmit (the shared core has no event for it; the projects and mentions list needs a signed-in client, planned later), PostCompact (its output is ignored), SubagentStop, MessageDisplay and the rest.
+Not wired: UserPromptSubmit (the shared core has no event for it; your projects and mentions come at session start with the [sign-in](../README.md#sign-in-for-your-projects-and-mentions)), PostCompact (its output is ignored), SubagentStop, MessageDisplay and the rest.
 
 ## How it works
 
