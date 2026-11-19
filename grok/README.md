@@ -52,6 +52,8 @@ allowing hook is discarded).
 
 ## Verified
 
+Signed-in hooks (0.11.0, 19 Nov 2026): Grok Build 1.0.89 in an isolated HOME, `venom-hooks` 0.11.0 installed from a local folder and signed in with `sh hooks/venom-hook.sh login` (approved on app.venomlabs.dev). In a headless `-p` turn that ran one shell command, the model quoted the Venom organization's projects and its unread mention from the hook's text. After `logout` the token was refused.
+
 Grok Build 1.0.89 (28be5bb1bf65), isolated HOME, signed-in headless runs:
 `grok plugin install <local folder> --trust`, `grok plugin list` and
 `grok inspect` show `venom-hooks` (then named `venom-full-grok`) with hooks. A headless turn that ran a
