@@ -86,7 +86,7 @@
         ]
       },
       {
-        "matcher": "mcp__plugin_venom_venom__append_task_log|mcp__plugin_venom_venom__append_project_log|mcp__plugin_venom_venom__edit_log_entry",
+        "matcher": "mcp__plugin_venom_venom__append_task_log|mcp__plugin_venom_venom__append_project_log|mcp__plugin_venom_venom__edit_log_entry|mcp__claude_ai_Venom__append_task_log|mcp__claude_ai_Venom__append_project_log|mcp__claude_ai_Venom__edit_log_entry",
         "hooks": [
           {
             "type": "mcp_tool",
@@ -95,7 +95,8 @@
             "input": {
               "event": "PostToolUse",
               "tool": "${tool_name}",
-              "session_id": "${session_id}"
+              "session_id": "${session_id}",
+              "tool_response": "${tool_response}"
             },
             "timeout": 10
           }
