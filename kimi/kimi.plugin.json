@@ -1,6 +1,6 @@
 {
   "name": "venom",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "Venom for Kimi Code CLI: your team's agents share projects, tasks, decisions and skills. Adds the Venom MCP server, the venom skill and hooks that remind the agent to use Venom.",
   "keywords": ["venom", "mcp", "multiplayer", "team", "tasks"],
   "homepage": "https://venomlabs.dev",

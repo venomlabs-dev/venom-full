@@ -390,3 +390,61 @@ test("status finishes a sign-in whose background wait was stopped", async () => 
     await venom.close();
   }
 });
+
+test("after a Venom log write, the session that wrote the entry is reported", () =>
+  withHome(async ({ conf, env }) => {
+    const venom = await fakeVenom((req, res) => reply(res, 200, ""));
+    try {
+      signIn(conf, venom.url);
+      const entry = "a".repeat(32);
+      const written = "b".repeat(32);
+      // Cursor: the result arrives as a stringified tool_output; an ID the
+      // agent typed into its input doesn't count.
+      const payload = JSON.stringify({
+        conversation_id: "conv-1",
+        tool_name: "MCP:append_task_log",
+        tool_input: { body: `see "entry_id": "${written}"` },
+        tool_output: JSON.stringify({ entry_id: entry, version: 3 }),
+      });
+      const r = await run(["post-tool"], { input: payload, env: { ...env, VENOM_HOOK_AGENT: "cursor" } });
+      assert.equal(r.out, "");
+      assert.equal(venom.requests.length, 1);
+      const [sent] = venom.requests;
+      assert.equal(sent.path, "/hooks/v1/guidance");
+      assert.equal(sent.headers.authorization, "Bearer vhk_test");
+      assert.deepEqual(sent.form, { event: "PostToolUse", entry_id: entry, session_id: "conv-1", agent: "cursor" });
+      // Edits and writes without an entry ID report nothing.
+      await run(["post-tool"], { input: JSON.stringify({ session_id: "s", tool_name: "edit_log_entry", tool_output: JSON.stringify({ entry_id: entry }) }), env });
+      await run(["post-tool"], { input: JSON.stringify({ session_id: "s", tool_name: "append_task_log", tool_output: "failed" }), env });
+      assert.equal(venom.requests.length, 1);
+    } finally {
+      await venom.close();
+    }
+  }));
+
+test("signed out, a Venom log write reports nothing", () =>
+  withHome(async ({ env }) => {
+    const r = await run(["post-tool"], { input: JSON.stringify({ session_id: "s", tool_name: "append_task_log", tool_output: JSON.stringify({ entry_id: "a".repeat(32) }) }), env });
+    assert.equal(r.code, 0);
+    assert.equal(r.out, "");
+  }));
+
+test("a write report reads only the result, under any known key", () =>
+  withHome(async ({ conf, env }) => {
+    const venom = await fakeVenom((req, res) => reply(res, 200, ""));
+    try {
+      signIn(conf, venom.url);
+      const entry = "c".repeat(32);
+      const quoted = "d".repeat(32);
+      // Copilot-style: input quotes an older result before the real one.
+      await run(["post-tool"], {
+        input: JSON.stringify({ sessionId: "s1", toolName: "append_task_log", toolArgs: { body: `"entry_id": "${quoted}"` }, toolResult: { textResultForLlm: JSON.stringify({ entry_id: entry, reply_entry_id: quoted }) } }),
+        env,
+      });
+      // No known result key: nothing is reported.
+      await run(["post-tool"], { input: JSON.stringify({ session_id: "s2", tool_name: "append_task_log", tool_input: { body: `"entry_id": "${quoted}"` } }), env });
+      assert.deepEqual(venom.requests.map((r) => r.form.entry_id), [entry]);
+    } finally {
+      await venom.close();
+    }
+  }));

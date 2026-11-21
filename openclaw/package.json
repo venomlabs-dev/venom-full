@@ -1,6 +1,6 @@
 {
   "name": "@venomlabs/openclaw",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "Venom for OpenClaw: multiplayer AI for your team. Adds the Venom MCP server, the venom skill, and Venom guidance at session start, after compaction, in subagents and after commits, PRs and deploys.",
   "type": "module",
   "main": "./index.js",

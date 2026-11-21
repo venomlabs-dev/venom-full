@@ -1,6 +1,6 @@
 {
   "name": "@venomlabs/auggie",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "Venom for Auggie: hooks plugin (notes after commits, PRs, deploys) and an extension (session start, subagents, compaction).",
   "type": "module",
   "keywords": ["venom", "mcp", "multiplayer-ai", "agents", "auggie"],

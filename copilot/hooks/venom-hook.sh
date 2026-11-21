@@ -275,6 +275,44 @@ pending="$dir/$session.pending"
 # Recent: the file exists and was touched less than $2 minutes ago.
 recent() { [ -f "$1" ] && [ -n "$(find "$1" -mmin "-$2" 2>/dev/null)" ]; }
 
+# The agent's name and this session's key, as the server knows them.
+session_key() {
+  agent=$(printf '%s' "${VENOM_HOOK_AGENT:-$AGENT}" | tr 'A-Z' 'a-z' | tr -cd 'a-z0-9-' | cut -c1-32)
+  # A process id is only unique on this machine, today.
+  case $session in
+    host-* | ppid-* | junie-*) key="$session-$(hostname 2>/dev/null | cksum | cut -d' ' -f1)-$(date +%Y%m%d)" ;;
+    *) key=$session ;;
+  esac
+}
+
+# After a Venom log write: tell the server which session wrote the entry, so
+# the user's other agents see it as "from your own agent Cursor ·k3f9" and this
+# session isn't told about its own mention. Signed in only; never waits long.
+report_write() {
+  signed_in || return 0
+  command -v curl >/dev/null 2>&1 || return 0
+  recent "$dir/offline" 5 && return 0
+  # The ID in the tool's result, not one the agent wrote in its input: read
+  # only what follows a known result key, and nothing when there is none.
+  case $input in
+    *'"tool_output"'*) out=${input#*'"tool_output"'} ;;
+    *'"tool_response"'*) out=${input#*'"tool_response"'} ;;
+    *'"toolResult"'*) out=${input#*'"toolResult"'} ;;
+    *'"result_json"'*) out=${input#*'"result_json"'} ;;
+    *'"result"'*) out=${input#*'"result"'} ;;
+    *) return 0 ;;
+  esac
+  entry=$(printf '%s' "$out" | grep -o -E '(^|[^A-Za-z_])entry_id[\\]*"[[:space:]]*:[[:space:]]*[\\]*"[0-9a-f]{32}' | head -n 1 | grep -o -E '[0-9a-f]{32}$')
+  [ -n "$entry" ] || return 0
+  token=$(setting token) server=$(setting server)
+  session_key
+  auth "$token" |
+    curl -s -K - -X POST --connect-timeout 1 --max-time 3 -o /dev/null \
+      --data-urlencode "event=PostToolUse" --data-urlencode "entry_id=$entry" \
+      --data-urlencode "session_id=$key" --data-urlencode "agent=${agent:-agent}" \
+      "${server:-$SERVER}/hooks/v1/guidance" 2>/dev/null || true
+}
+
 # The signed-in guidance for this session start: status 0 with the text (it
 # may be empty), 1 when signed out, 2 when the server can't answer now. After
 # a failure the server is skipped for 5 minutes.
@@ -283,12 +321,7 @@ server_text() {
   command -v curl >/dev/null 2>&1 || return 2
   recent "$dir/offline" 5 && return 2
   token=$(setting token) server=$(setting server)
-  agent=$(printf '%s' "${VENOM_HOOK_AGENT:-$AGENT}" | tr 'A-Z' 'a-z' | tr -cd 'a-z0-9-' | cut -c1-32)
-  # A process id is only unique on this machine, today.
-  case $session in
-    host-* | ppid-* | junie-*) key="$session-$(hostname 2>/dev/null | cksum | cut -d' ' -f1)-$(date +%Y%m%d)" ;;
-    *) key=$session ;;
-  esac
+  session_key
   from=$(json_value 'source' | tr -cd 'a-z' | cut -c1-16)
   # A reply cut short (curl fails) or that isn't Venom's plain text (a
   # proxy's page, say) counts as no answer.
@@ -343,7 +376,10 @@ fi
 # that only mentions append_task_log doesn't count.
 tool=${VENOM_HOOK_TOOL:-$(json_value 'tool_name|toolName')}
 [ -n "$tool" ] || tool=$input
-case $tool in *append_task_log* | *append_project_log* | *edit_log_entry*) rm -f "$pending"; exit 0 ;; esac
+case $tool in
+  *append_task_log* | *append_project_log*) rm -f "$pending"; report_write; exit 0 ;;
+  *edit_log_entry*) rm -f "$pending"; exit 0 ;;
+esac
 
 command=${VENOM_HOOK_COMMAND:-$(json_value 'command|cmd')}
 [ -n "$command" ] || exit 0
