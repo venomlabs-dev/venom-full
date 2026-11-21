@@ -14,13 +14,26 @@ first (it has the MCP server, the rule and the skill).
 2. Install this package. Cursor Marketplace once listed. Until then:
 
 ```bash
-git clone https://github.com/venomlabs-dev/venom-full ~/venom-full
-cp -R ~/venom-full/cursor ~/.cursor/plugins/local/venom-hooks
+git clone --depth 1 https://github.com/venomlabs-dev/venom-full ~/.venom-full
+cp -R ~/.venom-full/cursor ~/.cursor/plugins/local/venom-hooks
 ```
 
 Then run **Developer: Reload Window** in Cursor. Cursor skips symlinks that
 leave the plugin folder, so copy instead of linking. The Cursor CLI can load
-the same folder for one run: `cursor-agent --plugin-dir ~/venom-full/cursor`.
+the same folder for one run: `cursor-agent --plugin-dir ~/.venom-full/cursor`.
+
+Once Venom is connected, sign the hooks in so each session starts with your
+projects and unread mentions: `sh ~/.venom-full/shared/venom-hook.sh login`,
+then open the link it prints and approve it. To update, run
+`git -C ~/.venom-full pull` and copy the folder again over the old one
+(`rm -rf ~/.cursor/plugins/local/venom-hooks` first, or `cp` nests a copy).
+
+### Windows
+
+The hooks are shell scripts that Cursor runs directly, so native Windows
+doesn't run them. In Cursor connected to WSL, install them inside WSL with the
+steps above. On native Windows, install the `venom` plugin alone (rule, skill
+and server). Neither case has been tested yet.
 
 ### User-level hooks (Cursor CLI, or if plugins don't load)
 
@@ -29,7 +42,7 @@ the file exists; Cursor runs user hooks from `~/.cursor/`):
 
 ```bash
 mkdir -p ~/.cursor/hooks/venom
-cp ~/venom-full/cursor/hooks/*.sh ~/.cursor/hooks/venom/
+cp ~/.venom-full/cursor/hooks/*.sh ~/.cursor/hooks/venom/
 ```
 
 ```json

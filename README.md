@@ -62,8 +62,11 @@ Sign in once per machine, and every agent's Venom hooks on it start each
 session with your Venom projects and unread mentions, like Claude Code does:
 
 ```bash
-sh <the package folder>/hooks/venom-hook.sh login
+sh ~/.venom-full/shared/venom-hook.sh login
 ```
+
+(From any clone or installed package folder, `sh <folder>/hooks/venom-hook.sh login`
+does the same.)
 
 It prints a link. Open it, sign in to Venom if you need to, check that the code
 matches, pick the organization and approve. Your agent can run the command for
@@ -109,8 +112,11 @@ it was checked.
 | Crush | [crush](crush) | `sh <clone>/crush/install.sh --apply`. Start-up and milestone reminders only: Crush can't ask at the end of a turn |
 | Kilo Code | [opencode](opencode) | The OpenCode plugin: `kilo plugin github:venomlabs-dev/venom-full`. In Kilo the model received its milestone note (earlier, milestones-only version); the newer session-start and end-of-turn parts are unit-tested only |
 
-`<clone>` is a local clone of this repository
-(`git clone https://github.com/venomlabs-dev/venom-full`).
+`<clone>` is a local clone of this repository. Venom's setup and its install
+offer use `~/.venom-full`
+(`git clone --depth 1 https://github.com/venomlabs-dev/venom-full ~/.venom-full`;
+`git -C ~/.venom-full pull` updates it). Keep the clone: Crush's hooks run from it, and
+updates come from it.
 
 To change a text, edit [shared/guidance.json](shared/guidance.json) and run
 `npm run sync`, which updates every folder's copy; `npm test` fails if a copy
