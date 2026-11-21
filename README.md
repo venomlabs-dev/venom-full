@@ -99,7 +99,7 @@ it was checked.
 | JetBrains Junie | [junie](junie) | `/extensions marketplace add <clone>/junie`, then `/extensions install venom-hooks` (Junie itself was not run) |
 | Kiro | [kiro](kiro) | Copy the hook files from `<clone>/kiro/hooks/` into `~/.kiro/hooks/` (see the folder README) |
 | Augment (Auggie) | [auggie](auggie) | `auggie --plugin-dir <clone>/auggie` for the hooks, and `auggie install <clone>/auggie` for the session-start, subagent and compaction notes (the extension). `auggie plugin marketplace add venomlabs-dev/venom-full`, then enable `venom-hooks`, is untested on GitHub |
-| Mistral Vibe | [vibe](vibe) | Copy the folder to `~/.vibe/plugins/venom-hooks` |
+| Mistral Vibe | [vibe](vibe) | Copy the folder to `~/.vibe/plugins/venom-hooks`, then sign in with `/mcp login` as its README says |
 | Kimi Code | [kimi](kimi) | `/plugins install <clone>/kimi`. This one plugin replaces the `venom` plugin in Kimi (server, skill and hooks): don't install both |
 | Muse Code | [muse](muse) | `muse plugins install <clone>/muse`, then `muse plugins approve venom-hooks` (not verified in Muse) |
 | Pi | [pi](pi) | `pi install <clone>/pi` (checked); `pi install git:github.com/venomlabs-dev/venom-full` (untested) |
