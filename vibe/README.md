@@ -17,7 +17,9 @@ cp -R /tmp/venom-full/vibe ~/.vibe/plugins/venom-hooks
 rm -rf /tmp/venom-full
 ```
 
-Then restart Vibe or run `/reload-plugins`, and check `/plugins`: `venom-hooks` should list four hooks. Sign in to Venom from Vibe's MCP settings as usual.
+Then restart Vibe or run `/reload-plugins`, and check `/plugins`: `venom-hooks` should list four hooks.
+
+Sign in to Venom in a new chat: run `/mcp status`, then `/mcp login` with the server whose name ends in `_venom`. Vibe names the `venom` plugin's server `plugin_<id>_venom`, with an id that differs on each machine, and doesn't start its sign-in by itself. Don't add a server named `venom`: it would be a second Venom server. Then run `sh ~/.vibe/plugins/venom-hooks/hooks/venom-hook.sh login` once and approve the link it prints, so each new chat starts with your projects and unread mentions.
 
 ## What it adds
 
@@ -33,7 +35,7 @@ Skipped: pre- and post-compaction (Vibe has no compaction event), `notification`
 
 ## Limits
 
-- Your projects and unread mentions at session start come with the sign-in (`sh hooks/venom-hook.sh login` in this folder's installed copy; see [Sign in](../README.md#sign-in-for-your-projects-and-mentions)). Built and unit-tested; not yet seen in a live session of this agent.
+- Your projects and unread mentions at session start come with the sign-in (`sh hooks/venom-hook.sh login` in this folder's installed copy; see [Sign in](../README.md#sign-in-for-your-projects-and-mentions)). Seen in the Vibe app.
 - The "stop" question uses Vibe's post_agent retry (at most 3 per turn). The agent may answer it with a short reply if nothing is worth logging.
 - A forked session that carries a parent session id may be treated as a subagent (unverified).
 - Plugins are experimental in Vibe and hooks run from the session's pinned plugin copy: update the plugin, then start a new session.
@@ -47,4 +49,4 @@ Mistral Vibe 3.1.3 (uv tool, isolated home), Python API only:
 - The `match` patterns were checked against Vibe's own matcher (`bash`, `venom.append_task_log`, main versus subagent).
 - `node --test vibe/test/*.test.mjs` (8 tests).
 
-Not verified: a live model turn (needs a Mistral API key; not run) and what the model receives. Vibe's source and docs say `additional_context` from these events reaches the model.
+Live, in the Vibe app 3.1.3 on 21 Nov 2026, signed in to Venom and to the hooks: a new chat's model named the projects from the session-start text before its first Venom call, then used the Venom tools. Not seen live yet: the milestone reminder, the stop question and the subagent note.
