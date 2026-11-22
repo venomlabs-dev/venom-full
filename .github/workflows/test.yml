@@ -3,6 +3,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -30,7 +31,7 @@ jobs:
   copilot-marketplace:
     # After a merge: the published install, venom-full@venom from the venom
     # marketplace in venomlabs-dev/plugin, which fetches copilot/ from main.
-    if: github.event_name == 'push'
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

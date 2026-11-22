@@ -23,6 +23,15 @@ case $event in
     ;;
 esac
 
+# Two copies of these hooks (the old venom-hooks plugin left next to
+# venom-full) get the same payload for the same event: only the first answers.
+# Copilot's payloads carry a timestamp and tool call ID, so a repeat is a copy.
+seen="${TMPDIR:-/tmp}/venom-copilot-seen"
+mkdir -p "$seen" 2>/dev/null
+find "$seen" -mindepth 1 -maxdepth 1 -mmin +60 -exec rm -rf {} + 2>/dev/null
+key=$(printf '%s %s' "$event" "$input" | cksum | cut -d ' ' -f 1)
+mkdir "$seen/$event-$key" 2>/dev/null || exit 0
+
 text=$(printf '%s' "$input" | sh "$dir/venom-hook.sh" "$event" 2>/dev/null) || exit 0
 [ -n "$text" ] || exit 0
 

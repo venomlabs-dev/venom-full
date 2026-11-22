@@ -13,6 +13,8 @@ here=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 pkg=$(CDPATH= cd -- "$here/../.." && pwd)
 root=$(CDPATH= cd -- "$pkg/.." && pwd)
 work=$(mktemp -d)
+mock=""
+trap '[ -z "$mock" ] || kill "$mock" 2>/dev/null; rm -rf "$work"' EXIT
 port=${MOCK_PORT:-18517}
 log="$work/requests.jsonl"
 : > "$log"
@@ -29,8 +31,10 @@ EOF
 
 node "$here/mock-model.mjs" "$port" "$log" &
 mock=$!
-trap 'kill $mock 2>/dev/null || true' EXIT
-sleep 1
+i=0
+until node -e 'fetch(process.argv[1]).then(() => process.exit(0), () => process.exit(1))' "http://127.0.0.1:$port/v1/models"; do
+  i=$((i + 1)); [ "$i" -lt 50 ] || { echo "FAIL: the stand-in model didn't start"; exit 1; }; sleep 0.2
+done
 
 fail() { echo "FAIL: $*"; echo "--- requests"; cut -c1-2000 "$log" || true;
   echo "--- copilot logs"; tail -n 80 "$COPILOT_HOME"/logs/* 2>/dev/null || true; exit 1; }
@@ -74,5 +78,5 @@ if ! grep -qF "$desc" "$log"; then
 fi
 echo "== mcp"
 COPILOT_OFFLINE=true copilot mcp list 2>&1 | tee "$work/mcp.txt" || true
-grep -qi "venom" "$work/mcp.txt" || fail "copilot mcp list has no venom server"
+grep -A3 "Plugin servers" "$work/mcp.txt" | grep -qE '^[[:space:]]*venom \(http\)' || fail "copilot mcp list has no venom plugin server"
 echo "PASS: one install brings the server, the skill and the hooks, and the hooks reach the model"

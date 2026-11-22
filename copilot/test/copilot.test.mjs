@@ -122,3 +122,12 @@ test("the package is Venom Full for Copilot: server, skill and hooks", () => {
   const hooks = JSON.parse(readFileSync(join(folder, "com.github.copilot/hooks/hooks.json"), "utf8"));
   assert.deepEqual(Object.keys(hooks.hooks).sort(), ["PostToolUse", "SessionStart", "Stop", "SubagentStart"]);
 });
+
+// The old venom-hooks plugin left next to venom-full runs the same wrapper on
+// the same payload: only the first copy answers. A new payload still does.
+test("a second copy of the hooks stays quiet on the same payload", () => withTmp((tmp) => {
+  const start = { hook_event_name: "SessionStart", ...ctx("s-dup"), source: "startup" };
+  assert.notEqual(run("session-start", start, tmp), "");
+  assert.equal(run("session-start", start, tmp), "");
+  assert.notEqual(run("session-start", { ...start, timestamp: "2026-11-18T17:00:00.000Z" }, tmp), "");
+}));
