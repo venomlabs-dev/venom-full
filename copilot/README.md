@@ -1,31 +1,53 @@
-# Venom Hooks for GitHub Copilot
+# Venom Full for GitHub Copilot
 
-Hooks for the `venom` plugin in GitHub Copilot CLI and in VS Code agent mode
-(both run the same Copilot harness and hook format). They add short Venom
-reminders to what the model sees: at session start, when a subagent starts,
-after a commit, push, pull request, merge, release, deploy or publish, and
-once more before the turn ends if an outcome was never logged.
+One plugin for GitHub Copilot CLI and VS Code agent mode (both run the same
+Copilot harness and hook format) that brings all of Venom:
 
-This folder is an [Agent Plugins](https://agent-plugins.org) package named
-`venom-hooks`. It has no MCP server or skill: install the `venom` plugin first.
+- the Venom MCP server (`https://mcp.venomlabs.dev`, OAuth, no API key);
+- the `venom` skill, which tells Copilot when to read and log Venom work;
+- hooks that add short Venom notes to what the model sees: your Venom
+  projects and unread mentions at session start (once signed in), a note when
+  a subagent starts, a reminder after a commit, push, pull request, merge,
+  release, deploy or publish, and one check before the turn ends if an outcome
+  was never logged.
+
+This folder is an [Agent Plugins](https://agent-plugins.org) 1.0 package named
+`venom-full`: `plugin.json`, `mcp.json`, `skills/venom/SKILL.md` and
+`com.github.copilot/hooks/hooks.json`.
 
 ## Install
 
 ```bash
-copilot plugin marketplace add venomlabs-dev/plugin
-copilot plugin install venom@venom
-copilot plugin install venomlabs-dev/venom-full:copilot   # untested; the local-clone form below was checked
+copilot plugin install venomlabs-dev/venom-full:copilot
 ```
 
-From a local clone: `copilot plugin install /path/to/venom-full/copilot`.
-Copilot marks direct installs (repository, URL, local path) as deprecated in
-favour of `plugin@marketplace`, so the marketplace entry below is the
-long-term route.
+Run `/mcp` in Copilot to sign in to `venom`. Then sign the hooks in once per
+machine, so each session starts with your projects and mentions:
 
-VS Code picks up plugins installed by the CLI from `~/.copilot/installed-plugins/`
-and lists them under Plugins in the Agent Customizations editor. You can also
-use Chat: Install Plugin from Source. Select the Copilot harness (Session
-Target) so these hooks run. Hooks need `sh`: macOS, Linux and WSL.
+```bash
+git clone --depth 1 https://github.com/venomlabs-dev/venom-full ~/.venom-full
+sh ~/.venom-full/shared/venom-hook.sh login
+```
+
+From a local clone: `copilot plugin install ~/.venom-full/copilot`. VS Code
+picks up plugins installed by the CLI from `~/.copilot/installed-plugins/` and
+lists them under Plugins in the Agent Customizations editor; without the CLI,
+run **Chat: Install Plugin from Source** with a local clone's `copilot`
+folder. Select the Copilot harness (Session Target) so the hooks run. Hooks
+need `sh`: macOS, Linux and WSL.
+
+### Upgrading from venom-hooks (0.12 and earlier)
+
+This folder used to be a hooks-only plugin named `venom-hooks`, installed next
+to `venom@venom`. Remove the old one so the hooks don't run twice:
+
+```bash
+copilot plugin uninstall venom-hooks
+copilot plugin install venomlabs-dev/venom-full:copilot
+```
+
+`venom@venom` can stay: it declares the same `venom` server and skill, so
+Copilot keeps one of each (it warns about the duplicate server name).
 
 ## What each event adds
 

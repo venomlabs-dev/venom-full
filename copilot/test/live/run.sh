@@ -59,7 +59,13 @@ grep -q "venom smoke" "$log" || fail "the model never got a shell tool (no tool 
 git log --oneline | grep -q "venom smoke" || fail "the shell tool call didn't run the commit"
 grep -qF "$session_start" "$log" || fail "session start text never reached the model"
 grep -qF "$milestone" "$log" || fail "milestone text never reached the model"
-grep -q '"venom"' "$log" || fail "the venom skill isn't offered to the model"
+# The skill reaches the model as its description (first 50 characters).
+desc=$(sed -n 's/^description: //p' "$pkg/skills/venom/SKILL.md" | head -n 1 | cut -c1-50)
+if ! grep -qF "$desc" "$log"; then
+  node -e 'for (const l of require("fs").readFileSync(process.argv[1], "utf8").split("\n")) {
+    const i = l.toLowerCase().indexOf("skill"); if (i >= 0) console.log("..." + l.slice(Math.max(0, i - 300), i + 900)); }' "$log" | head -c 6000
+  fail "the venom skill isn't offered to the model"
+fi
 echo "== mcp"
 copilot mcp list 2>&1 | tee "$work/mcp.txt" || true
 grep -qi "venom" "$work/mcp.txt" || fail "copilot mcp list has no venom server"
