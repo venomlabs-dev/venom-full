@@ -101,3 +101,33 @@ test("junk input exits 0 and prints nothing", () =>
     assert.equal(run("post-tool", "not json", tmp), "");
     assert.equal(run("stop", "", tmp), "");
   }));
+
+// One install brings everything (Agent Plugins 1.0, which awesome-copilot
+// requires): the manifest at the root, mcp.json, the skill and the hooks in
+// their fixed places.
+test("the package is Venom Full for Copilot: server, skill and hooks", () => {
+  const manifest = JSON.parse(readFileSync(join(folder, "plugin.json"), "utf8"));
+  assert.equal(manifest.$schema, "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json");
+  assert.equal(manifest.name, "venom-full");
+  for (const field of ["hooks", "mcpServers", "skills", "agents"]) {
+    assert.equal(manifest[field], undefined, `${field} is not an Agent Plugins 1.0 field`);
+  }
+  assert.deepEqual(JSON.parse(readFileSync(join(folder, "mcp.json"), "utf8")), {
+    $schema: "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+    mcpServers: { venom: { type: "streamable-http", url: "https://mcp.venomlabs.dev" } },
+  });
+  const skill = readFileSync(join(folder, "skills/venom/SKILL.md"), "utf8");
+  assert.match(skill, /^---\nname: venom\ndescription: \S/);
+  assert.equal(skill, readFileSync(join(root, "opencode/skills/venom/SKILL.md"), "utf8"));
+  const hooks = JSON.parse(readFileSync(join(folder, "com.github.copilot/hooks/hooks.json"), "utf8"));
+  assert.deepEqual(Object.keys(hooks.hooks).sort(), ["PostToolUse", "SessionStart", "Stop", "SubagentStart"]);
+});
+
+// The old venom-hooks plugin left next to venom-full runs the same wrapper on
+// the same payload: only the first copy answers. A new payload still does.
+test("a second copy of the hooks stays quiet on the same payload", () => withTmp((tmp) => {
+  const start = { hook_event_name: "SessionStart", ...ctx("s-dup"), source: "startup" };
+  assert.notEqual(run("session-start", start, tmp), "");
+  assert.equal(run("session-start", start, tmp), "");
+  assert.notEqual(run("session-start", { ...start, timestamp: "2026-11-18T17:00:00.000Z" }, tmp), "");
+}));
