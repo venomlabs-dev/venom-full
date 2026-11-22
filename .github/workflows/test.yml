@@ -27,3 +27,17 @@ jobs:
           node-version: 22
       - run: npm install -g @github/copilot@1.0.114
       - run: sh copilot/test/live/run.sh
+  copilot-marketplace:
+    # After a merge: the published install, venom-full@venom from the venom
+    # marketplace in venomlabs-dev/plugin, which fetches copilot/ from main.
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install -g @github/copilot@1.0.114
+      - run: sh copilot/test/live/run.sh
+        env:
+          MARKETPLACE: venomlabs-dev/plugin

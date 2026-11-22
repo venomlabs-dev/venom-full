@@ -1,6 +1,6 @@
 #!/bin/sh
 # Live test of Venom Full for Copilot in the real Copilot CLI, against a
-# stand-in model (mock-model.mjs) with COPILOT_OFFLINE=true: no GitHub sign-in,
+# stand-in model (mock-model.mjs), the session with COPILOT_OFFLINE=true: no GitHub sign-in,
 # no network model. It proves one install brings the server, the skill and the
 # hooks, and that the hooks' texts reach the model.
 #
@@ -17,7 +17,7 @@ port=${MOCK_PORT:-18517}
 log="$work/requests.jsonl"
 : > "$log"
 
-export HOME="$work/home" COPILOT_HOME="$work/home/.copilot" COPILOT_OFFLINE=true
+export HOME="$work/home" COPILOT_HOME="$work/home/.copilot"
 mkdir -p "$COPILOT_HOME"
 cat > "$COPILOT_HOME/providers.json" <<EOF
 {
@@ -36,7 +36,13 @@ fail() { echo "FAIL: $*"; echo "--- requests"; cut -c1-2000 "$log" || true;
   echo "--- copilot logs"; tail -n 80 "$COPILOT_HOME"/logs/* 2>/dev/null || true; exit 1; }
 
 echo "== install"
-copilot plugin install "$pkg"
+if [ -n "${MARKETPLACE:-}" ]; then
+  # The published route: the venom marketplace lists this folder as venom-full.
+  copilot plugin marketplace add "$MARKETPLACE"
+  copilot plugin install venom-full@venom
+else
+  copilot plugin install "$pkg"
+fi
 copilot plugin list | tee "$work/plugins.txt"
 grep -q "venom-full" "$work/plugins.txt" || fail "plugin list has no venom-full"
 installed=$(find "$COPILOT_HOME" -path '*installed-plugins*' -name plugin.json -exec grep -l '"venom-full"' {} + | head -n 1)
@@ -50,7 +56,7 @@ echo "== session"
 repo="$work/repo"
 mkdir -p "$repo" && cd "$repo"
 git init -q && git config user.email ci@example.com && git config user.name ci
-copilot -p "Commit the work." --model mock/mock-model --allow-all-tools > "$work/session.txt" 2>&1 || true
+COPILOT_OFFLINE=true copilot -p "Commit the work." --model mock/mock-model --allow-all-tools > "$work/session.txt" 2>&1 || true
 cat "$work/session.txt"
 
 session_start=$(node -e 'console.log(JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")).session_start)' "$root/shared/guidance.json")
@@ -67,6 +73,6 @@ if ! grep -qF "$desc" "$log"; then
   fail "the venom skill isn't offered to the model"
 fi
 echo "== mcp"
-copilot mcp list 2>&1 | tee "$work/mcp.txt" || true
+COPILOT_OFFLINE=true copilot mcp list 2>&1 | tee "$work/mcp.txt" || true
 grep -qi "venom" "$work/mcp.txt" || fail "copilot mcp list has no venom server"
 echo "PASS: one install brings the server, the skill and the hooks, and the hooks reach the model"

@@ -18,10 +18,12 @@ This folder is an [Agent Plugins](https://agent-plugins.org) 1.0 package named
 ## Install
 
 ```bash
-copilot plugin install venomlabs-dev/venom-full:copilot
+copilot plugin marketplace add venomlabs-dev/plugin
+copilot plugin install venom-full@venom
 ```
 
-Run `/mcp` in Copilot to sign in to `venom`. Then sign the hooks in once per
+The `venom` marketplace (in [venomlabs-dev/plugin](https://github.com/venomlabs-dev/plugin))
+lists this folder as `venom-full` for Copilot. Run `/mcp` in Copilot to sign in to `venom`. Then sign the hooks in once per
 machine, so each session starts with your projects and mentions:
 
 ```bash
@@ -29,7 +31,8 @@ git clone --depth 1 https://github.com/venomlabs-dev/venom-full ~/.venom-full
 sh ~/.venom-full/shared/venom-hook.sh login
 ```
 
-From a local clone: `copilot plugin install ~/.venom-full/copilot`. VS Code
+From a local clone: `copilot plugin install ~/.venom-full/copilot` (Copilot
+marks direct installs from a path or repository as deprecated). VS Code
 picks up plugins installed by the CLI from `~/.copilot/installed-plugins/` and
 lists them under Plugins in the Agent Customizations editor; without the CLI,
 run **Chat: Install Plugin from Source** with a local clone's `copilot`
@@ -43,7 +46,8 @@ to `venom@venom`. Remove the old one so the hooks don't run twice:
 
 ```bash
 copilot plugin uninstall venom-hooks
-copilot plugin install venomlabs-dev/venom-full:copilot
+copilot plugin marketplace update venom
+copilot plugin install venom-full@venom
 ```
 
 `venom@venom` can stay: it declares the same `venom` server and skill, so
@@ -78,15 +82,14 @@ wrapper stays silent there, as subagents report to their parent.
 
 ## Verified
 
-Copilot CLI 1.0.114 (npm `@github/copilot`), isolated HOME, no sign-in. The CLI
-ran against a local OpenAI-compatible mock (`COPILOT_PROVIDER_BASE_URL`,
-`COPILOT_OFFLINE=true`) that scripted tool calls:
-`copilot plugin install <local>/copilot` installs and `plugin list` shows
-`venom-hooks (v0.10.0)`; the session start text reached the model as a user
-message; a `git commit` and a `gh pr merge` result carried the milestone
-text; a merge with no log was followed by the stop reason as a new user turn,
-then silence; a fake `venom-append_task_log` MCP call cleared it; an `explore`
-subagent received the subagent text. Not run: VS Code (needs the app and a
-Copilot sign-in) and installs from GitHub or a marketplace (the CLI binary
-could not be cleared as keychain-free, so it was not run again after those
-steps). `node --test 'copilot/test/*.test.mjs'` runs the wrapper tests.
+CI runs [test/live/run.sh](test/live/run.sh) on Linux with Copilot CLI 1.0.114
+(npm `@github/copilot`) against a stand-in model (`providers.json` with an
+OpenAI-compatible mock, `COPILOT_OFFLINE=true`, no GitHub sign-in). It checks
+that one install of this folder brings the skill ("Installed 1 skill"), the
+`venom` server under `copilot mcp list` → Plugin servers, and the hooks; that
+the session-start text and the skill's description reach the model; and that
+after a real `git commit` tool call the milestone text comes back with the
+tool result. On pushes to main it also installs `venom-full@venom` from the
+published marketplace. First passing run: 22 Nov 2026. Not run: VS Code (needs
+the app and a Copilot sign-in). `node --test 'copilot/test/*.test.mjs'` runs
+the wrapper and package tests.
