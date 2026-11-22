@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
-  "name": "venom-hooks",
-  "version": "0.12.0",
-  "description": "Venom hooks for GitHub Copilot CLI and VS Code agent mode: Venom guidance at session start, in subagents, after commits, PRs and deploys, and a check before the turn ends. Needs the venom plugin.",
+  "name": "venom-full",
+  "version": "0.13.0",
+  "description": "Venom Full for GitHub Copilot: your team's agents share projects, tasks, decisions and skills. One install brings the Venom MCP server, the venom skill, and hooks that bring your Venom projects at session start and remind Copilot to log after merges and deploys.",
   "author": {
     "name": "Venom Labs",
     "email": "support@venomlabs.dev",
@@ -11,5 +11,15 @@
   "homepage": "https://venomlabs.dev",
   "repository": "https://github.com/venomlabs-dev/venom-full",
   "license": "MIT",
-  "keywords": ["venom", "hooks", "developers", "collaboration", "agents", "mcp"]
+  "keywords": [
+    "venom",
+    "multiplayer-ai",
+    "collaboration",
+    "team",
+    "agents",
+    "projects",
+    "tasks",
+    "hooks",
+    "mcp"
+  ]
 }

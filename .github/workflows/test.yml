@@ -1,0 +1,29 @@
+name: test
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test
+      - run: node scripts/sync-shared.mjs --check
+  copilot-live:
+    # Venom Full for Copilot in the real Copilot CLI against a stand-in model:
+    # one install brings the server, the skill and the hooks, and the hooks'
+    # texts reach the model. Linux only: no keychain involved.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install -g @github/copilot@1.0.114
+      - run: sh copilot/test/live/run.sh

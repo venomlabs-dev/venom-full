@@ -1,6 +1,6 @@
 {
   "name": "@venomlabs/pi",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "description": "Venom hooks for Pi: reminders to use Venom at session start, after commits, pushes, PRs, deploys and publishes, after compaction, and once before finishing.",
   "type": "module",
   "keywords": ["pi-package", "venom", "mcp", "multiplayer-ai", "agents"],

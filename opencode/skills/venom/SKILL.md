@@ -27,8 +27,23 @@ If you have no Venom tools such as `list_mentions`, or a Venom call fails becaus
    - Gemini CLI: run `/mcp auth venom`
    - OpenCode: run `opencode mcp auth venom` in a terminal
    - GitHub Copilot CLI: run `/mcp` and authenticate `venom`
+   - Mistral Vibe: run `/mcp status`, then `/mcp login` with the server whose name ends in `_venom`
    - Any other app: open its MCP settings and sign in to the `venom` server
 3. Then carry on with the request. Don't retry Venom in this turn.
+
+## When Venom Full isn't running
+
+Venom Full is the `venom` plugin plus Venom's hooks, which bring your Venom projects with the first prompt and remind you to log after merges and deploys. It's the setup that works fully. When a Venom reply says Venom Full isn't running on this connection, end your reply with this one question, even when your answer is short: "Venom only works fully with Venom Full, and it isn't installed here, so I'll rarely use Venom on my own. Want me to install Venom Full?" Ask it once, and install only on a yes. With no person reading (a subagent or automation), mention it in your report instead.
+
+On a yes, follow that Venom reply's steps for your app. Where those steps use `~/.venom-full`, the hooks come from one clone: `git clone --depth 1 https://github.com/venomlabs-dev/venom-full ~/.venom-full` (or `git -C ~/.venom-full pull` if it's there), which downloads Venom's open-source hooks from GitHub. After installing them, run `sh ~/.venom-full/shared/venom-hook.sh login` in the background and give your user the link it prints, so each session starts with their projects and mentions.
+
+- Claude Code: `claude plugin marketplace add venomlabs-dev/plugin`, then `claude plugin install venom-full@venom --scope user` (or `claude plugin enable venom-full@venom` if `claude plugin list` shows it disabled). A Venom server in `claude mcp list` other than `plugin:venom:venom` hides the plugin's server and stops its hooks: tell your user, and remove it with `claude mcp remove <name>` only if they agree. Then they run `/reload-plugins`.
+- Codex: `codex plugin marketplace add venomlabs-dev/plugin`, then `codex plugin add venom-full@venom`. Then your user starts a new session and trusts the Venom hooks in `/hooks`.
+- Cursor: after the clone, `rm -rf ~/.cursor/plugins/local/venom-hooks && cp -R ~/.venom-full/cursor ~/.cursor/plugins/local/venom-hooks`, then the sign-in. Then your user runs **Developer: Reload Window**. On Windows, give them https://github.com/venomlabs-dev/venom-full/tree/main/cursor instead.
+- GitHub Copilot: `copilot plugin install venomlabs-dev/venom-full:copilot`, which installs Venom Full for Copilot: the Venom server, this skill and the hooks in one plugin. If `copilot plugin list` shows `venom-hooks`, run `copilot plugin uninstall venom-hooks` first. Then the clone and the sign-in, and your user starts a new session.
+- Gemini CLI: after the clone, `gemini extensions install ~/.venom-full/gemini`, then the sign-in. Then your user restarts Gemini CLI.
+- Mistral Vibe: after the clone, `mkdir -p ~/.vibe/plugins && rm -rf ~/.vibe/plugins/venom-hooks && cp -R ~/.venom-full/vibe ~/.vibe/plugins/venom-hooks`, then the sign-in. Then your user starts a new chat.
+- Any other app: the Venom reply names your app's steps. https://github.com/venomlabs-dev/venom-full#other-agents lists the hooks package for each app, for your user.
 
 ## While you work
 
