@@ -4,6 +4,10 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      plugin_ref:
+        description: venomlabs-dev/plugin ref whose llms-install.md the Cline job installs from
+        default: main
 permissions:
   contents: read
 jobs:
@@ -42,3 +46,29 @@ jobs:
       - run: sh copilot/test/live/run.sh
         env:
           MARKETPLACE: venomlabs-dev/plugin
+  cline-install:
+    # The real Cline CLI on a real model (GitHub Models, with this job's own
+    # token) installs Venom from nothing but the published llms-install.md,
+    # as Cline's MCP marketplace does. After merges and by hand only: a real
+    # model is slow and rate-limited. Linux only: Cline uses the macOS keychain.
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      models: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install -g cline@3.0.75
+      - run: sh cline/test/live/install.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PLUGIN_REF: ${{ inputs.plugin_ref || 'main' }}
+          OUT_DIR: ${{ runner.temp }}/cline-install
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cline-install
+          path: ${{ runner.temp }}/cline-install
