@@ -1,8 +1,8 @@
 # Venom Hooks for Devin CLI and Devin Desktop
 
 Adds Venom reminders to the context of Devin CLI and of Devin Desktop's agent
-(Devin Local, which replaced Windsurf's Cascade and shares Devin CLI's hooks and
-plugins) at the right moments, so the
+(Devin Local, which replaced Windsurf's Cascade and, per Devin's docs, shares
+Devin CLI's hooks and plugins; not tried) at the right moments, so the
 agent keeps using Venom without being told: at the start of a session, after a
 shell command that commits, pushes, opens or merges a pull request, releases,
 deploys or publishes, and once at the end of a turn if an outcome-type step
@@ -17,8 +17,27 @@ Level: Plugin + some hooks. Hooks use the shared core
 
 ## Install
 
-Route 1, a hooks file (verified with `devin migrate hooks`, no Devin login
-needed). Clone once, then add the hooks to a project or to your user config:
+The simplest route is the [`venom`](https://github.com/venomlabs-dev/plugin)
+plugin, which installs these hooks with it as a required plugin, along with the
+Venom server, the skill and an always-on rule:
+
+```bash
+devin plugins install venomlabs-dev/plugin
+```
+
+Installing plugins needs `devin auth login`. Update with `devin plugins update`.
+To sign the hooks in, so each session starts with your projects and mentions:
+
+```bash
+git clone --depth 1 https://github.com/venomlabs-dev/venom-full ~/.venom-full
+sh ~/.venom-full/shared/venom-hook.sh login
+```
+
+Hooks only, as a plugin: `devin plugins install venomlabs-dev/venom-full#devin`.
+
+Without plugins, a hooks file (checked with `devin migrate hooks`, no Devin
+login needed). Clone once, then add the hooks to a project or to your user
+config:
 
 ```bash
 git clone --depth 1 https://github.com/venomlabs-dev/venom-full ~/.venom-full
@@ -33,14 +52,6 @@ If you already have hooks there, add the three entries to your existing events.
 Run `/hooks` in Devin to see what is loaded. Update with
 `git -C ~/.venom-full pull`. Each command checks that the script exists and
 exits quietly (status 0) if not.
-
-Route 2, as a Devin plugin (**unverified**: `devin plugins` needs `devin auth
-login`, so the install, the plugin's `hooks.json` and the plugin-root variable
-were never tried):
-
-```bash
-devin plugins install venomlabs-dev/venom-full#devin   # untested
-```
 
 ## What each Devin event adds
 
@@ -60,26 +71,28 @@ devin plugins install venomlabs-dev/venom-full#devin   # untested
   reaches the model, so it isn't wired. If Devin adds one, map it to the core's
   `compacted` event.
 - **`UserPromptSubmit`**: can inject context, but the core has nothing for it.
-- Your projects and unread mentions at session start come with the sign-in (`sh hooks/venom-hook.sh login` in this folder's installed copy; see [Sign in](../README.md#sign-in-for-your-projects-and-mentions)). Built and unit-tested; not yet seen in a live session of this agent.
-- Plugin hooks (route 2) are unverified, best effort and fail open in Devin, and `Stop` is a block
+- Your projects and unread mentions at session start come with the sign-in (see [Sign in](../README.md#sign-in-for-your-projects-and-mentions)). Seen in a live Devin CLI session.
+- Each hook command exits quietly if its script is missing, and `Stop` is a block
   decision, so a rare extra turn is possible (the core asks at most once per
   15 minutes).
 
 ## Verification
 
-Devin CLI 3000.14.30821 (macOS, isolated home, not signed in):
+Live, 23 November 2026, Devin CLI 3000.14.30821 on macOS, signed in to Devin
+and Venom, installed with `devin plugins install venomlabs-dev/plugin -y`:
 
-- `node --test devin/test/devin.test.mjs` runs the wrapper with payloads in the
-  shape of the Devin docs (session start, milestone, non-milestone, stop once,
-  Venom log clearing stop): 11 tests pass. `node scripts/sync-shared.mjs --check` passes.
-- `devin migrate hooks` confirmed the `.devin/hooks.v1.json` shape (events at the
-  top level, no wrapper key) and that the shell tool is named `exec`.
-- Not verified: `devin plugins install` and `devin plugins info` refuse to run
-  without a login ("You must be logged in to manage plugins"), so the plugin
-  install, the `hooks.json` wrapper shape and the plugin-root variable were
-  not tried (nor that the manifest's `"hooks": "./hooks.json"` is read). `hooks.json` uses the Claude-compatible `"hooks"` wrapper and
-  `${DEVIN_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}}`: the binary
-  references `PLUGIN_ROOT` and `CLAUDE_PLUGIN_ROOT` names for hooks, but not
-  which one is set. Headless `devin -p` also needs a login, so no hook was
-  seen reaching the model. Sign in once and run `devin plugins info venom-hooks`
-  and `/hooks` to confirm.
+- Devin installed `venom-hooks` as the `venom` plugin's required plugin.
+  `devin plugins info venom-hooks` lists the three hooks, with the
+  `${DEVIN_PLUGIN_ROOT:-${CLAUDE_PLUGIN_ROOT:-$PLUGIN_ROOT}}` commands, so the
+  `hooks.json` wrapper shape is read.
+- In a headless `devin -p` session in a scratch repository, the session-start
+  note reached the model with the signed-in projects, unread mentions and the
+  session tag, and a real `git commit` brought back the milestone note.
+- Not seen live: the end-of-turn `Stop` question (no merge or deploy in the
+  test), and Devin Desktop.
+
+Unit tests: `node --test devin/test/devin.test.mjs` runs the wrapper with
+payloads in the shape of the Devin docs (session start, milestone,
+non-milestone, stop once, Venom log clearing stop). `devin migrate hooks`
+confirmed the `.devin/hooks.v1.json` shape (events at the top level, no
+wrapper key) and that the shell tool is named `exec`.

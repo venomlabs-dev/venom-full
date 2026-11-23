@@ -98,7 +98,7 @@ it was checked.
 | Grok Build | [grok](grok) | `grok plugin install <clone>/grok --trust` (`venomlabs-dev/venom-full#grok` is untested) |
 | Qwen Code | [qwen](qwen) | `qwen extensions install <clone>/qwen` |
 | Factory Droid | [droid](droid) | `droid plugin marketplace add venomlabs-dev/venom-full`, then `droid plugin install venom-hooks@venom-full` |
-| Devin CLI and Devin Desktop | [devin](devin) | Hooks file: `cp <clone>/devin/hooks.v1.json .devin/hooks.v1.json` (checked with `devin migrate hooks`). The plugin route (`devin plugins install venomlabs-dev/venom-full#devin`) is unverified |
+| Devin CLI and Devin Desktop | [devin](devin) | Installed with the [`venom`](https://github.com/venomlabs-dev/plugin) plugin: `devin plugins install venomlabs-dev/plugin`. Live in Devin CLI 3000.14, signed in: session start with projects and mentions, commit milestone. Without plugins: `cp <clone>/devin/hooks.v1.json .devin/hooks.v1.json` |
 | JetBrains Junie | [junie](junie) | `/extensions marketplace add <clone>/junie`, then `/extensions install venom-hooks` (Junie itself was not run) |
 | Kiro | [kiro](kiro) | Copy the hook files from `<clone>/kiro/hooks/` into `~/.kiro/hooks/` (see the folder README) |
 | Augment (Auggie) | [auggie](auggie) | `auggie --plugin-dir <clone>/auggie` for the hooks, and `auggie install <clone>/auggie` for the session-start, subagent and compaction notes (the extension). `auggie plugin marketplace add venomlabs-dev/venom-full`, then enable `venom-hooks`, is untested on GitHub |
