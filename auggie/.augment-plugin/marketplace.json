@@ -1,14 +1,14 @@
 {
   "name": "venom-full",
-  "description": "Venom hooks for Auggie.",
+  "description": "Venom Full for Auggie.",
   "owner": {
     "name": "Venom Labs",
     "url": "https://venomlabs.dev"
   },
   "plugins": [
     {
-      "name": "venom-hooks",
-      "description": "Reminds Auggie to log commits, pushes, PRs, merges, releases, deploys and publishes in Venom.",
+      "name": "venom-full",
+      "description": "The Venom server, the venom skill, an always-on rule and Venom's hooks for Auggie, in one plugin.",
       "source": "./",
       "category": "productivity"
     }

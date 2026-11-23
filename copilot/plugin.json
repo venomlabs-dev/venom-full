@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "venom-full",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "description": "Venom Full for GitHub Copilot: your team's agents share projects, tasks, decisions and skills. One install brings the Venom MCP server, the venom skill, and hooks that bring your Venom projects at session start and remind Copilot to log after merges and deploys.",
   "author": {
     "name": "Venom Labs",

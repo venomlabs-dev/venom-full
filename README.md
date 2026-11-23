@@ -83,10 +83,10 @@ connection in Venom.
   agent hears how to sign in at most once a day.
 
 Install the `venom` plugin (server and skill) first, then the package for your
-agent (except Kimi and OpenClaw, whose one plugin has both). The shell-hook
-packages are named `venom-hooks`, so they don't clash with `venom-full`, the
-Claude Code plugin at this repository's root; the code plugins for Pi, Hermes
-and Cline's CLI keep their own names. Each folder's README has the details, what reaches the model, and how
+agent (except Kimi, OpenClaw, Copilot and Auggie, whose one plugin has both).
+Most shell-hook packages are named `venom-hooks`; Copilot's and Auggie's are
+`venom-full`, since they are the whole of Venom there; the code plugins for
+Pi, Hermes and Cline's CLI keep their own names. Each folder's README has the details, what reaches the model, and how
 it was checked.
 
 | Agent | Folder | Install |
@@ -101,7 +101,7 @@ it was checked.
 | Devin CLI and Devin Desktop | [devin](devin) | Installed with the [`venom`](https://github.com/venomlabs-dev/plugin) plugin: `devin plugins install venomlabs-dev/plugin`. Live in Devin CLI 3000.14, signed in: session start with projects and mentions, commit milestone. Without plugins: `cp <clone>/devin/hooks.v1.json .devin/hooks.v1.json` |
 | JetBrains Junie | [junie](junie) | `/extensions marketplace add <clone>/junie`, then `/extensions install venom-hooks` (Junie itself was not run) |
 | Kiro | [kiro](kiro) | Copy the hook files from `<clone>/kiro/hooks/` into `~/.kiro/hooks/` (see the folder README) |
-| Augment (Auggie) | [auggie](auggie) | `auggie --plugin-dir <clone>/auggie` for the hooks, and `auggie install <clone>/auggie` for the session-start, subagent and compaction notes (the extension). `auggie plugin marketplace add venomlabs-dev/venom-full`, then enable `venom-hooks`, is untested on GitHub |
+| Augment (Auggie) | [auggie](auggie) | Venom Full in one plugin: `auggie plugin marketplace add venomlabs-dev/venom-full`, then enable `venom-full` in `/plugins` (server, skill, rule and hooks). `auggie install <clone>/auggie` adds the session-start, subagent and compaction notes (the extension). Loads in Auggie 1.2.2; not run with a model |
 | Mistral Vibe | [vibe](vibe) | Copy the folder to `~/.vibe/plugins/venom-hooks`, then sign in with `/mcp login` as its README says |
 | Kimi Code | [kimi](kimi) | `/plugins install <clone>/kimi`. This one plugin replaces the `venom` plugin in Kimi (server, skill and hooks): don't install both |
 | Muse Code | [muse](muse) | `muse plugins install <clone>/muse`, then `muse plugins approve venom-hooks` (not verified in Muse) |

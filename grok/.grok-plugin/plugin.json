@@ -1,6 +1,6 @@
 {
   "name": "venom-hooks",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "description": "Venom reminders for Grok Build: session start, subagents, a check after commits, PRs, releases and deploys, and one more ask at the end of a turn. Needs the venom plugin.",
   "author": {
     "name": "Venom Labs",
