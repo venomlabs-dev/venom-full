@@ -1,0 +1,26 @@
+{
+  "session_start": [
+    {
+      "matcher": "*",
+      "hooks": [
+        { "command": "sh \"$PLUGIN_ROOT/hooks/venom-openhands.sh\" session-start", "timeout": 10 }
+      ]
+    }
+  ],
+  "post_tool_use": [
+    {
+      "matcher": "*",
+      "hooks": [
+        { "command": "sh \"$PLUGIN_ROOT/hooks/venom-openhands.sh\" post-tool", "timeout": 10 }
+      ]
+    }
+  ],
+  "stop": [
+    {
+      "matcher": "*",
+      "hooks": [
+        { "command": "sh \"$PLUGIN_ROOT/hooks/venom-openhands.sh\" stop", "timeout": 10 }
+      ]
+    }
+  ]
+}

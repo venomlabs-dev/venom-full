@@ -29,7 +29,7 @@ cat > "$COPILOT_HOME/providers.json" <<EOF
 }
 EOF
 
-node "$here/mock-model.mjs" "$port" "$log" &
+node "$root/test/live/mock-model.mjs" "$port" "$log" &
 mock=$!
 i=0
 until node -e 'fetch(process.argv[1]).then(() => process.exit(0), () => process.exit(1))' "http://127.0.0.1:$port/v1/models"; do
