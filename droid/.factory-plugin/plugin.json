@@ -1,7 +1,7 @@
 {
   "name": "venom-hooks",
   "description": "Venom reminders for Factory Droid: where to look at session start, what to keep after compaction, and when to log a milestone. Use with the venom plugin.",
-  "version": "0.14.0",
+  "version": "0.15.0",
   "author": { "name": "Venom Labs", "url": "https://venomlabs.dev" },
   "homepage": "https://venomlabs.dev",
   "repository": "https://github.com/venomlabs-dev/venom-full",

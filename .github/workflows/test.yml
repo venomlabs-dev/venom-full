@@ -42,3 +42,61 @@ jobs:
       - run: sh copilot/test/live/run.sh
         env:
           MARKETPLACE: venomlabs-dev/plugin
+  goose-live:
+    # Venom in the real Goose CLI against a stand-in model and a stand-in for
+    # Venom's sign-in: `goose plugin install` of the published plugin brings
+    # the skill to the model, and the extension the plugin README's Goose link
+    # adds asks for Venom's OAuth sign-in. Goose has no Venom Full hooks
+    # package: its hooks can't add text the model sees.
+    runs-on: ubuntu-latest
+    env:
+      GOOSE_VERSION: v1.60.2
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install Goose
+        run: |
+          mkdir -p "$RUNNER_TEMP/goose"
+          curl -fsSL "https://github.com/block/goose/releases/download/$GOOSE_VERSION/goose-x86_64-unknown-linux-gnu.tar.bz2" | tar -xj -C "$RUNNER_TEMP/goose"
+          dirname "$(find "$RUNNER_TEMP/goose" -type f -name goose | head -n 1)" >> "$GITHUB_PATH"
+      - run: sh test/live/goose.sh
+  openhands-live:
+    # Venom Full for OpenHands in the real OpenHands Software Agent SDK (what
+    # Agent Canvas and OpenHands Cloud run) against a stand-in model: as a
+    # local plugin folder and installed with install_plugin, the skill, the
+    # session-start text and the stop question reach the model. The agent
+    # server's MCP settings route adds the Venom server with OAuth and asks
+    # for sign-in (stand-in server).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install openhands-sdk==1.63.1 openhands-tools==1.63.1 openhands-agent-server==1.63.1
+      - run: sh openhands/test/live/run.sh
+      - run: sh openhands/test/live/run.sh
+        env:
+          ROUTE: installed
+  openhands-github:
+    # After a merge: the published install, install_plugin from
+    # github:venomlabs-dev/venom-full with repo_path openhands.
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install openhands-sdk==1.63.1 openhands-tools==1.63.1
+      - run: sh openhands/test/live/run.sh
+        env:
+          ROUTE: github

@@ -1,16 +1,21 @@
 #!/usr/bin/env node
-// A stand-in OpenAI-compatible model for the Copilot live test (run.sh).
+// A stand-in OpenAI-compatible model for the live tests (Copilot, Goose,
+// OpenHands).
 //
 //   node mock-model.mjs <port> <requests.jsonl>
 //
 // It records every request, then answers the first turn with one shell tool
-// call (an empty git commit, a Venom milestone) and every later turn with
-// "Done.". Streaming and plain responses both work.
+// call (by default an empty git commit, a Venom milestone) and every later
+// turn with "Done.". MOCK_COMMAND sets the command; MOCK_COMMAND=none never
+// calls a tool. Streaming and plain responses both work.
 import { appendFileSync } from "node:fs";
 import { createServer } from "node:http";
 
 const [port, log] = process.argv.slice(2);
-const COMMAND = 'git commit --allow-empty -m "venom smoke"';
+const COMMAND = process.env.MOCK_COMMAND || 'git commit --allow-empty -m "venom smoke"';
+// The shell tool's name in each host: Copilot bash/shell/powershell,
+// OpenHands terminal, Goose developer__shell or shell.
+const SHELL = /^(bash|shell|powershell|terminal|execute_bash)$|__shell$/i;
 
 // Arguments for the shell tool, from its JSON schema: the command, and a plain
 // value for anything else it requires.
@@ -27,9 +32,9 @@ function shellArgs(tool) {
 
 function reply(body) {
   const messages = body.messages ?? [];
-  const shell = (body.tools ?? []).find((t) => /^(bash|shell|powershell)$/i.test(t.function?.name ?? ""));
+  const shell = (body.tools ?? []).find((t) => SHELL.test(t.function?.name ?? ""));
   const toolTurn = messages.some((m) => m.role === "tool");
-  if (shell && !toolTurn) {
+  if (shell && !toolTurn && COMMAND !== "none") {
     return {
       tool_calls: [
         { index: 0, id: "call_venom_1", type: "function",
