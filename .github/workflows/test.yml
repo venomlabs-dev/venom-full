@@ -8,6 +8,9 @@ on:
       plugin_ref:
         description: venomlabs-dev/plugin ref whose llms-install.md the Cline job installs from
         default: main
+      cline_model:
+        description: Ollama model for the Cline job
+        default: qwen2.5-coder:7b
 permissions:
   contents: read
 jobs:
@@ -47,28 +50,37 @@ jobs:
         env:
           MARKETPLACE: venomlabs-dev/plugin
   cline-install:
-    # The real Cline CLI on a real model (GitHub Models, with this job's own
-    # token) installs Venom from nothing but the published llms-install.md,
-    # as Cline's MCP marketplace does. After merges and by hand only: a real
-    # model is slow and rate-limited. Linux only: Cline uses the macOS keychain.
+    # The real Cline CLI on a real (open) model installs Venom from nothing
+    # but the published llms-install.md, as Cline's MCP marketplace does.
+    # Ollama serves the model on the runner: no key, nothing paid. After merges
+    # and by hand only: CPU inference is slow. Linux only: Cline uses the macOS
+    # keychain.
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      models: read
+    timeout-minutes: 90
+    env:
+      MODEL: ${{ inputs.cline_model || 'qwen2.5-coder:7b' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
       - run: npm install -g cline@3.0.75
+      - name: Ollama with a long context
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          sudo systemctl stop ollama || true
+          OLLAMA_CONTEXT_LENGTH=32768 nohup ollama serve > "$RUNNER_TEMP/ollama.log" 2>&1 &
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:11434/api/version && break; sleep 1; done
+          ollama pull "$MODEL"
       - run: sh cline/test/live/install.sh
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PLUGIN_REF: ${{ inputs.plugin_ref || 'main' }}
           OUT_DIR: ${{ runner.temp }}/cline-install
       - if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cline-install
-          path: ${{ runner.temp }}/cline-install
+          path: |
+            ${{ runner.temp }}/cline-install
+            ${{ runner.temp }}/ollama.log

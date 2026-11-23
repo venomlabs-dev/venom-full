@@ -2,17 +2,18 @@
 # Live check that the real Cline CLI, on a real model, installs Venom from
 # nothing but the published llms-install.md: the way Cline's MCP marketplace
 # one-click install works (the task names the repository and carries its
-# install file). The model is GitHub Models, reached with the job's own
-# GITHUB_TOKEN, so no key is stored anywhere. Linux CI only: the Cline CLI uses
-# the macOS keychain.
+# install file). The model is an open model served by Ollama on the runner
+# (no key, nothing paid): GitHub Models' free tier caps requests at 8k input
+# tokens, below Cline's system prompt. Linux CI only: the Cline CLI uses the
+# macOS keychain.
 #
-#   GITHUB_TOKEN=... sh cline/test/live/install.sh
+#   sh cline/test/live/install.sh       (needs ollama serving on :11434)
 #   PLUGIN_REF=<branch>   test an unmerged llms-install.md (default main)
-#   MODEL=<id>            a GitHub Models id (default openai/gpt-4.1)
+#   MODEL=<ollama model>  default qwen2.5-coder:7b
 set -eu
-model=${MODEL:-openai/gpt-4.1}
+model=${MODEL:-qwen2.5-coder:7b}
 ref=${PLUGIN_REF:-main}
-base=https://models.github.ai/inference
+base=http://127.0.0.1:11434/v1
 work=$(mktemp -d)
 out=${OUT_DIR:-$work}
 export HOME="$work/home"
@@ -21,16 +22,15 @@ mkdir -p "$HOME" "$out"
 fail() { echo "FAIL: $*"; exit 1; }
 
 echo "== the model answers"
-curl -fsS "$base/chat/completions" -H "Authorization: Bearer $GITHUB_TOKEN" \
-  -H "Content-Type: application/json" \
+curl -fsS "$base/chat/completions" -H "Content-Type: application/json" \
   -d "{\"model\":\"$model\",\"messages\":[{\"role\":\"user\",\"content\":\"Say OK.\"}],\"max_tokens\":5}" \
-  > "$out/probe.json" || fail "GitHub Models didn't answer (models: read permission, or the model id)"
+  > "$out/probe.json" || fail "the local model didn't answer"
 cat "$out/probe.json"; echo
 
 echo "== Cline uses it"
 # Cline's OpenAI-compatible provider: its id differs between Cline surfaces.
-cline auth --provider openai --apikey "$GITHUB_TOKEN" --modelid "$model" --baseurl "$base" ||
-  cline auth --provider openai-compatible --apikey "$GITHUB_TOKEN" --modelid "$model" --baseurl "$base" ||
+cline auth --provider openai --apikey ollama --modelid "$model" --baseurl "$base" ||
+  cline auth --provider openai-compatible --apikey ollama --modelid "$model" --baseurl "$base" ||
   { cline auth --help; fail "cline auth didn't take an OpenAI-compatible provider"; }
 
 project="$work/project"
