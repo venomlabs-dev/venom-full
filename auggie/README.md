@@ -81,6 +81,9 @@ only runs Augment's own models, so no model turn was run:
   `skill:venom` from `auggie/skills/venom`, `/mcp` listed
   `venom-full@venom-full/venom (auth required)`, and `--check-startup`
   reported no problems.
+- From GitHub after the 0.14.0 release, in a fresh home: `auggie plugin
+  marketplace add venomlabs-dev/venom-full`, then `venom-full` enabled, gave the
+  same skill and server.
 - With the extension also installed (`auggie install <this folder>`), the
   skill was still listed once and the startup check was clean.
 - `auggie mcp list` lists only servers added by hand, and `auggie mcp remove
