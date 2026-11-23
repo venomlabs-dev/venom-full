@@ -96,3 +96,13 @@ payloads in the shape of the Devin docs (session start, milestone,
 non-milestone, stop once, Venom log clearing stop). `devin migrate hooks`
 confirmed the `.devin/hooks.v1.json` shape (events at the top level, no
 wrapper key) and that the shell tool is named `exec`.
+
+## Maintainers: the pin
+
+The [`venom`](https://github.com/venomlabs-dev/plugin) plugin pins this folder
+to an exact venom-full commit (`requiredPlugins[0].sha` in its
+`.devin-plugin/plugin.json`), because Devin's marketplace endorses one exact
+commit. After a change here lands on main: set that sha to the new main
+commit, release the plugin, and bump the plugin's sha in
+[CognitionAI/devin-marketplace](https://github.com/CognitionAI/devin-marketplace).
+Until then, Devin users keep the old hooks.
