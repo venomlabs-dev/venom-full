@@ -45,13 +45,19 @@ instead (below).
      `[{"source":"github:venomlabs-dev/venom-full","ref":"main","repo_path":"openhands"}]`
      as its base64 `plugins` value.
 3. Optional, for your projects and mentions at session start: sign the hooks
-   in once per machine, `sh ~/.venom-full/shared/venom-hook.sh login`
+   in once per machine with the plugin's own script, `sh <plugin
+   folder>/hooks/venom-hook.sh login` (for the copy above,
+   `sh ~/.openhands/plugins/venom-full/hooks/venom-hook.sh login`; from a
+   clone, `sh ~/.venom-full/shared/venom-hook.sh login`). Signed out, the
+   first conversation each day says how
    ([details](../README.md#sign-in-for-your-projects-and-mentions)).
 
 Don't add the [`venom` plugin](https://github.com/venomlabs-dev/plugin)'s
 Agent Plugins package in OpenHands: its server has no sign-in there.
 
-Hooks need `sh`: macOS, Linux and WSL.
+Hooks need `sh`: macOS, Linux and WSL. Tested with the OpenHands SDK 1.63.1;
+the hooks need `PLUGIN_ROOT` set for plugin hooks, which older versions may
+not do.
 
 ## What each event adds
 
@@ -71,8 +77,9 @@ Hooks need `sh`: macOS, Linux and WSL.
   With Goose's `venom` plugin installed on the same machine, OpenHands loads
   that too, and per OpenHands' source its `venom` server (no sign-in) replaces
   the one you added in step 1. Not run.
-- Signed-in session starts need the sign-in file where the hooks run: on
-  OpenHands Cloud the sandbox has none, so the hooks use their fixed texts.
+- Signed-in session starts need the sign-in file where the hooks run. An
+  OpenHands Cloud sandbox has none and starts fresh, so each Cloud
+  conversation gets the fixed texts plus the note on how to sign in.
 
 ## Verified
 

@@ -84,9 +84,9 @@ jobs:
         env:
           ROUTE: installed
   openhands-github:
-    # After a merge: the published install, install_plugin from
+    # On main only: the published install, install_plugin from
     # github:venomlabs-dev/venom-full with repo_path openhands.
-    if: github.event_name != 'pull_request'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

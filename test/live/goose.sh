@@ -92,6 +92,8 @@ entry=$(node -e '
   const key = name.toLowerCase().replace(/\s/g, "").replace(/[^a-z0-9_-]/g, "_");
   console.log([key, name, p.get("description") || ""].join("\t"));' "$link") || fail "the link doesn't add https://mcp.venomlabs.dev"
 key=$(printf '%s' "$entry" | cut -f1)
+! grep -q '^extensions:' "$XDG_CONFIG_HOME/goose/config.yaml" 2>/dev/null ||
+  fail "config.yaml already has extensions: the test would write a second block"
 name=$(printf '%s' "$entry" | cut -f2)
 description=$(printf '%s' "$entry" | cut -f3 | sed "s/'/''/g")
 cat >> "$XDG_CONFIG_HOME/goose/config.yaml" <<EOF
