@@ -1,6 +1,6 @@
 {
   "name": "@venomlabs/opencode",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "description": "Venom for OpenCode: multiplayer AI for your team. Adds the Venom MCP server, the venom skill, and guidance at compaction, in subagents and after commits and PRs.",
   "type": "module",
   "main": "./index.js",

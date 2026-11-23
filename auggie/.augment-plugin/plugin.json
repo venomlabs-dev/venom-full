@@ -1,7 +1,7 @@
 {
-  "name": "venom-hooks",
-  "version": "0.13.0",
-  "description": "Venom hooks for Auggie: a note after commits, pushes, pull requests, merges, releases, deploys and publishes to log the outcome in Venom. Use with the venom plugin.",
+  "name": "venom-full",
+  "version": "0.14.0",
+  "description": "Venom Full for Auggie: the Venom server, the venom skill, an always-on rule, and hooks that remind Auggie to log commits, PRs, merges and deploys where your teammates' agents see them.",
   "author": {
     "name": "Venom Labs",
     "url": "https://venomlabs.dev"
@@ -9,5 +9,12 @@
   "homepage": "https://venomlabs.dev",
   "repository": "https://github.com/venomlabs-dev/venom-full",
   "license": "MIT",
-  "keywords": ["venom", "hooks", "collaboration", "agents", "mcp"]
+  "keywords": [
+    "venom",
+    "multiplayer-ai",
+    "collaboration",
+    "agents",
+    "hooks",
+    "mcp"
+  ]
 }

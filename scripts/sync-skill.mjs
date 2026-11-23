@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Copies the venom skill from a checkout of venomlabs-dev/plugin (its source)
-// into every package here that ships it: <folder>/skills/venom/SKILL.md.
+// into every package here that ships it: <folder>/skills/venom/SKILL.md, and
+// VENOM.md into the body of every <folder>/rules/venom.md.
 //
 //   node scripts/sync-skill.mjs [path-to-plugin-checkout]          update copies
 //   node scripts/sync-skill.mjs [path-to-plugin-checkout] --check  fail if stale
@@ -30,6 +31,21 @@ for (const folder of readdirSync(root).sort()) {
   else {
     writeFileSync(copy, skill);
     console.log(`updated: ${folder}/skills/venom/SKILL.md`);
+  }
+}
+// Rules files carry their app's own frontmatter and VENOM.md as the body.
+const rules = readFileSync(join(plugin, "VENOM.md"), "utf8");
+for (const folder of readdirSync(root).sort()) {
+  const copy = join(root, folder, "rules/venom.md");
+  if (!existsSync(copy)) continue;
+  const text = readFileSync(copy, "utf8");
+  const front = text.match(/^---\n[\s\S]*?\n---\n\n/)?.[0] ?? "";
+  if (text === front + rules) continue;
+  stale += 1;
+  if (check) console.log(`stale: ${folder}/rules/venom.md`);
+  else {
+    writeFileSync(copy, front + rules);
+    console.log(`updated: ${folder}/rules/venom.md`);
   }
 }
 if (check && stale) process.exit(1);

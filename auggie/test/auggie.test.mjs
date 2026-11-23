@@ -44,9 +44,29 @@ test("the plugin registers one PostToolUse hook on bash, command type, plugin-ro
   assert.equal(group.hooks.length, 1);
   assert.equal(group.hooks[0].type, "command");
   assert.deepEqual(group.hooks[0].args, ["${AUGMENT_PLUGIN_ROOT}/hooks/post-tool.sh"]);
-  assert.equal(json(".augment-plugin/plugin.json").name, "venom-hooks");
-  assert.equal(json(".augment-plugin/marketplace.json").plugins[0].source, "./");
   assert.ok(statSync(join(root, "hooks/post-tool.sh")).mode & 0o100);
+});
+
+// Auggie 1.2.2's plugin loader reads .augment-plugin/plugin.json, .mcp.json,
+// skills/, rules/ and hooks/hooks.json from one plugin folder, so Venom Full
+// is one plugin: `/mcp` lists venom-full@venom-full/venom and get_commands
+// lists skill:venom from it.
+test("Venom Full for Auggie is one plugin: server, skill, rule and hooks", () => {
+  assert.equal(json(".augment-plugin/plugin.json").name, "venom-full");
+  for (const [file, source] of [[".augment-plugin/marketplace.json", "./"], ["../.augment-plugin/marketplace.json", "./auggie"]]) {
+    const { name, plugins } = json(file);
+    assert.equal(name, "venom-full", file);
+    assert.deepEqual(plugins.map((p) => [p.name, p.source]), [["venom-full", source]], file);
+  }
+  assert.deepEqual(json(".mcp.json"), { mcpServers: { venom: { type: "http", url: "https://mcp.venomlabs.dev" } } });
+  // The skill is the one every package ships (scripts/sync-skill.mjs).
+  const skill = (dir) => readFileSync(join(root, dir, "skills/venom/SKILL.md"), "utf8");
+  assert.equal(skill("."), skill("../copilot"));
+  // Auggie's rule types are always_apply, agent_requested and manual.
+  const rule = readFileSync(join(root, "rules/venom.md"), "utf8");
+  assert.match(rule, /^---\ntype: always_apply\ndescription: .+\n---\n\n# Venom\n/);
+  // `auggie install` of this folder loads the extension only, not the skill a second time.
+  assert.deepEqual(json("package.json").pi, { extensions: ["./extensions/venom.js"] });
 });
 
 test("guidance.json is the shared one", () => {

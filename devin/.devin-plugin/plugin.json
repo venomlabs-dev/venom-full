@@ -1,6 +1,6 @@
 {
   "name": "venom-hooks",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "description": "Venom hooks for Devin CLI: reminders to use Venom at session start, after commits, pushes, PRs and deploys, and once at the end of a turn. Use with the venom plugin or the Venom MCP server.",
   "author": { "name": "Venom Labs", "url": "https://venomlabs.dev" },
   "homepage": "https://venomlabs.dev",
