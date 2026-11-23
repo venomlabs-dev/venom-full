@@ -83,9 +83,11 @@ connection in Venom.
   agent hears how to sign in at most once a day.
 
 Install the `venom` plugin (server and skill) first, then the package for your
-agent (except Kimi, OpenClaw, Copilot and Auggie, whose one plugin has both).
-Most shell-hook packages are named `venom-hooks`; Copilot's and Auggie's are
-`venom-full`, since they are the whole of Venom there; the code plugins for
+agent (except Kimi, OpenClaw, Copilot and Auggie, whose one plugin has both,
+and OpenHands, whose plugin has the skill and the hooks while the server goes
+in OpenHands' MCP settings). Most shell-hook packages are named `venom-hooks`;
+Copilot's, Auggie's and OpenHands' are `venom-full`, since they are the whole
+of Venom there; the code plugins for
 Pi, Hermes and Cline's CLI keep their own names. Each folder's README has the details, what reaches the model, and how
 it was checked.
 
@@ -102,6 +104,7 @@ it was checked.
 | JetBrains Junie | [junie](junie) | `/extensions marketplace add <clone>/junie`, then `/extensions install venom-hooks` (Junie itself was not run) |
 | Kiro | [kiro](kiro) | Copy the hook files from `<clone>/kiro/hooks/` into `~/.kiro/hooks/` (see the folder README) |
 | Augment (Auggie) | [auggie](auggie) | Venom Full in one plugin: `auggie plugin marketplace add venomlabs-dev/venom-full`, then enable `venom-full` in `/plugins` (server, skill, rule and hooks). `auggie install <clone>/auggie` adds the session-start, subagent and compaction notes (the extension). Loads in Auggie 1.2.2; not run with a model |
+| OpenHands (Agent Canvas, OpenHands Cloud, SDK) | [openhands](openhands) | Agent Canvas, Plugins: install from source `github:venomlabs-dev/venom-full`, path `openhands`; or `cp -R <clone>/openhands ~/.openhands/plugins/venom-full`. Skill and hooks; add the server in Settings → MCP with OAuth (folder README). Live in CI with the OpenHands SDK 1.63.1 and a stand-in model |
 | Mistral Vibe | [vibe](vibe) | Copy the folder to `~/.vibe/plugins/venom-hooks`, then sign in with `/mcp login` as its README says |
 | Kimi Code | [kimi](kimi) | `/plugins install <clone>/kimi`. This one plugin replaces the `venom` plugin in Kimi (server, skill and hooks): don't install both |
 | Muse Code | [muse](muse) | `muse plugins install <clone>/muse`, then `muse plugins approve venom-hooks` (not verified in Muse) |
@@ -111,6 +114,11 @@ it was checked.
 | Cline | [cline](cline) | `sh <clone>/cline/install.sh` (stops rather than overwrite hook files you already have), plus the CLI plugin in [cline](cline) |
 | Crush | [crush](crush) | `sh <clone>/crush/install.sh --apply`. Start-up and milestone reminders only: Crush can't ask at the end of a turn |
 | Kilo Code | [opencode](opencode) | The OpenCode plugin: `kilo plugin github:venomlabs-dev/venom-full`. In Kilo the model received its milestone note (earlier, milestones-only version); the newer session-start and end-of-turn parts are unit-tested only |
+
+Goose has no package here: its hooks can't add text the model sees. Venom in
+Goose is the `venom` plugin (the skill) plus the Venom extension link (the
+server), both in the [plugin README](https://github.com/venomlabs-dev/plugin#apps-that-read-claude-plugins);
+[test/live/goose.sh](test/live/goose.sh) checks both in Goose 1.60.2 in CI.
 
 `<clone>` is a local clone of this repository. Venom's setup and its install
 offer use `~/.venom-full`

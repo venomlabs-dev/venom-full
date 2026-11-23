@@ -113,4 +113,5 @@ grep -q '"path":"/","auth":false' "$mcp_log" || fail "goose never called the Ven
 grep -q '"path":"/register"' "$mcp_log" || fail "goose didn't register for Venom's OAuth sign-in"
 grep -qiE "authorize .* at:" "$work/session2.txt" || fail "goose didn't ask the user to sign in"
 grep -qF "http://127.0.0.1:$mcp_port/authorize?" "$work/session2.txt" || fail "the sign-in link isn't the server's authorize page"
+echo "== registered OAuth client"; grep '"path":"/register"' "$mcp_log" | head -n 1 | cut -c1-600
 echo "PASS: the plugin brings the venom skill to the model, and the extension link's server asks for Venom's sign-in"

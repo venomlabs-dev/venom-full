@@ -107,4 +107,5 @@ node -e '
 grep -q '"ok":true' "$work/oauth.txt" || { tail -n 40 "$work/agent-server.txt"; fail "OpenHands didn't start Venom's sign-in"; }
 grep -qF "\"authorization_url\":\"http://127.0.0.1:$mcp_port/authorize?" "$work/oauth.txt" || fail "the sign-in link isn't the server's authorize page"
 grep -q '"path":"/register"' "$mcp_log" || fail "OpenHands didn't register for Venom's OAuth sign-in"
+echo "== registered OAuth client"; grep '"path":"/register"' "$mcp_log" | head -n 1 | cut -c1-600
 echo "PASS: the package loads, the skill, session start and stop question reach the model, and the Venom server added in MCP settings asks for sign-in"
