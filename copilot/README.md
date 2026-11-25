@@ -50,10 +50,9 @@ copilot plugin marketplace update venom
 copilot plugin install venom-full@venom
 ```
 
-You can also uninstall `venom@venom`, which is the server and skill without
-hooks. If you keep it, Copilot's docs say a server name declared twice is used
-once (the last one loaded, with a warning) and skills dedupe by name; that
-pairing isn't in the live test. If both `venom-hooks` and `venom-full` stay
+Also uninstall `venom@venom` if you have it:
+`copilot plugin uninstall venom@venom`. `venom-full@venom` already has the
+server and skill, so keeping both would declare them twice. If both `venom-hooks` and `venom-full` stay
 installed, the hooks answer once per event: the wrapper skips a payload it
 has already answered.
 

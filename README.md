@@ -1,11 +1,13 @@
 # Venom Full
 
-The full Venom experience for developers. In Claude Code and Codex it adds
-hooks to the [`venom`](https://github.com/venomlabs-dev/plugin) plugin.
-OpenCode and Amp get their own plugin from this repository: see
+Venom Full is the best Venom package for every supported agent: Venom's
+server and skill plus every hook and instruction. In Claude Code, Codex and
+Cowork it is the `venom-full` plugin, which works with the
+[`venom`](https://github.com/venomlabs-dev/plugin) plugin that its install
+adds. OpenCode and Amp get their own plugin from this repository: see
 [OpenCode](#opencode) and [Amp](#amp). Every other agent that has hooks gets
 its own package in a folder of this repository: see
-[Other agents](#other-agents).
+[Other agents](#other-agents). Always install Venom Full, never `venom` alone.
 
 What the hooks do:
 
@@ -29,10 +31,12 @@ same one as `venom`.
 
 Claude Code (installs `venom` too):
 
-```text
-/plugin marketplace add venomlabs-dev/plugin
-/plugin install venom-full@venom
+```bash
+claude plugin marketplace add venomlabs-dev/plugin
+claude plugin install venom-full@venom --scope user
 ```
+
+Inside a session, `/plugin install venom-full@venom` does the same.
 
 Codex:
 
@@ -42,7 +46,12 @@ codex plugin add venom@venom
 codex plugin add venom-full@venom
 ```
 
-Then trust the Venom hooks once in `/hooks`.
+Then enable hooks in Codex and trust the Venom hooks once in `/hooks`.
+
+Cowork: on your Claude account, go to Customize, then Plugins, then Add, then
+Add marketplace, and enter `venomlabs-dev/plugin`. Add `venom-full` and
+`venom`, then connect Venom on the Connectors tab. Cowork runs plugin hooks.
+Not yet tried in the app.
 
 ## Other agents
 
@@ -82,10 +91,11 @@ connection in Venom.
   seconds), the hooks use their fixed texts, as before. While signed out, the
   agent hears how to sign in at most once a day.
 
-Install the `venom` plugin (server and skill) first, then the package for your
-agent (except Kimi, OpenClaw, Copilot and Auggie, whose one plugin has both,
-and OpenHands, whose plugin has the skill and the hooks while the server goes
-in OpenHands' MCP settings). Most shell-hook packages are named `venom-hooks`;
+Installing Venom Full for these agents means the `venom` plugin (server and
+skill) plus the package for your agent, as the steps in each row and folder
+README show. Kimi, OpenClaw, Copilot and Auggie have one plugin that has both,
+and OpenHands has a plugin with the skill and the hooks while the server goes
+in OpenHands' MCP settings. Most shell-hook packages are named `venom-hooks`;
 Copilot's, Auggie's and OpenHands' are `venom-full`, since they are the whole
 of Venom there; the code plugins for
 Pi, Hermes and Cline's CLI keep their own names. Each folder's README has the details, what reaches the model, and how
@@ -99,8 +109,8 @@ it was checked.
 | Antigravity | [antigravity](antigravity) | `agy plugin install <clone>/antigravity` (the GitHub `tree/main/antigravity` URL is untested) |
 | Grok Build | [grok](grok) | `grok plugin install <clone>/grok --trust` (`venomlabs-dev/venom-full#grok` is untested) |
 | Qwen Code | [qwen](qwen) | `qwen extensions install <clone>/qwen` |
-| Factory Droid | [droid](droid) | `droid plugin marketplace add venomlabs-dev/venom-full`, then `droid plugin install venom-hooks@venom-full` |
-| Devin CLI and Devin Desktop | [devin](devin) | Installed with the [`venom`](https://github.com/venomlabs-dev/plugin) plugin: `devin plugins install venomlabs-dev/plugin`. Live in Devin CLI 3000.14, signed in: session start with projects and mentions, commit milestone. Without plugins: `cp <clone>/devin/hooks.v1.json .devin/hooks.v1.json` |
+| Factory Droid | [droid](droid) | `droid plugin marketplace add venomlabs-dev/plugin`, `droid plugin install venom@plugin --scope user`, `droid plugin marketplace add venomlabs-dev/venom-full`, then `droid plugin install venom-hooks@venom-full --scope user` |
+| Devin CLI and Devin Desktop | [devin](devin) | Venom Full for Devin is the [`venom`](https://github.com/venomlabs-dev/plugin) plugin, which carries the Devin hooks: `devin plugins install venomlabs-dev/plugin`. Live in Devin CLI 3000.14, signed in: session start with projects and mentions, commit milestone. Without plugins: `cp <clone>/devin/hooks.v1.json .devin/hooks.v1.json` |
 | JetBrains Junie | [junie](junie) | `/extensions marketplace add <clone>/junie`, then `/extensions install venom-hooks` (Junie itself was not run) |
 | Kiro | [kiro](kiro) | Copy the hook files from `<clone>/kiro/hooks/` into `~/.kiro/hooks/` (see the folder README) |
 | Augment (Auggie) | [auggie](auggie) | Venom Full in one plugin: `auggie plugin marketplace add venomlabs-dev/venom-full`, then enable `venom-full` in `/plugins` (server, skill, rule and hooks). `auggie install <clone>/auggie` adds the session-start, subagent and compaction notes (the extension). Loads in Auggie 1.2.2; not run with a model |
@@ -133,7 +143,7 @@ is out of date. Nothing in these folders reaches Claude Code or Codex
 
 ## How it works
 
-In Claude Code and Codex this plugin has no MCP server, skill or code of its
+In Claude Code, Codex and Cowork this plugin has no MCP server, skill or code of its
 own. It ships `mcp_tool` hooks that call the Venom server's `get_guidance`
 tool through the `venom` plugin's connection, so there's one sign-in and one
 set of Venom tools. The wording comes from the server and changes without a

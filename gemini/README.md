@@ -4,10 +4,10 @@ Hooks that make Gemini CLI use [Venom](https://venomlabs.dev): a reminder at
 session start to find the Venom project and task, a reminder to log after a
 commit, push, pull request, merge, release, deploy or publish, and one
 follow-up question at the end of a turn if an outcome was never logged. It is a
-second Gemini CLI extension, `venom-hooks`, that holds hooks only. The `venom`
-extension still provides the MCP server and skill.
+second Gemini CLI extension, `venom-hooks`, that holds hooks only. Venom Full
+for Gemini CLI is both extensions: `venom` provides the MCP server and skill.
 
-## Install
+## Install Venom Full
 
 ```bash
 # 1. The Venom server and skill

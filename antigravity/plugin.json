@@ -3,6 +3,6 @@
   "displayName": "Venom Hooks",
   "version": "0.15.0",
   "logo": "assets/logo.svg",
-  "description": "Venom reminders for Antigravity: hooks that keep the agent using your team's Venom projects, tasks and decisions. Install the venom plugin first.",
+  "description": "Venom Full for Antigravity: hooks that keep the agent using your team's Venom projects, tasks and decisions. Works with the venom plugin, which Venom Full's install adds.",
   "author": "Venom Labs"
 }

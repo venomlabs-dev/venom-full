@@ -6,10 +6,11 @@ agent's context at session start, around compaction, after a milestone (commit, 
 PR, merge, release, deploy, publish) and, once, at the end of a turn that merged,
 released or deployed with nothing logged to Venom.
 
-## Install
+## Install Venom Full
 
-Install the `venom` Power first (Kiro: Powers panel, or `kiro-cli powers install`).
-Then copy the hooks. For every project (user level, Kiro CLI V3):
+Venom Full for Kiro is the `venom` Power plus these hooks. First install the
+`venom` Power (Kiro: Powers panel, or `kiro-cli powers install`). Then copy
+the hooks. For every project (user level, Kiro CLI V3):
 
 ```bash
 git clone https://github.com/venomlabs-dev/venom-full && cd venom-full

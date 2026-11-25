@@ -1,19 +1,19 @@
 # Venom hooks for Pi
 
 [Venom](https://venomlabs.dev) makes the coding agents your team already uses
-multiplayer. The `venom` plugin gives Pi the Venom skill and MCP server; this
-extension makes Pi remember to use them. It adds short Venom reminders to what
+multiplayer. Venom Full for Pi is two installs: the `venom` plugin gives Pi the
+Venom skill and MCP server, and this extension makes Pi remember to use them. It adds short Venom reminders to what
 the model sees at the start of a session, after commits, pushes, pull requests,
 merges, releases, deploys and publishes, after compaction, and once before Pi
 finishes a turn that merged or shipped something without logging it to Venom.
 It is one JavaScript file that Pi loads as it is (no build step).
 
-## Install
+## Install Venom Full
 
 ```bash
-pi install git:github.com/venomlabs-dev/plugin          # the Venom skill, first
+pi install git:github.com/venomlabs-dev/plugin          # Venom Full, step 1: the Venom skill
 git clone https://github.com/venomlabs-dev/venom-full
-pi install ./venom-full/pi                              # these hooks
+pi install ./venom-full/pi                              # Venom Full, step 2: these hooks
 pi mcp add venom --url https://mcp.venomlabs.dev        # the Venom server, then /mcp login venom
 ```
 

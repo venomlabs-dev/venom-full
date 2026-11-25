@@ -7,11 +7,11 @@ release, deploy or publish to log the outcome. It works in the Cline CLI and
 in the Cline VS Code extension. It has two parts: two hook files (both hosts)
 and a one-file plugin (CLI only, adds the session-start note there).
 
-Install the `venom` plugin or the Venom MCP server, rule and skill first
-(see [venomlabs-dev/plugin](https://github.com/venomlabs-dev/plugin)); these
-hooks only add the reminders.
+Venom Full for Cline is the `venom` plugin (or the Venom MCP server, rule and
+skill; see [venomlabs-dev/plugin](https://github.com/venomlabs-dev/plugin))
+plus the hooks in this folder, which add the reminders.
 
-## Install
+## Install Venom Full
 
 Hook files, for the CLI and VS Code, all projects:
 

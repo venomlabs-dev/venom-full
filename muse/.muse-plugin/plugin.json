@@ -3,7 +3,7 @@
   "name": "venom-hooks",
   "displayName": "Venom Hooks",
   "version": "0.15.0",
-  "description": "Venom reminders for Muse Code: find the Venom task at session start, log outcomes after commits, pushes, PRs and deploys, and keep the task in view across compaction and subagents. Install the venom plugin for the server and skill.",
+  "description": "Venom Full for Muse Code: find the Venom task at session start, log outcomes after commits, pushes, PRs and deploys, and keep the task in view across compaction and subagents. Works with the venom plugin, which Venom Full's install adds for the server and skill.",
   "compat": {
     "source": "native",
     "manifestDir": ".muse-plugin"

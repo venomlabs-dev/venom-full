@@ -8,7 +8,7 @@
   "plugins": [
     {
       "name": "venom-hooks",
-      "description": "Venom reminders for Droid: session start, compaction, subagents, milestones and one end-of-turn check. Install the venom plugin too.",
+      "description": "Venom Full for Droid: session start, compaction, subagents, milestones and one end-of-turn check. Works with the venom plugin, which Venom Full's install adds.",
       "source": "./droid",
       "category": "productivity"
     }

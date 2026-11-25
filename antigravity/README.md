@@ -5,13 +5,14 @@ use Venom: at session start, and after a milestone (commit, push, pull request,
 merge, release, closed issue, workflow run, deploy, publish) to log the
 outcome. If a turn ends after a merge, release, workflow, deploy or publish
 with nothing logged to Venom, Venom asks once more. This package has hooks
-only: install the `venom` plugin first for the MCP server and skill.
+only. Venom Full for Antigravity is two installs: the `venom` plugin for the
+MCP server and skill, then this package.
 
-## Install
+## Install Venom Full
 
 ```bash
-agy plugin install https://github.com/venomlabs-dev/plugin     # venom plugin first
-agy plugin install https://github.com/venomlabs-dev/venom-full/tree/main/antigravity   # untested
+agy plugin install https://github.com/venomlabs-dev/plugin     # Venom Full, step 1: server and skill
+agy plugin install https://github.com/venomlabs-dev/venom-full/tree/main/antigravity   # Venom Full, step 2: hooks (untested)
 ```
 
 From a local clone: `agy plugin install /path/to/venom-full/antigravity`.

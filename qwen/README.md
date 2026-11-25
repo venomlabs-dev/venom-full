@@ -1,8 +1,8 @@
 # Venom hooks for Qwen Code
 
-An extension for [Qwen Code](https://github.com/QwenLM/qwen-code) that adds short Venom reminders to the agent's context at the right moments, so it checks Venom before work and logs outcomes after. It carries hooks only: the Venom MCP server and the `venom` skill come from the `venom` extension, which you install first.
+An extension for [Qwen Code](https://github.com/QwenLM/qwen-code) that adds short Venom reminders to the agent's context at the right moments, so it checks Venom before work and logs outcomes after. It carries hooks only: the Venom MCP server and the `venom` skill come from the `venom` extension, which Venom Full for Qwen Code installs with this one.
 
-## Install
+## Install Venom Full
 
 ```bash
 qwen extensions install venomlabs-dev/plugin
