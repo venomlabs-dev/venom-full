@@ -33,8 +33,10 @@ then open the link it prints and approve it. To update, run
 
 The hooks are shell scripts that Cursor runs directly, so native Windows
 doesn't run them. In Cursor connected to WSL, install them inside WSL with the
-steps above. On native Windows, install the `venom` plugin (rule, skill
-and server) for now; Venom Full's hooks need WSL. Neither case has been tested yet.
+steps above. On native Windows, install only the `venom` plugin (rule, skill
+and server). Venom Full's hooks are shell scripts, so on Windows they need
+WSL; in Cursor with WSL, install Venom Full as above. Neither case has been
+tested yet.
 
 ### User-level hooks (Cursor CLI, or if plugins don't load)
 

@@ -2,9 +2,9 @@
 
 Venom Full is the best Venom package for every supported agent: Venom's
 server and skill plus every hook and instruction. In Claude Code, Codex and
-Cowork it is the `venom-full` plugin, which works with the
-[`venom`](https://github.com/venomlabs-dev/plugin) plugin that its install
-adds. OpenCode and Amp get their own plugin from this repository: see
+Cowork it is the `venom-full` plugin, used with the
+[`venom`](https://github.com/venomlabs-dev/plugin) plugin; Venom Full's
+install steps add both. OpenCode and Amp get their own plugin from this repository: see
 [OpenCode](#opencode) and [Amp](#amp). Every other agent that has hooks gets
 its own package in a folder of this repository: see
 [Other agents](#other-agents). Always install Venom Full, never `venom` alone.

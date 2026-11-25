@@ -1,7 +1,7 @@
 {
   "name": "venom-hooks",
   "version": "0.15.0",
-  "description": "Venom Full for Devin CLI: reminders to use Venom at session start, after commits, pushes, PRs and deploys, and once at the end of a turn. Works with the venom plugin, which Venom Full's install adds.",
+  "description": "Venom Full for Devin CLI: reminders to use Venom at session start, after commits, pushes, PRs and deploys, and once at the end of a turn. Use with the venom plugin or the Venom MCP server.",
   "author": { "name": "Venom Labs", "url": "https://venomlabs.dev" },
   "homepage": "https://venomlabs.dev",
   "repository": "https://github.com/venomlabs-dev/venom-full",

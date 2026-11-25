@@ -3,6 +3,6 @@
   "displayName": "Venom Hooks",
   "version": "0.15.0",
   "logo": "assets/logo.svg",
-  "description": "Venom Full for Antigravity: hooks that keep the agent using your team's Venom projects, tasks and decisions. Works with the venom plugin, which Venom Full's install adds.",
+  "description": "Venom Full for Antigravity: hooks that keep the agent using your team's Venom projects, tasks and decisions. Used with the venom plugin; Venom Full's install steps add both.",
   "author": "Venom Labs"
 }

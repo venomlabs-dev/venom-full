@@ -1,4 +1,4 @@
 {
   "name": "venom-hooks",
-  "description": "Venom Full for Junie: a note at the first prompt to find the Venom task, and a log reminder after commits, PRs, merges and deploys. Works with the venom extension, which Venom Full's install adds."
+  "description": "Venom Full for Junie: a note at the first prompt to find the Venom task, and a log reminder after commits, PRs, merges and deploys. Used with the venom extension; Venom Full's install steps add both."
 }
