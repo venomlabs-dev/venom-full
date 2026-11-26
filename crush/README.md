@@ -2,9 +2,9 @@
 
 Crush (charmbracelet) has no plugin system, only MCP servers, skills and hooks, and its hooks are marked preliminary. This folder adds the part of Venom's reminders that Crush can carry: a hook can add text to the model's context only on the tool events (`PreToolUse`, `PostToolUse`, `PostToolUseFailure`), so Venom's session-start and compaction texts ride on the next tool call, and milestone reminders (commit, push, PR, merge, release, deploy, publish) come after the shell tool.
 
-## Install
+## Install Venom Full
 
-1. Add the Venom MCP server to Crush with OAuth switched on (see "OAuth" below), and put Venom's rules in your `AGENTS.md` (the `venom` plugin from venomlabs-dev/plugin has the text).
+1. Venom Full for Crush starts with the server and rules. Add the Venom MCP server to Crush with OAuth switched on (see "OAuth" below), and put Venom's rules in your `AGENTS.md` (the `venom` plugin from venomlabs-dev/plugin has the text).
 2. Clone this repo and run the installer from the clone:
 
 ```sh

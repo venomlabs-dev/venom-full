@@ -2,15 +2,15 @@
 
 A Vibe-native plugin (Agent Plugins 1.0, experimental in Vibe) that adds hooks to the Venom setup in Mistral Vibe CLI and the Vibe desktop app. It keeps the agent using [Venom](https://venomlabs.dev): a reminder at session start, a reminder to log after commits, pushes, PRs, merges, releases, deploys and publishes, a one-time question at the end of a turn if a merge, release, workflow, deploy or publish was never logged, and a note for subagents to report to their parent instead of writing.
 
-It has no MCP server or skill of its own. Install the `venom` plugin first: it gives Vibe the Venom server and skill.
+It has no MCP server or skill of its own. Venom Full for Vibe is the `venom` plugin (the Venom server and skill) plus this package, as the steps below install them.
 
-## Install
+## Install Venom Full
 
 ```bash
-# 1. The Venom server and skill
+# 1. Venom Full, step 1: the Venom server and skill
 git clone https://github.com/venomlabs-dev/plugin ~/.vibe/plugins/venom
 
-# 2. These hooks (only the vibe/ folder: the repository root is a Claude Code plugin, and Vibe would load it as one)
+# 2. Venom Full, step 2: these hooks (only the vibe/ folder: the repository root is a Claude Code plugin, and Vibe would load it as one)
 git clone --depth 1 --filter=blob:none --sparse https://github.com/venomlabs-dev/venom-full /tmp/venom-full
 git -C /tmp/venom-full sparse-checkout set vibe
 cp -R /tmp/venom-full/vibe ~/.vibe/plugins/venom-hooks

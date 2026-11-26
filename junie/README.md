@@ -2,7 +2,9 @@
 
 A Junie extension that adds Venom reminders to Junie CLI (and Junie hosts that run hooks): a note on the first prompt of a session to find the Venom project and task, a reminder to log the outcome after a commit, push, PR, merge, release, deploy or publish, and one "did you log it?" question at the end of a turn after an outcome-type milestone. It needs the `venom` extension (the Venom MCP server and skill) installed first.
 
-## Install
+## Install Venom Full
+
+Venom Full for Junie is the `venom` extension plus `venom-hooks`.
 
 ```text
 /extensions marketplace add venomlabs-dev/plugin

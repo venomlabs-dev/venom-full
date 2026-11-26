@@ -3,13 +3,13 @@
 `venom-hooks` is a Droid plugin that adds short Venom reminders to Droid's
 context at the right moments: where to look at the start of a session, what to
 keep after compaction, and when to log a milestone (commit, push, pull request,
-merge, release, deploy, publish). It carries no MCP server of its own: install
-the `venom` plugin first, which gives Droid the Venom server and the `venom`
-skill. The Claude Code and Codex hooks in this repository's root can't run in
+merge, release, deploy, publish). It carries no MCP server of its own: Venom
+Full for Droid is the `venom` plugin (the Venom server and the `venom` skill)
+plus this package, installed in the steps below. The Claude Code and Codex hooks in this repository's root can't run in
 Droid (they are `mcp_tool` hooks, which Droid ignores), so this folder is a
 separate package of plain command hooks.
 
-## Install
+## Install Venom Full
 
 ```bash
 droid plugin marketplace add venomlabs-dev/plugin

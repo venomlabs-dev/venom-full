@@ -1,5 +1,5 @@
 {
   "name": "venom-hooks",
   "version": "0.15.0",
-  "description": "Venom hooks for Gemini CLI: reminders to use Venom at session start and after commits, pushes, pull requests, merges, releases, deploys and publishes. Install the venom extension first for the Venom MCP server and skill."
+  "description": "Venom Full for Gemini CLI: reminders to use Venom at session start and after commits, pushes, pull requests, merges, releases, deploys and publishes. Used with the venom extension; Venom Full's install steps add both."
 }

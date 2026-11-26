@@ -5,7 +5,8 @@ Venom task when a session starts, log the outcome after a commit, push, PR,
 merge, release, deploy or publish, keep the task in view across compaction, and
 tell subagents to report to their parent. It is a native Muse plugin
 (`.muse-plugin/plugin.json`) that carries only command hooks. The Venom server and
-the `venom` skill come from the `venom` plugin, so install that first.
+the `venom` skill come from the `venom` plugin, which Venom Full for Muse
+Code installs with this one.
 
 **Not verified anywhere in Muse: nothing here has run inside Muse Code.** The
 manifest shape, the hook commands, the reply fields and that Muse loads and
@@ -13,7 +14,7 @@ runs the hooks all come from docs and binary strings (see Verification).
 Each hook command checks that its script exists (relative to the plugin
 folder) and exits quietly if not.
 
-## Install
+## Install Venom Full
 
 ```bash
 git clone https://github.com/venomlabs-dev/venom-full
@@ -22,7 +23,7 @@ muse plugins approve venom-hooks
 ```
 
 (`muse plugins install` takes a local path or `<plugin>@<marketplace>`; it has no
-GitHub subfolder source, so clone first.) Install `venom` before or after:
+GitHub subfolder source, so clone first.) Also install `venom` (before or after):
 `muse plugins install <path to venomlabs-dev/plugin>/platforms/agent-plugin`.
 Start a new session: Muse reads hooks at startup. `muse plugins inspect venom-hooks`
 lists the registered hooks.
