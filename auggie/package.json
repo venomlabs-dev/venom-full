@@ -1,6 +1,6 @@
 {
   "name": "@venomlabs/auggie",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "description": "Venom Full for Auggie: the venom-full plugin (server, skill, rule, milestone hook) and this extension (session start, subagents, compaction).",
   "type": "module",
   "keywords": ["venom", "mcp", "multiplayer-ai", "agents", "auggie"],

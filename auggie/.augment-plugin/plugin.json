@@ -1,6 +1,6 @@
 {
   "name": "venom-full",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "description": "Venom Full for Auggie: the Venom server, the venom skill, an always-on rule, and hooks that remind Auggie to log commits, PRs, merges and deploys where your teammates' agents see them.",
   "author": {
     "name": "Venom Labs",

@@ -86,6 +86,23 @@
         ]
       },
       {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "tool": "${tool_name}",
+              "file": "${tool_input.file_path}",
+              "session_id": "${session_id}"
+            },
+            "timeout": 10
+          }
+        ]
+      },
+      {
         "matcher": "mcp__plugin_venom_venom__append_task_log|mcp__plugin_venom_venom__append_project_log|mcp__plugin_venom_venom__edit_log_entry|mcp__claude_ai_Venom__append_task_log|mcp__claude_ai_Venom__append_project_log|mcp__claude_ai_Venom__edit_log_entry",
         "hooks": [
           {
@@ -97,6 +114,22 @@
               "tool": "${tool_name}",
               "session_id": "${session_id}",
               "tool_response": "${tool_response}"
+            },
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.+__((send|reply|forward)(_[a-z0-9]+)*|([a-z0-9]+_)*(send|post)_(message|email|mail|reply))$",
+        "hooks": [
+          {
+            "type": "mcp_tool",
+            "server": "plugin:venom:venom",
+            "tool": "get_guidance",
+            "input": {
+              "event": "PostToolUse",
+              "tool": "${tool_name}",
+              "session_id": "${session_id}"
             },
             "timeout": 10
           }

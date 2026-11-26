@@ -1,6 +1,6 @@
 {
   "name": "venom-hooks",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "description": "Venom Full for Grok Build: session start, subagents, a check after commits, PRs, releases and deploys, and one more ask at the end of a turn. Used with the venom plugin; Venom Full's install steps add both.",
   "author": {
     "name": "Venom Labs",
