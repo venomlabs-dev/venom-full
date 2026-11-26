@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "name": "venom-hooks",
   "displayName": "Venom Hooks",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "description": "Venom Full for Muse Code: find the Venom task at session start, log outcomes after commits, pushes, PRs and deploys, and keep the task in view across compaction and subagents. Used with the venom plugin; Venom Full's install steps add both.",
   "compat": {
     "source": "native",

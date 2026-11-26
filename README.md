@@ -51,7 +51,9 @@ Then enable hooks in Codex and trust the Venom hooks once in `/hooks`.
 Cowork: on your Claude account, go to Customize, then Plugins, then Add, then
 Add marketplace, and enter `venomlabs-dev/plugin`. Add `venom-full` and
 `venom`, then connect Venom on the Connectors tab. Cowork runs plugin hooks.
-Not yet tried in the app.
+Its reminders are written for office work: after a document, deck, sheet or
+PDF is saved, or an email or message is sent, Venom asks the agent to log the
+decision and the next step. Not yet tried in the app.
 
 ## Other agents
 
