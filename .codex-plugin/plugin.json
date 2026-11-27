@@ -1,6 +1,6 @@
 {
   "name": "venom-full",
-  "version": "0.16.0",
+  "version": "0.16.1",
   "description": "Venom Full for Codex: Venom projects and mentions at session start, guidance after compaction and at subagent start, and a check after commits, PRs, releases and deploys. Used with the venom plugin; Venom Full's install steps add both.",
   "author": {
     "name": "Venom Labs",

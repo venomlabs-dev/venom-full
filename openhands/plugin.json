@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "venom-full",
-  "version": "0.16.0",
+  "version": "0.16.1",
   "description": "Venom Full for OpenHands: your team's agents share projects, tasks, decisions and skills. Brings the venom skill and hooks that start each conversation with your Venom projects and ask once to log after a merge, release or deploy. Add the Venom MCP server (https://mcp.venomlabs.dev, OAuth) in OpenHands' MCP settings.",
   "author": {
     "name": "Venom Labs",
