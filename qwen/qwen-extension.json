@@ -1,6 +1,6 @@
 {
   "name": "venom-hooks",
-  "version": "0.16.0",
+  "version": "0.16.1",
   "description": "Venom Full for Qwen Code: reminders to use Venom at session start, around compaction, in subagents and after commits, PRs, merges, releases and deploys. Used with the venom extension; Venom Full's install steps add both.",
   "hooks": "hooks/qwen-hooks.json"
 }
